@@ -1,0 +1,134 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' 
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:c='urn:import:gwt.client.ui'>
+
+    <ui:style type='gwt.client.view.desktop.JournalViewImpl.Style'>
+        .row {
+            display: table;
+            margin: 10px 0;
+        }
+        
+        .label {
+            display: table-cell;
+            width: 120px;
+        }
+        
+        .input {
+            display: table-cell;
+        }
+        
+        .fLb {
+            display: table-cell;
+            padding: 0 20px 0 0;
+        }
+        
+        .oLb {
+            display: table-cell;
+            padding: 0 20px;
+        }
+        
+        .errMsg {
+            display: table-cell;
+            color: red;
+            padding: 0 0 0 20px;
+        }
+        
+        .colHeader {
+            margin: 10px 0 5px 0;
+            font-size: 17px;
+            font-weight: bold;
+        }
+        
+        .errLb {
+            color: red;
+        }
+        
+        .cell {
+            display: block;
+            float: left;
+            margin: 0 10px 0 0;
+            box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            -webkit-box-sizing: border-box;
+        }
+        
+        .accNoCell {
+            width: 400px;
+        }
+        
+        .accNoSB {
+            width: 335px;
+        }
+        
+        .debitCell {
+            width: 150px;
+        }
+        
+        .creditCell {
+            width: 150px;
+        }
+        
+        .totalLb {
+            text-align: right;
+        }
+        
+        .errTotalLb {
+            color: red;
+            padding: 0 0 0 20px;
+            font-size: 13px;
+            font-weight: normal;
+        }
+        
+        .clearfix:after {
+           content: ".";
+           visibility: hidden;
+           display: block;
+           height: 0;
+           clear: both;
+        }
+    </ui:style>
+
+    <g:HTMLPanel>
+        <div class='{style.row}'>
+            <g:Label ui:field="journalTypeLb" styleName='{style.label}'></g:Label>
+            <g:Label ui:field="journalTypeInputLb" styleName='{style.input}'></g:Label>
+        </div>
+        <div class='{style.row}'>
+            <g:Label ui:field="docTypeLb" styleName='{style.label}'></g:Label>
+            <c:CustomListBox ui:field="docTypeLB" styleName='{style.input}'></c:CustomListBox>
+        </div>
+        <div class='{style.row}'>
+            <g:Label ui:field="noLb" styleName='{style.label}'></g:Label>
+            <g:TextBox ui:field="noTB" styleName='{style.input}' visibleLength='15'></g:TextBox>
+            <g:Label ui:field="errNoLb" styleName='{style.errMsg}'></g:Label>
+        </div>
+        <div class='{style.row}'>
+            <g:Label ui:field="dateLb" styleName='{style.label}'></g:Label>
+            <g:Label ui:field="dayLb" styleName='{style.fLb}'></g:Label>
+            <c:CustomIntBox ui:field="dayIB" styleName='{style.input}' visibleLength='2'></c:CustomIntBox>
+            <g:Label ui:field="monthLb" styleName='{style.oLb}'></g:Label>
+            <c:CustomIntBox ui:field="monthIB" styleName='{style.input}' visibleLength='2'></c:CustomIntBox>
+            <g:Label ui:field="yearLb" styleName='{style.oLb}'></g:Label>
+            <c:CustomIntBox ui:field="yearIB" styleName='{style.input}' visibleLength='4'></c:CustomIntBox>
+            <g:Label ui:field="errDateLb" styleName='{style.errMsg}'></g:Label>
+        </div>
+        <div class='{style.row}'>
+            <g:Label ui:field="descLb" styleName='{style.label}'></g:Label>
+            <g:TextBox ui:field="descTB" styleName='{style.input}' visibleLength='60'></g:TextBox>
+            <g:Label ui:field="errDescLb" styleName='{style.errMsg}'></g:Label>
+        </div>
+        <div class='{style.clearfix} {style.colHeader}'>
+            <g:Label ui:field="accNoLb" styleName='{style.cell} {style.accNoCell}'></g:Label>
+            <g:Label ui:field="debitLb" styleName='{style.cell} {style.debitCell}'></g:Label>
+            <g:Label ui:field="creditLb" styleName='{style.cell} {style.creditCell}'></g:Label>
+        </div>
+        <g:FlowPanel ui:field="itemPanel"></g:FlowPanel>
+        <div class='{style.clearfix} {style.colHeader}'>
+            <label class='{style.cell} {style.accNoCell} {style.totalLb}'>Total</label>
+            <g:Label ui:field="totalDebitLb" styleName='{style.cell} {style.debitCell}'></g:Label>
+            <g:Label ui:field="totalCreditLb" styleName='{style.cell} {style.creditCell}'></g:Label>
+            <g:Label ui:field="errTotalLb" styleName='{style.cell} {style.errTotalLb}'></g:Label>
+        </div>
+        
+    </g:HTMLPanel>
+</ui:UiBinder>

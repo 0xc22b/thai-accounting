@@ -1,0 +1,67 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+
+    <ui:style type='gwt.client.view.desktop.ComViewImpl.Style'>
+        .row {
+            display: table;
+            margin: 10px 0;
+        }
+        
+        .label {
+            display: table-cell;
+            width: 120px;
+        }
+        
+        .input {
+            display: table-cell;
+        }
+        
+        .errMsg {
+            display: table-cell;
+            color: red;
+            padding: 0 0 0 20px;
+        }
+    </ui:style>
+
+    <g:HTMLPanel>
+        <div class='{style.row}'>
+            <g:Label ui:field="nameLb" styleName='{style.label}'></g:Label>
+            <g:TextBox ui:field="nameTB" styleName='{style.input}' visibleLength='30'></g:TextBox>
+            <g:Label ui:field="errNameLb" styleName='{style.errMsg}'></g:Label>
+        </div>
+        <div>
+            <g:Label ui:field="addressLb"></g:Label>
+            <g:TextBox ui:field="addressTB"></g:TextBox>
+            <g:Label ui:field="errAddressLb"></g:Label>
+        </div>
+        <div>
+            <g:Label ui:field="telNoLb"></g:Label>
+            <g:TextBox ui:field="telNoTB"></g:TextBox>
+            <g:Label ui:field="errTelNoLb"></g:Label>
+        </div>
+        <div>
+            <g:Label ui:field="comTypeLb"></g:Label>
+            <g:TextBox ui:field="comTypeTB"></g:TextBox>
+            <g:Label ui:field="errComTypeLb"></g:Label>
+        </div>
+        <div>
+            <g:Label ui:field="taxIDLb"></g:Label>
+            <g:TextBox ui:field="taxIDTB"></g:TextBox>
+            <g:Label ui:field="errTaxIDLb"></g:Label>
+        </div>
+        <div>
+            <g:Label ui:field="merchantIDLb"></g:Label>
+            <g:TextBox ui:field="merchantIDTB"></g:TextBox>
+            <g:Label ui:field="errMerchantIDLb"></g:Label>
+        </div>
+        <div>
+            <g:Label ui:field="yearTypeLb"></g:Label>
+            <g:TextBox ui:field="yearTypeTB"></g:TextBox>
+            <g:Label ui:field="errYearTypeLb"></g:Label>
+        </div>
+        <div>
+            <g:Label ui:field="vatLb"></g:Label>
+            <g:TextBox ui:field="vatRateTB"></g:TextBox>
+            <g:Label ui:field="errVatRateLb"></g:Label>
+        </div>
+    </g:HTMLPanel>
+</ui:UiBinder>

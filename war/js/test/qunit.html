@@ -1,0 +1,132 @@
+<!DOCTYPE html>  
+<html>  
+<head>  
+    <meta charset="utf-8">
+
+    <link rel="stylesheet" href="qunit.css" type="text/css" media="screen">
+
+    <title>QUnit Test Suite</title>
+</head>
+<body>
+    <div id="qunit"></div>
+    <div id="qunit-fixture">
+      <label id="errLb">&nbsp;</label>
+
+      <label id='logInErrLb' class='errLb'>&nbsp;</label>
+      <input type='text' name='username' placeholder='username or email' id='logInUsernameTB' /> 
+      <input type='password' name='password'  placeholder='password' id='logInPasswordTB' />
+      <button id='logInBtn'>OK</button>
+      <img src='/img/loading.gif' id='logInLoadingImg' style='display: none;' />
+
+      <label id='signUpUsernameErrLb' class='errLb'>&nbsp;</label>
+      <input type='text' name='username' placeholder='username' id='signUpUsernameTB' />
+      <label id='signUpPasswordErrLb' class='errLb'>&nbsp;</label> 
+      <input type='password' name='password'  placeholder='password' id='signUpPasswordTB' />
+      <label id='signUpRepeatPasswordErrLb' class='errLb'>&nbsp;</label> 
+      <input type='password' name='password'  placeholder='Repeat password' id='signUpRepeatPasswordTB' />
+      <label id='signUpEmailErrLb' class='errLb'>&nbsp;</label>
+      <input type='text' name='email'  placeholder='email' id='signUpEmailTB' />
+      <button id='signUpBtn'>OK</button>
+      <img src='/img/loading.gif' id='signUpLoadingImg' style='display: none;' />
+
+      <label id="resultLb" style="display: none;"></label>
+      <div id="formPanel">
+	<label id="usernameOrEmailErrLb" class="errLb">&nbsp;</label>
+	<input type="text" placeholder="username or email" id="usernameOrEmailTB" />
+
+	<label id="newPasswordErrLb" class="errLb">&nbsp;</label>
+	<input type="password" placeholder="new password" id="newPasswordTB" />
+	<label id="repeatPasswordErrLb" class="errLb">&nbsp;</label>
+	<input type="password" placeholder="password again" id="repeatPasswordTB" />
+      </div>
+
+      <div id="changeUsernamePanel">
+        <div class="lb">Username: <span id="changeUsernameLb"></span></div>
+        <button id="changeUsernameBtn">change</button>
+        <div id="changeUsernameEditor" style="display: none;">
+          <label id="changeUsernameErrLb" class="errLb">&nbsp;</label>
+          <input type="text" placeholder="New username" id="changeUsernameTB" />
+          <label id="changeUsernamePasswordErrLb" class="errLb">&nbsp;</label>
+          <input type="password" placeholder="password" id="changeUsernamePasswordTB" />
+          <button id="changeUsernameOkBtn">OK</button>
+          <img src="/img/loading.gif" id="changeUsernameLoadingImg" style="display: none;" />
+        </div>
+      </div>
+      <div id="changeEmailPanel">
+        <div class="lb">Email: <span id="changeEmailLb"></span></div>
+	<button id="changeEmailBtn">change</button>
+	<label>Email verified.</label>
+	<button id="resendEmailConfirmBtn">Resend email verification</button>
+        <div id="changeEmailEditor" style="display: none;">
+          <label id="changeEmailErrLb" class="errLb">&nbsp;</label>
+          <input type="text" placeholder="New email" id="changeEmailTB" />
+          <label id="changeEmailPasswordErrLb" class="errLb">&nbsp;</label>
+          <input type="password" placeholder="password" id="changeEmailPasswordTB" />
+          <button id="changeEmailOkBtn">OK</button>
+          <img src="/img/loading.gif" id="changeEmailLoadingImg" style="display: none;" />
+        </div>
+      </div>    
+      <div id="changePasswordPanel">
+	<button id="changePasswordBtn">Change password</button>
+        <div id="changePasswordEditor" style="display: none;">
+          <label id="changeNewPasswordErrLb" class="errLb">&nbsp;</label>
+          <input type="password" placeholder="New password" id="changeNewPasswordTB" />
+          <label id="changeRepeatPasswordErrLb" class="errLb">&nbsp;</label>
+          <input type="password" placeholder="Repeat New password" id="changeRepeatPasswordTB" />
+          <label id="changePasswordErrLb" class="errLb">&nbsp;</label>
+          <input type="password" placeholder="Current password" id="changePasswordTB" />
+          <button id="changePasswordOkBtn">OK</button>
+          <img src="/img/loading.gif" id="changePasswordLoadingImg" style="display: none;" />
+        </div>
+      </div>
+      <div id="changeLangPanel">
+	<div class="lb">Language: <span id="changeLangLb">${lang}</span></div>
+	<button id="changeLangBtn">change</button>
+        <div id="changeLangEditor" style="display: none;">
+          <label id="changeLangErrLb" class="errLb">&nbsp;</label>
+          <select id="changeLangS">
+            <option value="en" selected>en</option>
+            <option value="th">th</option>
+          </select>
+          <button id="changeLangOkBtn">OK</button>
+          <img src="/img/loading.gif" id="changeLangLoadingImg" style="display: none;" />
+        </div>
+      </div>
+      <div id="deleteAccountPanel">
+	<button id="deleteAccountBtn">Delete account</button>
+        <div id="deleteAccountEditor" style="display: none;">
+          <label id="deleteAccountPasswordErrLb" class="errLb">&nbsp;</label>
+          <input type="password" placeholder="password" id="deleteAccountPasswordTB" />
+          <button id="deleteAccountOkBtn">OK</button>
+          <img src="/img/loading.gif" id="deleteAccountLoadingImg" style="display: none;" />
+        </div>
+      </div>
+    </div>
+
+    <!-- JavaScript at the bottom for fast page loading -->
+    
+    <!-- Grab Google CDN's jQuery, with a protocol relative URL; fall back to local if offline -->
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="../libs/jquery-1.7.1.min.js"><\/script>')</script>
+
+    <script type="text/javascript" src="qunit.js"></script> 
+    <script>
+      QUnit.config.reorder = false;
+    </script>
+ 
+    <!-- Your project file goes here -->  
+    <script type="text/javascript" src="../userverifier-alpha.js"></script>  
+    <script type="text/javascript" src="../home-alpha.js"></script>
+    <script type="text/javascript" src="../forgot-alpha.js"></script>  
+    <script type="text/javascript" src="../user-alpha.js"></script>  
+
+    <!-- Your tests file goes here -->
+    <script>
+      var USER_OBJ = {};
+    </script>
+    <script type="text/javascript" src="userverifiertest.js"></script>
+    <script type="text/javascript" src="hometest.js"></script>
+    <script type="text/javascript" src="forgottest.js"></script>
+    <script type="text/javascript" src="usertest.js"></script>
+</body>
+</html>

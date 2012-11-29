@@ -1,0 +1,102 @@
+<!-- BaseViewImpl.ui.xml -->
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+
+    <ui:style type='gwt.client.view.desktop.ShellImpl.Style'>
+        
+        body {
+            overflow-y: scroll;
+        }
+        
+        input {
+            -moz-border-bottom-colors: none;
+            -moz-border-image: none;
+            -moz-border-left-colors: none;
+            -moz-border-right-colors: none;
+            -moz-border-top-colors: none;
+            border-color: #999999 #CCCCCC #CCCCCC;
+            border-right: 1px solid #CCCCCC;
+            border-style: solid;
+            border-width: 1px;
+            font-family: Arial Unicode MS,Arial,sans-serif;
+            font-size: 100%;
+            padding: 5px 4px;
+        }   
+        
+        .header {
+            margin: 10px 10px 0 0;
+        }
+        
+        .hLb {
+            margin: 0 0 10px 0;
+            padding: 10px 0 5px 0;
+            border-bottom: 1px solid #000;
+            font-size: 26px;
+            font-weight: bold;
+            line-height: 31px;
+            vertical-align: baseline;
+        }
+        
+        .actBtn {
+            margin: 0 10px 0 0;
+        }
+        
+        .upperRightPanel {
+	        position: fixed;
+	        top: 10px;
+	        right: 10px;
+	    }
+        
+        .logOutBtn {
+	        float: right;
+	        border: 0;
+	        background-color: white;
+	        cursor: pointer;
+	    }
+	    
+	    .logOutBtn:hover {
+	        text-decoration: underline;
+	    }
+	    
+	    .userBtn {
+	        float: right;
+	        border: 0;
+	        background-color: white;
+	        cursor: pointer;
+	    }
+	    
+	    .userBtn:hover {
+	        text-decoration: underline;
+	    }
+        
+        .container {
+            margin: 0 10px 0 0;
+        }
+        
+        .container > div:first-child {
+            height: 100%;
+        }
+    </ui:style>
+
+    <g:DockLayoutPanel unit="PCT">
+        <g:west size="9">
+            <g:FlowPanel></g:FlowPanel>
+        </g:west>
+        <g:center>
+            <g:DockLayoutPanel unit="PX">
+                <g:north size="120">
+                    <g:FlowPanel styleName='{style.header}'>
+                        <g:Label ui:field="hLb" styleName='{style.hLb}'></g:Label>
+                        <g:FlowPanel ui:field="actBar"></g:FlowPanel>
+                        <g:HTMLPanel styleName='{style.upperRightPanel}'>
+                            <g:Button ui:field="logOutBtn" styleName='{style.logOutBtn}'></g:Button>
+                            <g:Button ui:field="userBtn" styleName='{style.userBtn}'></g:Button>
+                        </g:HTMLPanel>
+                    </g:FlowPanel>
+                </g:north>
+                <g:center>
+                    <g:ScrollPanel ui:field="container" styleName='{style.container}'></g:ScrollPanel>
+                </g:center>
+            </g:DockLayoutPanel>
+        </g:center>
+    </g:DockLayoutPanel>
+</ui:UiBinder>

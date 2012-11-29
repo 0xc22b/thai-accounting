@@ -1,0 +1,171 @@
+body,table td,select,button {
+	font-family: Arial Unicode MS, Arial, sans-serif;
+	font-size: small;
+}
+
+pre {
+	font-family: "courier new", courier;
+	font-size: small;
+}
+
+body {
+	width: 970px;
+	color: black;
+	margin: 80px auto 10px;
+	border: 0px;
+	padding: 0px;
+	background: #fff;
+	direction: ltr;
+	overflow-y: scroll;
+}
+
+a,a:visited {
+	color: #000;
+	text-decoration: none;
+}
+
+a:hover {
+	color: #000;
+	text-decoration: underline;
+}
+
+select {
+	background: white;
+}
+
+button {
+	margin: 0;
+	padding: 5px 7px;
+	text-decoration: none;
+	cursor: pointer;
+	cursor: hand;
+	font-size: small;
+	background: url("images/hborder.png") repeat-x 0px -2077px;
+	border: 1px solid #bbb;
+	border-bottom: 1px solid #a0a0a0;
+	border-radius: 3px;
+	-moz-border-radius: 3px;
+}
+
+button:active {
+	border: 1px inset #ccc;
+}
+
+button:hover {
+	border-color: #939393;
+}
+
+button[disabled] {
+	cursor: default;
+	color: #888;
+}
+
+button[disabled]:hover {
+	border: 1px outset #ccc;
+}
+
+input {
+	padding: 5px 4px;
+	border: 1px solid #ccc;
+	border-top: 1px solid #999;
+	font-size: small;
+	font-family: Arial Unicode MS, Arial, sans-serif;
+}
+
+#logInP {
+    position: absolute;
+    top: 10px;
+    right: 100px;
+}
+
+#logInP label, #logInP a {
+	display: block;
+}
+
+#logInP h2 {
+	margin: 0;
+}
+
+#descP {
+	float: left;
+    width: 50%;
+}
+
+#signUpP {
+    float: right;
+    width: 50%;
+    margin: 50px 0;
+}
+
+#signUpP h2, #signUpP label, #signUpP input, #signUpP button {
+	display: block;
+	margin: 0 auto;
+	text-align: center;
+}
+
+#signUpP button {
+	margin-top: 10px;
+}
+
+#formPanel {
+	min-height: 400px;
+}
+
+#formPanel h2 {
+	margin: 0;
+}
+
+#formPanel label {
+	display: block;
+}
+
+.panel {
+	clear: both;
+	margin: 25px 0;
+}
+
+.panel .lb {
+	display: block;
+	float: left;
+	width: 100px;
+	margin: 6px 10px;
+	text-align: right;
+}
+
+.panel .value {
+	display: block;
+	float: left;
+	margin: 6px 10px 6px 0;
+}
+
+.panel .editor {
+	clear: both;
+	margin: 10px 0 10px 120px;
+}
+
+.panel .editor label, .panel .editor input, .panel .editor button {
+	display: block;
+	margin: 0;
+}
+
+.panel .editor button {
+	margin-top: 10px;
+}
+
+.panel .editor img {
+	margin: 20px 10px 10px;
+}
+
+.lb {
+	display: inline;
+}
+
+.errLb {
+	color: red;
+}
+
+#footer {
+	clear: both;
+	padding: 35px 0 0;
+	text-align: center;
+}

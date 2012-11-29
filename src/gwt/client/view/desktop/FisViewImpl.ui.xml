@@ -1,0 +1,60 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' 
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:c='urn:import:gwt.client.ui'>
+
+    <ui:style type='gwt.client.view.desktop.FisViewImpl.Style'>
+        .row {
+            display: table;
+            margin: 10px 0;
+        }
+        
+        .h3 {
+            font-size: 17px;
+            font-weight: bold;
+        }
+        
+        .label {
+            display: table-cell;
+            width: 120px;
+        }
+        
+        .input {
+            display: table-cell;
+        }
+        
+        .errMsg {
+            display: table-cell;
+            color: red;
+            padding: 0 0 0 20px;
+        }
+    </ui:style>
+
+    <g:HTMLPanel>
+        <div class='{style.row}'>
+            <g:Label ui:field="beginLb" styleName='{style.h3}'></g:Label>
+        </div>
+        <div class='{style.row}'>
+            <g:Label ui:field="beginMonthLb" styleName='{style.label}'></g:Label>
+            <c:CustomIntBox ui:field="beginMonthIB" styleName='{style.input}' visibleLength='2'></c:CustomIntBox>
+            <g:Label ui:field="errBeginMonthLb" styleName='{style.errMsg}'></g:Label>
+        </div>
+        <div class='{style.row}'>
+            <g:Label ui:field="beginYearLb" styleName='{style.label}'></g:Label>
+            <c:CustomIntBox ui:field="beginYearIB" styleName='{style.input}' visibleLength='4'></c:CustomIntBox>
+            <g:Label ui:field="errBeginYearLb" styleName='{style.errMsg}'></g:Label>
+        </div>
+        <div class='{style.row}'>
+            <g:Label ui:field="endLb" styleName='{style.h3}'></g:Label>
+        </div>
+        <div class='{style.row}'>
+            <g:Label ui:field="endMonthLb" styleName='{style.label}'></g:Label>
+            <c:CustomIntBox ui:field="endMonthIB" styleName='{style.input}' visibleLength='2'></c:CustomIntBox>
+            <g:Label ui:field="errEndMonthLb" styleName='{style.errMsg}'></g:Label>
+        </div>
+        <div class='{style.row}'>
+            <g:Label ui:field="endYearLb" styleName='{style.label}'></g:Label>
+            <c:CustomIntBox ui:field="endYearIB" styleName='{style.input}' visibleLength='4'></c:CustomIntBox>
+            <g:Label ui:field="errEndYearLb" styleName='{style.errMsg}'></g:Label>
+        </div>
+    </g:HTMLPanel>
+</ui:UiBinder>

@@ -1,0 +1,195 @@
+body, table, table th, table td {
+    font-family: Arial Unicode MS, Arial, sans-serif;
+    font-size: 7pt;
+}
+
+body {
+    background: none repeat scroll 0 0 #FFFFFF;
+    border: 0 none;
+    color: black;
+    direction: ltr;
+    margin: 0px;
+    padding: 0;
+}
+
+/*=============================================================================
+ * ReportViewImpl.css
+ *=============================================================================
+ */
+
+.flexTable {
+    width: 100%;
+}
+
+.flexTable thead {
+    display: table-header-group;
+}
+
+.flexTable tr {
+    page-break-inside: avoid;
+}
+
+.flexTable thead tr:last-child th {
+    border-bottom: 1px solid #000;
+    font-weight: bold;
+    text-align: left;
+}
+
+.chart thead tr:nth-child\(1\) th:nth-child\(1\) {
+    text-align: left;
+}
+
+.chart thead tr:nth-child\(1\) th:nth-child\(2\) {
+    text-align: right;
+}
+
+.chart thead tr:nth-child\(2\) th:nth-child\(1\) {
+    text-align: left;
+}
+
+.chart thead tr:last-child th:nth-child\(1\){
+    width: 7%;
+}
+
+.chart thead tr:last-child th:nth-child\(3\){
+    width: 5%;
+}
+
+.chart thead tr:last-child th:nth-child\(4\){
+    width: 5%;
+}
+
+.chart thead tr:last-child th:nth-child\(5\){
+    width: 5%;
+}
+
+.chart thead tr:last-child th:nth-child\(6\){
+    width: 7%;
+}
+
+.journal thead tr:nth-child\(1\) th:nth-child\(1\) {
+    text-align: left;
+}
+
+.journal thead tr:nth-child\(1\) th:nth-child\(2\) {
+    text-align: right;
+}
+
+.journal thead tr:nth-child\(2\) th:nth-child\(1\) {
+    text-align: left;
+}
+
+.journal thead tr:nth-child\(3\) th:nth-child\(1\) {
+    text-align: left;
+}
+
+.journal thead tr:last-child th:nth-child\(1\){
+    width: 7%;
+}
+
+.journal thead tr:last-child th:nth-child\(4\){
+    width: 10%;
+    text-align: center !important;
+}
+
+.journal thead tr:last-child th:nth-child\(5\){
+    width: 10%;
+    text-align: center !important;
+}
+
+.journal tbody tr td:nth-child\(4\){
+    text-align: right !important;
+}
+
+.journal tbody tr td:nth-child\(5\){
+    text-align: right !important;
+}
+
+.ledger thead tr:nth-child\(1\) th:nth-child\(1\) {
+    text-align: left;
+}
+
+.ledger thead tr:nth-child\(1\) th:nth-child\(2\) {
+    text-align: right;
+}
+
+.ledger thead tr:nth-child\(2\) th:nth-child\(1\) {
+    text-align: left;
+}
+
+.ledger thead tr:nth-child\(3\) th:nth-child\(1\) {
+    text-align: left;
+}
+
+.ledger thead tr:last-child th:nth-child\(1\){
+    width: 7%;
+}
+
+.ledger thead tr:last-child th:nth-child\(2\){
+    width: 4%;
+}
+
+.ledger thead tr:last-child th:nth-child\(5\){
+    width: 10%;
+}
+
+.ledger thead tr:last-child th:nth-child\(6\){
+    width: 10%;
+}
+
+.ledger thead tr:last-child th:nth-child\(7\){
+    width: 10%;
+}
+
+.trial thead tr:nth-child\(1\) th:nth-child\(1\) {
+    text-align: left;
+}
+
+.trial thead tr:nth-child\(1\) th:nth-child\(2\) {
+    text-align: right;
+}
+
+.trial thead tr:nth-child\(2\) th:nth-child\(1\) {
+    text-align: left;
+}
+
+.trial thead tr:nth-child\(3\) th:nth-child\(1\) {
+    text-align: left;
+}
+
+.trial thead tr:last-child th:nth-child\(1\){
+    width: 7%;
+}
+
+.trial thead tr:last-child th:nth-child\(3\){
+    width: 10%;
+}
+
+.trial thead tr:last-child th:nth-child\(4\){
+    width: 10%;
+}
+
+.finance thead tr:nth-child\(1\) th:nth-child\(1\) {
+    text-align: center;
+}
+
+.finance thead tr:nth-child\(2\) th:nth-child\(1\) {
+    text-align: center;
+}
+
+.finance thead tr:nth-child\(3\) th:nth-child\(1\) {
+    text-align: center;
+}
+
+.center {
+    text-align: center;
+    border-bottom: 1px double #000;
+}
+
+.uline {
+    border-bottom: 1px solid #000;
+}
+
+.twoulines {
+    border-bottom: 1px double #000;
+}

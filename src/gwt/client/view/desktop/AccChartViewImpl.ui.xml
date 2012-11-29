@@ -1,0 +1,73 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' 
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:c='urn:import:gwt.client.ui'>
+
+    <ui:style type='gwt.client.view.desktop.AccChartViewImpl.Style'>
+        .row {
+            display: table;
+            margin: 10px 0;
+        }
+        
+        .label {
+            display: table-cell;
+            width: 120px;
+        }
+        
+        .input {
+            display: table-cell;
+        }
+        
+        .errMsg {
+            display: table-cell;
+            color: red;
+            padding: 0 0 0 20px;
+        }
+        
+        .noSB {
+            width: 100px;
+        }
+        
+        .nameSB {
+            width: 150px;
+        }
+        
+        .parentAccNoSB {
+            width: 300px;
+        }
+    </ui:style>
+
+    
+    <g:HTMLPanel>
+        <div class='{style.row}'>
+            <g:Label ui:field="noLb" styleName='{style.label}'></g:Label>
+            <c:CustomSuggestBox ui:field="noSB" styleName='{style.input}'></c:CustomSuggestBox>
+            <g:Label ui:field="errNoLb" styleName='{style.errMsg}'></g:Label>
+        </div>
+        <div class='{style.row}'>
+            <g:Label ui:field="nameLb" styleName='{style.label}'></g:Label>
+            <c:CustomSuggestBox ui:field="nameSB" styleName='{style.input}'></c:CustomSuggestBox>
+            <g:Label ui:field="errNameLb" styleName='{style.errMsg}'></g:Label>
+        </div>
+        <div class='{style.row}'>
+            <g:Label ui:field="parentAccNoLb" styleName='{style.label}'></g:Label>
+            <c:CustomSuggestBox ui:field="parentAccNoSB" styleName='{style.input}'></c:CustomSuggestBox>
+            <g:Label ui:field="errParentAccNoLb" styleName='{style.errMsg}'></g:Label>
+        </div>
+        <div class='{style.row}'>
+            <g:Label ui:field="typeLb" styleName='{style.label}'></g:Label>
+            <c:CustomListBox ui:field="typeLB" styleName='{style.input}'></c:CustomListBox>
+            <g:Label ui:field="errTypeLb" styleName='{style.errMsg}'></g:Label>
+        </div>
+        <div class='{style.row}'>
+            <g:Label ui:field="levelLb" styleName='{style.label}'></g:Label>
+            <c:CustomListBox ui:field="levelLB" styleName='{style.input}'></c:CustomListBox>
+            <g:Label ui:field="errLevelLb" styleName='{style.errMsg}'></g:Label>
+        </div>
+        <div class='{style.row}'>
+            <g:Label ui:field="accGrpLb" styleName='{style.label}'></g:Label>
+            <c:CustomListBox ui:field="accGrpLB" styleName='{style.input}'></c:CustomListBox>
+            <g:Label ui:field="errAccGrpLb" styleName='{style.errMsg}'></g:Label>
+        </div>
+    </g:HTMLPanel>
+    
+</ui:UiBinder>

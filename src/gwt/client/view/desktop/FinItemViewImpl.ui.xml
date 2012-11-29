@@ -1,0 +1,76 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' 
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:c='urn:import:gwt.client.ui'>
+
+    <ui:style type='gwt.client.view.desktop.FinItemViewImpl.Style'>
+        .row {
+            display: table;
+            margin: 10px 0;
+        }
+        
+        .label {
+            display: table-cell;
+            width: 120px;
+        }
+        
+        .input {
+            display: table-cell;
+        }
+        
+        .errMsg {
+            display: table-cell;
+            color: red;
+            padding: 0 0 0 20px;
+        }
+        
+        .accNoSB {
+            width: 300px;
+        }
+    </ui:style>
+
+    <g:HTMLPanel>
+        <div class='{style.row}'>
+            <g:Label ui:field="seqLb" styleName='{style.label}'></g:Label>
+            <c:CustomIntBox ui:field="seqIB" styleName='{style.input}'></c:CustomIntBox>
+            <g:Label ui:field="errSeqLb" styleName='{style.errMsg}'></g:Label>
+        </div>
+        <div class='{style.row}'>
+            <g:Label ui:field="commLb" styleName='{style.label}'></g:Label>
+            <c:CustomListBox ui:field='commLB' styleName='{style.input}'></c:CustomListBox>
+        </div>
+        <div class='{style.row}'>
+            <g:Label ui:field="argLb" styleName='{style.label}'></g:Label>
+            <g:TextBox ui:field="argTB" styleName='{style.input}'></g:TextBox>
+            <c:CustomSuggestBox ui:field="accNoSB" styleName='{style.input}'></c:CustomSuggestBox>
+            <g:Label ui:field="errArgLb" styleName='{style.errMsg}'></g:Label>
+        </div>
+        <div class='{style.row}'>
+            <g:Label ui:field="calConLb" styleName='{style.label}'></g:Label>
+            <c:CustomListBox ui:field='calConLB' styleName='{style.input}'></c:CustomListBox>
+        </div>
+        <div class='{style.row}'>
+            <g:Label ui:field="printConLb" styleName='{style.label}'></g:Label>
+            <c:CustomListBox ui:field='printConLB' styleName='{style.input}'></c:CustomListBox>
+        </div>
+        <div class='{style.row}'>
+            <g:Label ui:field="printStyleLb" styleName='{style.label}'></g:Label>
+            <c:CustomListBox ui:field='printStyleLB' styleName='{style.input}'></c:CustomListBox>
+        </div>
+        <div class='{style.row}'>
+            <g:Label ui:field="var1Lb" styleName='{style.label}'></g:Label>
+            <c:CustomListBox ui:field='var1LB' styleName='{style.input}'></c:CustomListBox>
+        </div>
+        <div class='{style.row}'>
+            <g:Label ui:field="var2Lb" styleName='{style.label}'></g:Label>
+            <c:CustomListBox ui:field='var2LB' styleName='{style.input}'></c:CustomListBox>        
+        </div>
+        <div class='{style.row}'>
+            <g:Label ui:field="var3Lb" styleName='{style.label}'></g:Label>
+            <c:CustomListBox ui:field='var3LB' styleName='{style.input}'></c:CustomListBox>
+        </div>
+        <div class='{style.row}'>
+            <g:Label ui:field="var4Lb" styleName='{style.label}'></g:Label>
+            <c:CustomListBox ui:field='var4LB' styleName='{style.input}'></c:CustomListBox>
+        </div>
+    </g:HTMLPanel>
+</ui:UiBinder>

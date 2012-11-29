@@ -1,0 +1,27 @@
+<ui:UiBinder 
+    xmlns:ui='urn:ui:com.google.gwt.uibinder' 
+    xmlns:g='urn:import:com.google.gwt.user.client.ui'
+    xmlns:c="urn:import:com.google.gwt.user.cellview.client">
+
+    <ui:style type='gwt.client.view.desktop.ListViewImpl.Style'>
+        .panel {
+            height: 100%;
+        }
+        .grid {
+            height: 90%;
+        }
+        
+        .page {
+            margin: 10px auto;
+        }
+        
+        .clickColumn {
+            cursor: pointer;
+        }
+    </ui:style>
+
+    <g:HTMLPanel styleName='{style.panel}'>
+        <c:DataGrid ui:field='dataGrid' styleName='{style.grid}'></c:DataGrid>
+        <c:SimplePager ui:field='pager' styleName='{style.page}' />
+    </g:HTMLPanel>
+</ui:UiBinder>

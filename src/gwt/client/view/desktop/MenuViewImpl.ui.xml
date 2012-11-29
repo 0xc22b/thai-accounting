@@ -1,0 +1,114 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' 
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:c='urn:import:gwt.client.ui'>
+
+    <ui:style type='gwt.client.view.desktop.MenuViewImpl.Style'>
+        
+        .row {
+            display: table;
+            margin: 10px 0;
+        }
+        
+        .btn {
+	        border: 1px solid #FFF;
+            margin: 0 10px 0 0;
+        }
+        
+        .btn:hover {
+	        border: 1px solid #FFF;
+	    }
+        
+        .label {
+            display: table-cell;
+            width: 120px;
+        }
+        
+        .fLb {
+            display: table-cell;
+            padding: 0 20px 0 0;
+        }
+        
+        .oLb {
+            display: table-cell;
+            padding: 0 20px;
+        }
+        
+        .input {
+            display: table-cell;
+        }
+        
+        .errMsg {
+            display: table-cell;
+            color: red;
+            padding: 0 0 0 20px;
+        }
+        
+        .suggestBox {
+            width: 300px;
+        }
+        
+        .endAccNoLb {
+            display: table-cell;
+            padding: 0 20px;
+        }
+        
+        .finRepPanel {
+            display: inline;
+        }
+    </ui:style>
+
+    <g:HTMLPanel>
+        <g:FlowPanel ui:field="setupPanel" styleName='{style.row}'>
+            <g:Button ui:field="journalTypeBtn"></g:Button>
+            <g:Button ui:field="docTypeBtn"></g:Button>
+            <g:Button ui:field="accGrpBtn"></g:Button>
+            <g:Button ui:field="accChartBtn"></g:Button>
+            <g:Button ui:field="beginningBtn"></g:Button>
+            <g:Button ui:field="finBtn"></g:Button>
+        </g:FlowPanel>
+        <g:FlowPanel ui:field="journalPanel" styleName='{style.row}'>
+        
+        </g:FlowPanel>
+        <g:FlowPanel ui:field="reportPanel" styleName='{style.row}'>
+            <g:Button ui:field="accChartRepBtn"></g:Button>
+            <g:Button ui:field="journalRepBtn"></g:Button>
+            <g:Button ui:field="ledgerRepBtn"></g:Button>
+            <g:Button ui:field="trialRepBtn"></g:Button>
+            <g:FlowPanel ui:field="finRepPanel" styleName='{style.finRepPanel}'></g:FlowPanel>
+        </g:FlowPanel>
+        <g:FlowPanel ui:field="subMenuPanel">
+            <g:FlowPanel styleName='{style.row}'>
+                <g:Label ui:field="journalTypeLb" styleName='{style.label}'></g:Label>
+                <c:CustomListBox ui:field="journalTypeLB"></c:CustomListBox>
+                <g:Label ui:field="beginAccNoLb" styleName='{style.label}'></g:Label>
+                <c:CustomSuggestBox ui:field="beginAccNoSB"></c:CustomSuggestBox>
+                <g:Label ui:field="endAccNoLb" styleName='{style.endAccNoLb}'></g:Label>
+                <c:CustomSuggestBox ui:field="endAccNoSB"></c:CustomSuggestBox>
+                <g:Label ui:field="errAccNoLb"></g:Label>
+            </g:FlowPanel>
+            <g:FlowPanel ui:field="datePanel">
+                <g:FlowPanel styleName='{style.row}'>
+                    <g:Label ui:field="beginDateLb" styleName='{style.label}'></g:Label>
+                    <g:Label ui:field="beginDayLb" styleName='{style.fLb}'></g:Label>
+                    <c:CustomIntBox ui:field="beginDayIB" styleName='{style.input}' visibleLength='2'></c:CustomIntBox>
+                    <g:Label ui:field="beginMonthLb" styleName='{style.oLb}'></g:Label>
+                    <c:CustomIntBox ui:field="beginMonthIB" styleName='{style.input}' visibleLength='2'></c:CustomIntBox>
+                    <g:Label ui:field="beginYearLb" styleName='{style.oLb}'></g:Label>
+                    <c:CustomIntBox ui:field="beginYearIB" styleName='{style.input}' visibleLength='4'></c:CustomIntBox>
+                    <g:Label ui:field="errBeginDateLb" styleName='{style.errMsg}'></g:Label>
+                </g:FlowPanel>
+                <g:FlowPanel styleName='{style.row}'>
+                    <g:Label ui:field="endDateLb" styleName='{style.label}'></g:Label>
+                    <g:Label ui:field="endDayLb" styleName='{style.fLb}'></g:Label>
+                    <c:CustomIntBox ui:field="endDayIB" styleName='{style.input}' visibleLength='2'></c:CustomIntBox>
+                    <g:Label ui:field="endMonthLb" styleName='{style.oLb}'></g:Label>
+                    <c:CustomIntBox ui:field="endMonthIB" styleName='{style.input}' visibleLength='2'></c:CustomIntBox>
+                    <g:Label ui:field="endYearLb" styleName='{style.oLb}'></g:Label>
+                    <c:CustomIntBox ui:field="endYearIB" styleName='{style.input}' visibleLength='4'></c:CustomIntBox>
+                    <g:Label ui:field="errEndDateLb" styleName='{style.errMsg}'></g:Label>
+                </g:FlowPanel>
+            </g:FlowPanel>
+            <g:Button ui:field="okBtn"></g:Button>
+        </g:FlowPanel>
+    </g:HTMLPanel>
+</ui:UiBinder>
