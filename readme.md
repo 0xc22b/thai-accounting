@@ -1,19 +1,19 @@
 # Thai-accounting
 
-2 Steps to generate accounting reports
+2 Steps to generate accounting reports:
 
-    1. Setup
+1.  Setup
     
-    * Journal type
-    * Document type
-    * Account group
-    * Account chart
-    * Beginning
-    * Financial statement
+    - Journal type
+    - Document type
+    - Account group
+    - Account chart
+    - Beginning
+    - Financial statement
     
-    2. Add journals
+2.  Add journals
  
-The accounting reports are
+The accounting reports are:
  
 * Account chart
 * Journal
