@@ -97,7 +97,7 @@ input {
     margin: 50px 0;
 }
 
-#signUpP h2, #signUpP label, #signUpP input, #signUpP button {
+#signUpP h2, #signUpP label, #signUpP input, #signUpP button, #signUpP img {
 	display: block;
 	margin: 0 auto;
 	text-align: center;
@@ -105,6 +105,10 @@ input {
 
 #signUpP button {
 	margin-top: 10px;
+}
+
+#signUpP img {
+	margin-top: 20px;
 }
 
 #formPanel {

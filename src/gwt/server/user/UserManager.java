@@ -2,25 +2,33 @@ package gwt.server.user;
 
 import gwt.server.user.UserVerifier.Log;
 import gwt.server.user.UserVerifier.LogInfoType;
+import gwt.server.user.model.MailMessage;
 import gwt.server.user.model.Session;
 import gwt.server.user.model.User;
 import gwt.server.user.model.UserData;
 import gwt.server.user.model.UserGrp;
 import gwt.shared.NotLoggedInException;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
 import java.util.Random;
 
-import java.util.Properties;
+import javax.mail.Address;
+import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.Multipart;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -52,7 +60,7 @@ public class UserManager {
     public static final String PARAMETER_FID = "fid";
     public static final String PARAMETER_VID = "vid";
     
-    public static final String FROM_EMAIL = "admin@thai-accounting.appspot.com";
+    public static final String FROM_EMAIL = "admin@thai-accounting.appspotmail.com";
     public static final String FROM_NAME = "Thai-Accounting Admin";
     
     public static final String FORGOT_RESULT = "Please check your email to accept confirmation link for changing password.";
@@ -147,7 +155,7 @@ public class UserManager {
                             ds.put(userData.getEntity());
                             
                             // Verify the email!
-                            sendEmailConfirm(user, log);
+                            sendEmailConfirmEmail(user, log);
                             
                             log.addLogInfo(LogInfoType.SIGN_UP, null, true, null);
                             return user;
@@ -383,7 +391,7 @@ public class UserManager {
                         setUserData(user.getKey(), false);
                         
                         // Verify the new email!
-                        sendEmailConfirm(user, log);
+                        sendEmailConfirmEmail(user, log);
                         
                         log.addLogInfo(LogInfoType.CHANGE_EMAIL, null, true, null);
                         return;
@@ -432,7 +440,7 @@ public class UserManager {
         log.addLogInfo(LogInfoType.CHANGE_PASSWORD, null, true, null);
     }
     
-    public static void forgotPassword(String usernameOrEmail, Log log) {
+    public static void sendEmailResetPassword(String usernameOrEmail, Log log) {
         
         User user;
         usernameOrEmail = usernameOrEmail.trim();
@@ -468,7 +476,7 @@ public class UserManager {
         Session session = addSession(Session.FORGOT_PASSWORD, user.getKey(), genSessionID());
 
         //Send an email with a link to reset password
-        String url = genForgotUrl(session.getKeyString(), session.getSessionID());
+        String url = genResetPasswordUrl(session.getKeyString(), session.getSessionID());
         String subject = "Reset password at thai-accounting";
         String msgBody = "<p>Please click the link below to reset password at thai-accounting.</p>"
                 + "<a href='" + url + "'>Link to reset password</a>"
@@ -482,7 +490,7 @@ public class UserManager {
                 FORGOT_RESULT);
     }
     
-    private static String genForgotUrl(String sessionKeyString, String sessionID) {
+    private static String genResetPasswordUrl(String sessionKeyString, String sessionID) {
         return "http://thai-accounting.appspot.com/forgot?" + PARAMETER_SSID + "=" + sessionKeyString
                 + "&" + PARAMETER_FID + "=" + sessionID;
     }
@@ -525,13 +533,13 @@ public class UserManager {
         return;
     }
     
-    public static void sendEmailConfirm(User user, Log log) {
+    public static void sendEmailConfirmEmail(User user, Log log) {
         // Generate forgot password session
         Session session = addSession(Session.EMAIL_CONFIRM, user.getKey(),
                 genSessionID());
         
         //Send an email with a link to reset password
-        String url = genEmailConfirmUrl(session.getKeyString(), session.getSessionID());
+        String url = genConfirmEmailUrl(session.getKeyString(), session.getSessionID());
         String subject = "Email verification - thai-accounting.appspot.com";
         String msgBody = "<p>To make sure that you can reset your password. We need to "
                 + "confirm your email address. All it takes is a single click.</p>"
@@ -545,12 +553,12 @@ public class UserManager {
         log.addLogInfo(UserVerifier.LogInfoType.SEND_EMAIL_CONFIRM, null, true, null);
     }
     
-    private static String genEmailConfirmUrl(String sessionKeyString, String sessionID) {
+    private static String genConfirmEmailUrl(String sessionKeyString, String sessionID) {
         return "http://thai-accounting.appspot.com/emailconfirm?" + PARAMETER_SSID + "="
                 + sessionKeyString + "&" + PARAMETER_VID + "=" + sessionID;
     }
 
-    public static boolean receiveEmailConfirm(String sessionKeyString,
+    public static boolean confirmEmail(String sessionKeyString,
             String sessionID) {
         
         Session session = getSession(sessionKeyString, Session.EMAIL_CONFIRM,
@@ -576,18 +584,74 @@ public class UserManager {
                 props, null);
 
         try {
-            Message msg = new MimeMessage(mailSession);
+            MimeMessage msg = new MimeMessage(mailSession);
             msg.setFrom(new InternetAddress(fromEmail, fromName));
             msg.addRecipient(Message.RecipientType.TO,
                     new InternetAddress(toEmail, toName));
             msg.setSubject(subject);
-            msg.setText(msgBody);
+            
+            Multipart mp = new MimeMultipart();
+            MimeBodyPart htmlPart = new MimeBodyPart();
+            htmlPart.setContent(msgBody, "text/html");
+            mp.addBodyPart(htmlPart);
+            msg.setContent(mp);
+            
             Transport.send(msg);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         } catch (MessagingException e) {
             e.printStackTrace();
         }
+    }
+    
+    public static Key receiveEmail(MimeMessage msg) throws MessagingException,
+            IOException {
+        Address[] a;
+        
+        // FROM -> Sender
+        String sender = "";        
+        if ((a = msg.getFrom()) != null) {
+            for (int i = 0; i < a.length; i++) {
+                sender += (i == 0 ? "" : ", ") + a[i].toString();
+            }
+        }
+        
+        // TO -> Recipients
+        String recipients = "";        
+        if ((a = msg.getRecipients(Message.RecipientType.TO)) != null) {
+            for (int i = 0; i < a.length; i++) {
+                recipients += (i == 0 ? "" : ", ") + a[i].toString();
+            }
+        }
+        
+        // SUBJECT
+        String subject = msg.getSubject();
+        
+        // CONTENT
+        ArrayList<String> contentList = new ArrayList<String>();
+        Object o;
+        o = msg.getContent();
+        if (o instanceof String) {
+            contentList.add((String)o);
+        } else if (o instanceof Multipart) {
+            Multipart mp = (Multipart)o;
+            for (int i = 0; i < mp.getCount(); i++) {
+                BodyPart bp = mp.getBodyPart(i);
+                o = bp.getContent();
+                if (o instanceof String) {
+                    contentList.add((String)o);
+                }
+            }
+        }
+        
+        // DATE
+        Date sentDate = msg.getSentDate();
+        
+        MailMessage mm = new MailMessage(sender, recipients, subject,
+                contentList.toString(), sentDate);
+        
+        DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+        return ds.put(mm.getEntity());
     }
     
     public static void changeLang(User user, String lang, Log log) {

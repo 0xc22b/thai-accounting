@@ -572,7 +572,7 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
     
     private String genTodayDate(){
         String dateS = DateTimeFormat.getFormat("dd/MM/yyyy").format(new Date());
-        //TODO Convert to Thai year using company settings
+        //TODO: Convert to Thai year using company/user settings.
         String yearS = dateS.split("/")[2];
         int year = Integer.parseInt(yearS) + 543;
         return dateS.substring(0, 6) + year;

@@ -27,7 +27,7 @@ public class ForgotServlet extends HttpServlet {
         String usernameOrEmail = req.getParameter(UserManager.PARAMETER_USERNAME);
         if (usernameOrEmail != null) {
             UserVerifier.Log log = new UserVerifier.Log();
-            UserManager.forgotPassword(usernameOrEmail, log);
+            UserManager.sendEmailResetPassword(usernameOrEmail, log);
             HomeServlet.response(resp, log);
             return;
         }

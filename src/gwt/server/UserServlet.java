@@ -170,7 +170,7 @@ public class UserServlet extends HttpServlet {
         
         UserVerifier.Log log = new UserVerifier.Log();
         
-        UserManager.sendEmailConfirm(user, log);
+        UserManager.sendEmailConfirmEmail(user, log);
         
         HomeServlet.response(resp, log);
     }

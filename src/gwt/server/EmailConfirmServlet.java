@@ -20,7 +20,7 @@ public class EmailConfirmServlet extends HttpServlet {
         String sessionKeyString = req.getParameter(UserManager.PARAMETER_SSID);
         String sessionID = req.getParameter(UserManager.PARAMETER_VID);
         if (sessionKeyString != null && sessionID != null) {
-            didEmailConfirm = UserManager.receiveEmailConfirm(sessionKeyString, sessionID);
+            didEmailConfirm = UserManager.confirmEmail(sessionKeyString, sessionID);
         }
         
         req.setAttribute("didEmailConfirm", didEmailConfirm);

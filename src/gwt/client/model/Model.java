@@ -391,6 +391,9 @@ public class Model {
                         // Update local storage
                         sComList.getSCom(comKeyString).getSFis(fisKeyString).editSJournalType(sJournalType);
 
+                        //TODO: update journal type name in doctype! 
+                        
+                        
                         // Return data to caller
                         callback.onSuccess(result);
                     }

@@ -18,12 +18,27 @@ import gwt.server.user.model.UserData;
 import gwt.server.user.model.UserGrp;
 import gwt.shared.NotLoggedInException;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
+import java.util.Properties;
+
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.mail.MailServicePb.MailMessage;
 import com.google.appengine.api.mail.dev.LocalMailService;
@@ -333,32 +348,32 @@ public class UserManagerTest {
     }
 
     @Test
-    public void testForgotPassword() {
+    public void testSendEmailResetPassword() {
         UserVerifier.Log log = new UserVerifier.Log();
         UserManager.signUp("wit", "wit@gmail.c", "raknaja2",
                 "raknaja2", log);
 
         // Forgot1
         UserVerifier.Log log1 = new UserVerifier.Log();
-        UserManager.forgotPassword("witter", log1);
+        UserManager.sendEmailResetPassword("witter", log1);
         assertFalse(log1.isValid());
         assertLogInfoType(log1, LogInfoType.FORGOT_PASSWORD, "witter",
                 false, UserVerifier.ERR_USER_NOT_FOUND);
 
         // Forgot2
         UserVerifier.Log log2 = new UserVerifier.Log();
-        UserManager.forgotPassword("wit", log2);
+        UserManager.sendEmailResetPassword("wit", log2);
         assertTrue(log2.isValid());
         assertLogInfoType(log2, LogInfoType.FORGOT_PASSWORD, "wit",
                 true, UserManager.FORGOT_RESULT);
     }
 
     @Test
-    public void testGenForgotUrl() {
+    public void testGenResetPasswordUrl() {
         @SuppressWarnings("rawtypes")
         Class[] argClasses = {String.class, String.class};
         Object[] argObjects = {"test1", "test2"};
-        String url = (String)Reflector.invokePrivateMethod(UserManager.class, "genForgotUrl",
+        String url = (String)Reflector.invokePrivateMethod(UserManager.class, "genResetPasswordUrl",
                 argClasses, null, argObjects);
         assertEquals("http://thai-accounting.appspot.com/forgot?ssid=test1&fid=test2", url);
     }
@@ -397,12 +412,12 @@ public class UserManagerTest {
     }
     
     @Test
-    public void testSendEmailConfirm() {
+    public void testSendEmailConfirmEmail() {
         UserVerifier.Log log = new UserVerifier.Log();
         User user = UserManager.signUp("wit", "wit@gmail.c", "raknaja2",
                 "raknaja2", log);
         
-        UserManager.sendEmailConfirm(user, log);
+        UserManager.sendEmailConfirmEmail(user, log);
         
         assertTrue(log.isValid());
         assertLogInfoType(log, UserVerifier.LogInfoType.SEND_EMAIL_CONFIRM,
@@ -410,17 +425,17 @@ public class UserManagerTest {
     }
     
     @Test
-    public void testGenEmailConfirmUrl() {
+    public void testGenConfirmEmailUrl() {
         @SuppressWarnings("rawtypes")
         Class[] argClasses = {String.class, String.class};
         Object[] argObjects = {"test1", "test2"};
-        String url = (String)Reflector.invokePrivateMethod(UserManager.class, "genEmailConfirmUrl",
+        String url = (String)Reflector.invokePrivateMethod(UserManager.class, "genConfirmEmailUrl",
                 argClasses, null, argObjects);
         assertEquals("http://thai-accounting.appspot.com/emailconfirm?ssid=test1&vid=test2", url);
     }
     
     @Test
-    public void testReceiveEmailConfirm() {
+    public void testConfirmEmail() {
         UserVerifier.Log log = new UserVerifier.Log();
         User user = UserManager.signUp("wit", "wit@gmail.c", "raknaja2",
                 "raknaja2", log);
@@ -437,7 +452,7 @@ public class UserManagerTest {
         Session session = (Session)Reflector.invokePrivateMethod(UserManager.class, "addSession",
                 argClasses1, null, argObjects1);
         
-        assertTrue(UserManager.receiveEmailConfirm(session.getKeyString(),
+        assertTrue(UserManager.confirmEmail(session.getKeyString(),
                 session.getSessionID()));
         
         UserData userData = UserManager.getUserData(user.getKey());
@@ -469,7 +484,94 @@ public class UserManagerTest {
         assertEquals("Sara <sara@mail.com>", mailMessage.getTo(0));
         assertEquals("Bob <bob@mail.com>", mailMessage.getSender());
         assertEquals("Let's go wild!", mailMessage.getSubject());
-        assertEquals("Read the header.", mailMessage.getTextBody());
+        assertEquals("Read the header.", mailMessage.getHtmlBody());
+    }
+    
+    @Test
+    public void testReceiveEmail1() {
+        Key mmKey = null;
+        Properties props = new Properties();
+        javax.mail.Session mailSession = javax.mail.Session.getDefaultInstance(
+                props, null);
+        try {
+            MimeMessage msg = new MimeMessage(mailSession);
+            msg.setFrom(new InternetAddress("bob@mail.com", "Bob"));
+            msg.addRecipient(Message.RecipientType.TO,
+                    new InternetAddress("sara@mail.com", "Sara"));
+            msg.setSubject("Test receiving an email.");
+            
+            Multipart mp = new MimeMultipart();
+            MimeBodyPart htmlPart = new MimeBodyPart();
+            htmlPart.setContent("<p>This is a test.</p>", "text/html");
+            mp.addBodyPart(htmlPart);
+            msg.setContent(mp);
+            
+            mmKey = UserManager.receiveEmail(msg);
+        } catch (UnsupportedEncodingException e) {
+            fail();
+        } catch (MessagingException e) {
+            fail();
+        } catch (IOException e) {
+            fail();
+        }
+        
+        if (mmKey == null) {
+            fail();
+        }
+        
+        DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+        try {
+            Entity en = ds.get(mmKey);
+            gwt.server.user.model.MailMessage mm
+                    = new gwt.server.user.model.MailMessage(en);
+            assertEquals("Bob <bob@mail.com>", mm.getSender());
+            assertEquals("Sara <sara@mail.com>", mm.getRecipients());
+            assertEquals("Test receiving an email.", mm.getSubject());
+            assertEquals("[<p>This is a test.</p>]", mm.getContent());
+        } catch (EntityNotFoundException e) {
+            fail();
+        }
+    }
+    
+    @Test
+    public void testReceiveEmail2() {
+        Key mmKey = null;
+        Properties props = new Properties();
+        javax.mail.Session mailSession = javax.mail.Session.getDefaultInstance(
+                props, null);
+        try {
+            MimeMessage msg = new MimeMessage(mailSession);
+            msg.setFrom(new InternetAddress("bob@mail.com", "Bob"));
+            msg.addRecipient(Message.RecipientType.TO,
+                    new InternetAddress("sara@mail.com", "Sara"));
+            msg.setSubject("Test receiving an email.");
+            msg.setText("This is a test.");
+            
+            mmKey = UserManager.receiveEmail(msg);
+        } catch (UnsupportedEncodingException e) {
+            fail();
+        } catch (MessagingException e) {
+            fail();
+        } catch (IOException e) {
+            fail();
+        }
+        
+        if (mmKey == null) {
+            fail();
+        }
+        
+        DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
+        try {
+            Entity en = ds.get(mmKey);
+            gwt.server.user.model.MailMessage mm
+                    = new gwt.server.user.model.MailMessage(en);
+            assertEquals("Bob <bob@mail.com>", mm.getSender());
+            assertEquals("Sara <sara@mail.com>", mm.getRecipients());
+            assertEquals("Test receiving an email.", mm.getSubject());
+            assertEquals("[This is a test.]", mm.getContent());
+        } catch (EntityNotFoundException e) {
+            fail();
+        }
     }
     
     @Test
