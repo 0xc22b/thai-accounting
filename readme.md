@@ -2,15 +2,13 @@
 
 2 Steps to generate accounting reports:
 
-1.  Setup
-    
-    - Journal type
-    - Document type
-    - Account group
-    - Account chart
-    - Beginning
-    - Financial statement
-    
+1.  Setup    
+    - Journal types
+    - Document types
+    - Account groups
+    - Account charts
+    - Beginnings
+    - Financial statements
 2.  Add journals
  
 The accounting reports are:
