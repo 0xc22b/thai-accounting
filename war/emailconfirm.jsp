@@ -13,7 +13,7 @@
         </div>
     </noscript>
 
-    <h2>Email verifiaction</h2>
+    <h2>Email verification</h2>
     <% if (((Boolean)request.getAttribute("didEmailConfirm")).booleanValue() == true) { %>
         <p>Your email has been verified.</p><a href="/">Continue</a>
     <% } else { %>

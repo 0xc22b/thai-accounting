@@ -94,7 +94,7 @@
             <button id="deleteAccountOkBtn">OK</button>
             <img src="/img/loading.gif" id="deleteAccountLoadingImg" style="display: none;" />
         </div>
-	</div>
+    </div>
     
     <div id="footer">
         Thai accounting 2012. All rights Reserved
