@@ -29,8 +29,8 @@ var JS_HOME = (function ($, UserVerifier) {
     onLogInBtnClick: function () {
       var usernameOrEmail, password, log, isValid, dataString;
 
-      usernameOrEmail = logInUsernameTB.val().trim();
-      password = logInPasswordTB.val().trim();
+      usernameOrEmail = $.trim(logInUsernameTB.val());
+      password = $.trim(logInPasswordTB.val());
 
       log = [];
       if (usernameOrEmail.indexOf('@') === -1) {
@@ -81,10 +81,10 @@ var JS_HOME = (function ($, UserVerifier) {
       var username, email, password, repeatPassword, log, isValid1, isValid2,
         isValid3, isValid4, logInfo, dataString;
 
-      username = signUpUsernameTB.val().trim();
-      email = signUpEmailTB.val().trim().toLowerCase();
-      password = signUpPasswordTB.val().trim();
-      repeatPassword = signUpRepeatPasswordTB.val().trim();
+      username = $.trim(signUpUsernameTB.val());
+      email = $.trim(signUpEmailTB.val()).toLowerCase();
+      password = $.trim(signUpPasswordTB.val());
+      repeatPassword = $.trim(signUpRepeatPasswordTB.val());
 
       log = [];
       isValid1 = UserVerifier.isUsernameValid(username, log);

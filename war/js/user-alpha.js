@@ -126,8 +126,8 @@ var JS_USER = (function ($, UserVerifier) {
     onChangeUsernameOkBtnClick: function () {
       var username, password, log, contentList;
 
-      username = changeUsernameTB.val().trim();
-      password = changeUsernamePasswordTB.val().trim();
+      username = $.trim(changeUsernameTB.val());
+      password = $.trim(changeUsernamePasswordTB.val());
 
       log = [];
       if (!UserVerifier.isUsernameValid(username, log) ||
@@ -238,8 +238,8 @@ var JS_USER = (function ($, UserVerifier) {
     onChangeEmailOkBtnClick: function (e) {
       var email, password, log, contentList;
 
-      email = changeEmailTB.val().trim();
-      password = changeEmailPasswordTB.val().trim();
+      email = $.trim(changeEmailTB.val());
+      password = $.trim(changeEmailPasswordTB.val());
 
       log = [];
       if (!UserVerifier.isEmailValid(email, log) ||
@@ -382,9 +382,9 @@ var JS_USER = (function ($, UserVerifier) {
     onChangePasswordOkBtnClick: function (e) {
       var newPassword, repeatPassword, password, log, contentList;
 
-      newPassword = changeNewPasswordTB.val().trim();
-      repeatPassword = changeRepeatPasswordTB.val().trim();
-      password = changePasswordTB.val().trim();
+      newPassword = $.trim(changeNewPasswordTB.val());
+      repeatPassword = $.trim(changeRepeatPasswordTB.val());
+      password = $.trim(changePasswordTB.val());
 
       log = [];
       if (!UserVerifier.isPasswordValid(newPassword, log, UserVerifier.LogInfoType.newPassword)
@@ -585,7 +585,7 @@ var JS_USER = (function ($, UserVerifier) {
     onDeleteAccountOkBtnClick: function () {
       var password, log, contentList;
 
-      password = deleteAccountPasswordTB.val().trim();
+      password = $.trim(deleteAccountPasswordTB.val());
 
       log = [];
       if (!UserVerifier.isPasswordValid(password, log,

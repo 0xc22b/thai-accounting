@@ -39,7 +39,7 @@ var JS_FORGOT = (function ($, UserVerifier) {
     onForgotPasswordOkBtnClick: function () {
       var usernameOrEmail, log, logInfo, dataString;
 
-      usernameOrEmail = usernameOrEmailTB.val().trim();
+      usernameOrEmail = $.trim(usernameOrEmailTB.val());
 
       log = [];
       if (usernameOrEmail.indexOf('@') === -1) {
@@ -122,8 +122,8 @@ var JS_FORGOT = (function ($, UserVerifier) {
     onResetPasswordOkBtnClick: function () {
       var newPassword, repeatPassword, log, logInfo, dataString;
 
-      newPassword = newPasswordTB.val().trim();
-      repeatPassword = repeatPasswordTB.val().trim();
+      newPassword = $.trim(newPasswordTB.val());
+      repeatPassword = $.trim(repeatPasswordTB.val());
 
       log = [];
       if (!UserVerifier.isPasswordValid(newPassword, log,
