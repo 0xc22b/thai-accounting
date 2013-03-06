@@ -29,3 +29,7 @@ http://thai-accounting.appspot.com/
 
 * GWT
 * Java App Engine
+
+## Caveats
+
+* IE only as using 'table-header-group' and page no. setup is more friendly
