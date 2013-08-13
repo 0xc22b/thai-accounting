@@ -63,7 +63,7 @@ public class App {
             }
         });
         
-        GWT.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
+        /*GWT.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
             @Override
             public void onUncaughtException(Throwable e) {
                 while (e instanceof UmbrellaException) {
@@ -77,7 +77,7 @@ public class App {
                 log.log(Level.SEVERE, "Uncaught exception", e);
                 Window.alert("An unexpected error occurred: " + message);
             }
-        });
+        });*/
         
         initBrowserHistory(historyMapper, historyHandler, new AllPlace(AllPlace.COM, AllPlace.LIST));
     }
