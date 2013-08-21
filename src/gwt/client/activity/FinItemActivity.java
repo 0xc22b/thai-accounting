@@ -67,12 +67,14 @@ public class FinItemActivity extends AbstractActivity implements FinItemView.Pre
         SFinItem sFinItem = new SFinItem(null, seq, comm, arg, calCon, printCon,
                 printStyle, var1, var2, var3, var4);
         
+        clientFactory.getShell().setLoading();
         clientFactory.getModel().addFinItem(allPlace.getComKeyString(),
                 allPlace.getFisKeyString(), allPlace.getKeyString(), sFinItem,
                 new AsyncCallback<String>() {
             @Override
             public void onFailure(Throwable caught) {
                 Window.alert(caught.getMessage());
+                setAddFinItemShell();
             }
             @Override
             public void onSuccess(String result) {
@@ -91,12 +93,14 @@ public class FinItemActivity extends AbstractActivity implements FinItemView.Pre
         SFinItem sFinItem = new SFinItem(keyString, seq, comm, arg, calCon, printCon,
                 printStyle, var1, var2, var3, var4);
         
+        clientFactory.getShell().setLoading();
         clientFactory.getModel().editFinItem(allPlace.getComKeyString(), 
                 allPlace.getFisKeyString(), allPlace.getKeyString(), sFinItem,
                 new AsyncCallback<String>() {
             @Override
             public void onFailure(Throwable caught) {
                 Window.alert(caught.getMessage());
+                setEditFinItemShell();
             }
             @Override
             public void onSuccess(String result) {
@@ -134,10 +138,7 @@ public class FinItemActivity extends AbstractActivity implements FinItemView.Pre
         assert(comKeyString != null && fisKeyString != null && finHeaderKeyString != null);
         
         // 1. set Shell
-        clientFactory.getShell().reset();
-        clientFactory.getShell().setHLb(constants.finItem() + ": " + constants.createNew());
-        clientFactory.getShell().setActBtn(0, constants.save(), ActionNames.OK, true);
-        clientFactory.getShell().setActBtn(1, constants.cancel(), ActionNames.CANCEL, true);
+        setAddFinItemShell();
         
         // 2. add Shell handlers via EventBus
         ActionEvent.register(eventBus, ActionNames.OK, new ActionEvent.Handler(){
@@ -174,6 +175,13 @@ public class FinItemActivity extends AbstractActivity implements FinItemView.Pre
         });
     }
     
+    private void setAddFinItemShell() {
+        clientFactory.getShell().reset();
+        clientFactory.getShell().setHLb(constants.finItem() + ": " + constants.createNew());
+        clientFactory.getShell().setActBtn(0, constants.save(), ActionNames.OK, true);
+        clientFactory.getShell().setActBtn(1, constants.cancel(), ActionNames.CANCEL, true);
+    }
+    
     private void setEditFinItem(final String comKeyString, final String fisKeyString,
             final String finHeaderKeyString, final String finItemKeyString){
         
@@ -181,10 +189,7 @@ public class FinItemActivity extends AbstractActivity implements FinItemView.Pre
                 && finItemKeyString != null);
         
         // 1. set Shell
-        clientFactory.getShell().reset();
-        clientFactory.getShell().setHLb(constants.finItem() + ": " + constants.edit());
-        clientFactory.getShell().setActBtn(0, constants.save(), ActionNames.OK, true);
-        clientFactory.getShell().setActBtn(1, constants.cancel(), ActionNames.CANCEL, true);
+        setEditFinItemShell();
         
         // 2. add Shell handlers via EventBus
         ActionEvent.register(eventBus, ActionNames.OK, new ActionEvent.Handler(){
@@ -220,6 +225,13 @@ public class FinItemActivity extends AbstractActivity implements FinItemView.Pre
                         finHeaderKeyString, finItemKeyString, true);
             }
         });
+    }
+    
+    private void setEditFinItemShell() {
+        clientFactory.getShell().reset();
+        clientFactory.getShell().setHLb(constants.finItem() + ": " + constants.edit());
+        clientFactory.getShell().setActBtn(0, constants.save(), ActionNames.OK, true);
+        clientFactory.getShell().setActBtn(1, constants.cancel(), ActionNames.CANCEL, true);
     }
     
     private void setViewFinItem(final String comKeyString, final String fisKeyString,

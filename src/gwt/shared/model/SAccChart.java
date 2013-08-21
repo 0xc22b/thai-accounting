@@ -22,12 +22,14 @@ public class SAccChart implements Serializable{
     
     private String accGroupName;
     private String parentAccChartNo;
+    private int parentAccChartLevel;
 	
 	public SAccChart(){
 		
 	}
 
-    public SAccChart(String keyString, String accGroupKeyString, String parentAccChartKeyString, String no, String name, AccType type,
+    public SAccChart(String keyString, String accGroupKeyString,
+            String parentAccChartKeyString, String no, String name, AccType type,
             int level, double beginning) {
         this.keyString = keyString;
         this.accGroupKeyString = accGroupKeyString;
@@ -78,6 +80,10 @@ public class SAccChart implements Serializable{
     public String getParentAccChartNo() {
         return parentAccChartNo;
     }
+    
+    public int getParentAccChartLevel() {
+        return parentAccChartLevel;
+    }
 
     public void setKeyString(String keyString) {
         this.keyString = keyString;
@@ -117,5 +123,9 @@ public class SAccChart implements Serializable{
 
     public void setParentAccChartNo(String parentAccChartNo) {
         this.parentAccChartNo = parentAccChartNo;
+    }
+    
+    public void setParentAccChartLevel(int parentAccChartLevel) {
+        this.parentAccChartLevel = parentAccChartLevel;
     }
 }

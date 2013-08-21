@@ -5,7 +5,8 @@ import com.google.gwt.user.client.ui.Widget;
 
 public interface DocTypeView<T> extends IsWidget {
 
-    public interface Presenter {      
+    public interface Presenter { 
+        boolean isDocTypeCodeDuplicate(String keyString, String code);
         void addDocType(String journalTypeKeyString, String code, String name, String journalDesc);
         void editDocType(String keyString, String journalTypeKeyString, String code, String name, String journalDesc);
     }

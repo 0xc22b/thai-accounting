@@ -41,8 +41,11 @@ public interface TConstants extends Constants{
     @DefaultStringValue("Save")
     String save();
     
-    @DefaultStringValue("Save and create setup")
-    String saveAndSetup();
+    @DefaultStringValue("Save and create default setup")
+    String saveAndDefaultSetup();
+    
+    @DefaultStringValue("Save and copy previous setup")
+    String saveAndPrevSetup();
     
     @DefaultStringValue("OK")
     String ok();
@@ -65,7 +68,7 @@ public interface TConstants extends Constants{
     @DefaultStringValue("Day")
     String day();
     
-    @DefaultStringValue("Month")
+    @DefaultStringValue("Month (1-12)")
     String month();
     
     @DefaultStringValue("Year")
@@ -113,14 +116,20 @@ public interface TConstants extends Constants{
     @DefaultStringValue("Ledger")
     String ledger();
     
-    @DefaultStringValue("Trial")
+    @DefaultStringValue("Trial balance sheet")
     String trial();
     
-    @DefaultStringValue("Balance")
-    String balance();
+    @DefaultStringValue("Balance sheet")
+    String balanceSheet();
     
-    @DefaultStringValue("Profit")
-    String profit();
+    @DefaultStringValue("Profit and loss")
+    String profitReport();
+    
+    @DefaultStringValue("Cost")
+    String costReport();
+    
+    @DefaultStringValue("Work sheet")
+    String workSheet();
     
     @DefaultStringValue("Acc no.")
     String accNo();
@@ -161,6 +170,9 @@ public interface TConstants extends Constants{
     @DefaultStringValue("New child")
     String newChild();
     
+    @DefaultStringValue("New sibling")
+    String newSibling();
+    
     @DefaultStringValue("Add new item")
     String addNewItem();
     
@@ -178,7 +190,28 @@ public interface TConstants extends Constants{
     
     @DefaultStringValue("Whole total")
     String wholeTotal();
+
+    @DefaultStringValue("Asset account no.")
+    String assetAccNo();
     
+    @DefaultStringValue("Debt account no.")
+    String debtAccNo();
+    
+    @DefaultStringValue("Shareholder account no.")
+    String shareholderAccNo();
+    
+    @DefaultStringValue("Income account no.")
+    String incomeAccNo();
+    
+    @DefaultStringValue("Expense account no.")
+    String expenseAccNo();
+    
+    @DefaultStringValue("Cost account no.")
+    String costAccNo();
+    
+    @DefaultStringValue("Show all")
+    String showAll();
+
     @DefaultStringValue("Jan")
     String jan();
     
@@ -249,5 +282,26 @@ public interface TConstants extends Constants{
     String var4();
     
     @DefaultStringValue("This field is invalid.")
-    String invalid();
+    String invalidMsg();
+    
+    @DefaultStringValue("This field is invalid. Must be a number, no space.")
+    String invalidNumberMsg();
+    
+    @DefaultStringValue("This acc no. is already in use.")
+    String duplicateAccChartNoMsg();
+    
+    @DefaultStringValue("This journal no. already in use.")
+    String duplicateJournalNoMsg();
+
+    @DefaultStringValue("This name is already in use.")
+    String duplicateNameMsg();
+    
+    @DefaultStringValue("Debt and shareholder")
+    String debtAndShareholder();
+    
+    @DefaultStringValue("accrued profit (loss)")
+    String accruedProfit();
+    
+    @DefaultStringValue("profit (loss)")
+    String profit();
 }

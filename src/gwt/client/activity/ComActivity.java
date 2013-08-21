@@ -62,12 +62,13 @@ public class ComActivity extends AbstractActivity implements ComView.Presenter {
             YearType yearType, Double vatRate) {
         
         SCom sCom = new SCom(null, name, address, telNo, comType, taxID, merchantID, yearType, vatRate, new Date());
-        
+
+        clientFactory.getShell().setLoading();
         clientFactory.getModel().addCom(sCom, new AsyncCallback<String>() {
             @Override
             public void onFailure(Throwable caught) {
-                // TODO Auto-generated method stub
                 Window.alert(caught.getMessage());
+                setAddComShell();
             }
             @Override
             public void onSuccess(String result) {
@@ -81,12 +82,13 @@ public class ComActivity extends AbstractActivity implements ComView.Presenter {
             String taxID, String merchantID, YearType yearType, Double vatRate) {
 
         SCom sCom = new SCom(keyString, name, address, telNo, comType, taxID, merchantID, yearType, vatRate, null);
-        
+
+        clientFactory.getShell().setLoading();
         clientFactory.getModel().editCom(sCom, new AsyncCallback<String>() {
             @Override
             public void onFailure(Throwable caught) {
-                // TODO Auto-generated method stub
                 Window.alert(caught.getMessage());
+                setEditComShell();
             }
             @Override
             public void onSuccess(String result) {
@@ -113,10 +115,7 @@ public class ComActivity extends AbstractActivity implements ComView.Presenter {
     
     private void setAddCom(){
         // 1. set Shell
-        clientFactory.getShell().reset();
-        clientFactory.getShell().setHLb(constants.com() + ": " + constants.createNew());
-        clientFactory.getShell().setActBtn(0, constants.save(), ActionNames.OK, true);
-        clientFactory.getShell().setActBtn(1, constants.cancel(), ActionNames.CANCEL, true);
+        setAddComShell();
         
         // 2. add Shell handlers via EventBus
         ActionEvent.register(eventBus, ActionNames.OK, new ActionEvent.Handler(){
@@ -137,15 +136,19 @@ public class ComActivity extends AbstractActivity implements ComView.Presenter {
         clientFactory.getComView().setCom(null, true);
     }
     
+    private void setAddComShell() {
+        clientFactory.getShell().reset();
+        clientFactory.getShell().setHLb(constants.com() + ": " + constants.createNew());
+        clientFactory.getShell().setActBtn(0, constants.save(), ActionNames.OK, true);
+        clientFactory.getShell().setActBtn(1, constants.cancel(), ActionNames.CANCEL, true);
+    }
+    
     private void setEditCom(String comKeyString){
         
         assert(comKeyString != null);
         
         // 1. set Shell
-        clientFactory.getShell().reset();
-        clientFactory.getShell().setHLb(constants.com() + ": " + constants.edit());
-        clientFactory.getShell().setActBtn(0, constants.save(), ActionNames.OK, true);
-        clientFactory.getShell().setActBtn(1, constants.cancel(), ActionNames.CANCEL, true);
+        setEditComShell();
         
         // 2. add Shell handlers via EventBus
         ActionEvent.register(eventBus, ActionNames.OK, new ActionEvent.Handler(){
@@ -174,6 +177,13 @@ public class ComActivity extends AbstractActivity implements ComView.Presenter {
                 clientFactory.getComView().setCom(result, true);
             }
         });
+    }
+    
+    private void setEditComShell() {
+        clientFactory.getShell().reset();
+        clientFactory.getShell().setHLb(constants.com() + ": " + constants.edit());
+        clientFactory.getShell().setActBtn(0, constants.save(), ActionNames.OK, true);
+        clientFactory.getShell().setActBtn(1, constants.cancel(), ActionNames.CANCEL, true);
     }
     
     private void setViewCom(final String comKeyString){

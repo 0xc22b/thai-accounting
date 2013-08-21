@@ -1,3 +1,12 @@
+/* ===========================================
+   Print styles
+   =========================================== */
+@media print {
+    @page {
+        margin: 0.5cm;
+    }
+}
+
 @external .flexTable, .chart, .journal, .ledger, .trial, .finance;
 
 .flexTable {
@@ -18,6 +27,11 @@
     text-align: left;
 }
 
+
+
+/**************************************************
+ * Account chart
+ *************************************************/
 .chart thead tr:nth-child\(1\) th:nth-child\(1\) {
     text-align: left;
 }
@@ -50,6 +64,11 @@
     width: 7%;
 }
 
+
+
+/**************************************************
+ * Journal
+ *************************************************/
 .journal thead tr:nth-child\(1\) th:nth-child\(1\) {
     text-align: left;
 }
@@ -88,6 +107,11 @@
     text-align: right !important;
 }
 
+
+
+/**************************************************
+ * Ledger
+ *************************************************/
 .ledger thead tr:nth-child\(1\) th:nth-child\(1\) {
     text-align: left;
 }
@@ -114,16 +138,36 @@
 
 .ledger thead tr:last-child th:nth-child\(5\){
     width: 10%;
+    text-align: center !important;
 }
 
 .ledger thead tr:last-child th:nth-child\(6\){
     width: 10%;
+    text-align: center !important;
 }
 
 .ledger thead tr:last-child th:nth-child\(7\){
     width: 10%;
+    text-align: center !important;
 }
 
+.ledger tbody tr td:nth-child\(5\){
+    text-align: right !important;
+}
+
+.ledger tbody tr td:nth-child\(6\){
+    text-align: right !important;
+}
+
+.ledger tbody tr td:nth-child\(7\){
+    text-align: right !important;
+}
+
+
+
+/**************************************************
+ * Trial
+ *************************************************/
 .trial thead tr:nth-child\(1\) th:nth-child\(1\) {
     text-align: left;
 }
@@ -146,12 +190,26 @@
 
 .trial thead tr:last-child th:nth-child\(3\){
     width: 10%;
+    text-align: center !important;
 }
 
 .trial thead tr:last-child th:nth-child\(4\){
     width: 10%;
+    text-align: center !important;
+}
+.trial tbody tr td:nth-child\(3\){
+    text-align: right !important;
 }
 
+.trial tbody tr td:nth-child\(4\){
+    text-align: right !important;
+}
+
+
+
+/**************************************************
+ * Finance
+ *************************************************/
 .finance thead tr:nth-child\(1\) th:nth-child\(1\) {
     text-align: center;
 }
@@ -164,17 +222,18 @@
     text-align: center;
 }
 
-@external .center, .uline, .twoulines;
+.finance tbody tr td:nth-child\(2\){
+	width: 10%;
+    text-align: right !important;
+}
+
+@external .right, .center, .uline, .oline;
+
+.right {
+	text-align: right;
+}
 
 .center {
     text-align: center;
-    border-bottom: 1px double #000;
-}
-
-.uline {
-    border-bottom: 1px solid #000;
-}
-
-.twoulines {
-    border-bottom: 1px double #000;
+    /*border-bottom: 1px double #000;*/
 }

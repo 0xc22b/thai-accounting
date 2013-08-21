@@ -57,19 +57,29 @@ public class JournalActivity extends AbstractActivity implements JournalView.Pre
     public void onStop() {
         eventBus.removeHandlers();
     }
-    
+
+    @Override
+    public boolean isJournalNoDuplicate(String keyString, String docTypeKeyString,
+            String no) {
+        return clientFactory.getModel().isJournalNoDuplicate(
+                allPlace.getComKeyString(), allPlace.getFisKeyString(),
+                keyString, docTypeKeyString, no);
+    }
+
     @Override
     public void addJournal(String docTypeKeyString, String no, int day,
             int month, int year, String desc, ArrayList<ItemData> itemDataList) {
         
         SJournalHeader sJournal = genSJournal(null, docTypeKeyString, no, day,
                 month, year, desc, itemDataList);
-        
+
+        clientFactory.getShell().setLoading();
         clientFactory.getModel().addJournal(allPlace.getComKeyString(),
                 allPlace.getFisKeyString(), sJournal, new AsyncCallback<String>() {
             @Override
             public void onFailure(Throwable caught) {
                 Window.alert(caught.getMessage());
+                setAddJournalShell();
             }
             @Override
             public void onSuccess(String result) {
@@ -88,11 +98,13 @@ public class JournalActivity extends AbstractActivity implements JournalView.Pre
         SJournalHeader sJournal = genSJournal(keyString, docTypeKeyString, no,
                 day, month, year, desc, itemDataList);
         
+        clientFactory.getShell().setLoading();
         clientFactory.getModel().editJournal(allPlace.getComKeyString(),
                 allPlace.getFisKeyString(), sJournal, new AsyncCallback<String>() {
             @Override
             public void onFailure(Throwable caught) {
                 Window.alert(caught.getMessage());
+                setEditJournalShell();
             }
             @Override
             public void onSuccess(String result) {
@@ -147,11 +159,7 @@ public class JournalActivity extends AbstractActivity implements JournalView.Pre
         assert(comKeyString != null && fisKeyString != null && journalTypeKeyString != null);
         
         // 1. set Shell
-        clientFactory.getShell().reset();
-        clientFactory.getShell().setHLb(constants.addJournals() + ": " + constants.createNew());
-        clientFactory.getShell().setActBtn(0, constants.save(), ActionNames.OK, true);
-        clientFactory.getShell().setActBtn(1, constants.cancel(), ActionNames.CANCEL, true);
-        clientFactory.getShell().setActBtn(2, constants.addNewItem(), ActionNames.ITEM, true);
+        setAddJournalShell();
         
         // 2. add Shell handlers via EventBus
         ActionEvent.register(eventBus, ActionNames.OK, new ActionEvent.Handler(){
@@ -193,6 +201,14 @@ public class JournalActivity extends AbstractActivity implements JournalView.Pre
         });
     }
     
+    private void setAddJournalShell() {
+        clientFactory.getShell().reset();
+        clientFactory.getShell().setHLb(constants.addJournals() + ": " + constants.createNew());
+        clientFactory.getShell().setActBtn(0, constants.save(), ActionNames.OK, true);
+        clientFactory.getShell().setActBtn(1, constants.cancel(), ActionNames.CANCEL, true);
+        clientFactory.getShell().setActBtn(2, constants.addNewItem(), ActionNames.ITEM, true);
+    }
+    
     private void setEditJournal(final String comKeyString, final String fisKeyString,
             final String journalTypeKeyString, final String journalKeyString){
         
@@ -200,11 +216,7 @@ public class JournalActivity extends AbstractActivity implements JournalView.Pre
                 && journalTypeKeyString != null && journalKeyString != null);
         
         // 1. set Shell
-        clientFactory.getShell().reset();
-        clientFactory.getShell().setHLb(constants.addJournals() + ": " + constants.edit());
-        clientFactory.getShell().setActBtn(0, constants.save(), ActionNames.OK, true);
-        clientFactory.getShell().setActBtn(1, constants.cancel(), ActionNames.CANCEL, true);
-        clientFactory.getShell().setActBtn(2, constants.addNewItem(), ActionNames.ITEM, true);
+        setEditJournalShell();
         
         // 2. add Shell handlers via EventBus
         ActionEvent.register(eventBus, ActionNames.OK, new ActionEvent.Handler(){
@@ -245,6 +257,14 @@ public class JournalActivity extends AbstractActivity implements JournalView.Pre
                         journalKeyString, true);
             }
         });
+    }
+    
+    private void setEditJournalShell() {
+        clientFactory.getShell().reset();
+        clientFactory.getShell().setHLb(constants.addJournals() + ": " + constants.edit());
+        clientFactory.getShell().setActBtn(0, constants.save(), ActionNames.OK, true);
+        clientFactory.getShell().setActBtn(1, constants.cancel(), ActionNames.CANCEL, true);
+        clientFactory.getShell().setActBtn(2, constants.addNewItem(), ActionNames.ITEM, true);
     }
     
     private void setViewJournal(final String comKeyString, final String fisKeyString,

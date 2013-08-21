@@ -77,9 +77,15 @@ public class AccChartListDefImpl extends ListDef<SFiscalYear, SAccChart> {
         case 1:
             return sAccChart.getNo();
         case 2:
+            int parentACLevel = sAccChart.getParentAccChartLevel();
+            // Level starts from 1
+            parentACLevel = parentACLevel == 0 ? 1 : parentACLevel;
             String s = "";
-            for(int j = 1; j < sAccChart.getLevel(); j++){
+            for(int j = 1; j < parentACLevel; j++){
                 s += "&nbsp;&nbsp;";
+            }
+            for(int j = parentACLevel; j < sAccChart.getLevel(); j++){
+                s += "&bull;&bull;";
             }
             return s + sAccChart.getName();
         case 3:

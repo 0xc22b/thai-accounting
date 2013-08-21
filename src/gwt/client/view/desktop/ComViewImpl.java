@@ -150,7 +150,7 @@ public class ComViewImpl<T> extends Composite implements ComView<T> {
     
     private boolean validateInputs(){
         if(nameTB.getValue().isEmpty()){
-            errNameLb.setText(constants.invalid());
+            errNameLb.setText(constants.invalidMsg());
             return false;
         }else{
             return true;

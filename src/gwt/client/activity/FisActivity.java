@@ -7,6 +7,7 @@ import gwt.client.event.ActionEvent;
 import gwt.client.event.ActionNames;
 import gwt.client.place.AllPlace;
 import gwt.client.view.FisView;
+import gwt.shared.SConstants;
 import gwt.shared.model.SFiscalYear;
 
 import com.google.gwt.activity.shared.AbstractActivity;
@@ -54,17 +55,19 @@ public class FisActivity extends AbstractActivity implements FisView.Presenter {
     }
     
     @Override
-    public void addFis(int beginMonth, int beginYear, int endMonth, int endYear,
-            boolean isSetup) {
+    public void addFis(int setupType, int beginMonth, int beginYear,
+            int endMonth, int endYear) {
         
         SFiscalYear sFis = new SFiscalYear(null, beginMonth, beginYear, endMonth,
                 endYear);
-        
-        clientFactory.getModel().addFis(place.getComKeyString(), sFis, isSetup,
+
+        clientFactory.getShell().setLoading();
+        clientFactory.getModel().addFis(place.getComKeyString(), setupType, sFis,
                 new AsyncCallback<String>() {
             @Override
             public void onFailure(Throwable caught) {
                 Window.alert(caught.getMessage());
+                setAddFisShell();
             }
             @Override
             public void onSuccess(String result) {
@@ -80,12 +83,14 @@ public class FisActivity extends AbstractActivity implements FisView.Presenter {
         
         SFiscalYear sFis = new SFiscalYear(keyString, beginMonth, beginYear,
                 endMonth, endYear);
-        
+
+        clientFactory.getShell().setLoading();
         clientFactory.getModel().editFis(place.getComKeyString(), sFis,
                 new AsyncCallback<String>() {
             @Override
             public void onFailure(Throwable caught) {
                 Window.alert(caught.getMessage());
+                setEditFisShell();
             }
             @Override
             public void onSuccess(String result) {
@@ -117,27 +122,32 @@ public class FisActivity extends AbstractActivity implements FisView.Presenter {
         assert(comKeyString != null);
         
         // 1. set Shell
-        clientFactory.getShell().reset();
-        clientFactory.getShell().setHLb(constants.fisList() + ": " + constants.createNew());
-        clientFactory.getShell().setActBtn(0, constants.save(), ActionNames.OK, true);
-        
-        clientFactory.getShell().setActBtn(1, constants.saveAndSetup(), ActionNames.OKANDSETUP, true);
-        
-        clientFactory.getShell().setActBtn(2, constants.cancel(), ActionNames.CANCEL, true);
+        setAddFisShell();
         
         // 2. add Shell handlers via EventBus
         ActionEvent.register(eventBus, ActionNames.OK, new ActionEvent.Handler(){
             @Override
             public void onAction(ActionEvent event) {
-                clientFactory.getFisView().addFisBtnClicked(false);
+                clientFactory.getFisView().addFisBtnClicked(
+                        SConstants.ADD_FIS_WITH_NO_SETUP);
             }
         });
         
-        ActionEvent.register(eventBus, ActionNames.OKANDSETUP,
+        ActionEvent.register(eventBus, ActionNames.OK_AND_DEFAULT_SETUP,
                 new ActionEvent.Handler(){
             @Override
             public void onAction(ActionEvent event) {
-                clientFactory.getFisView().addFisBtnClicked(true);
+                clientFactory.getFisView().addFisBtnClicked(
+                        SConstants.ADD_FIS_WITH_DEFAULT_SETUP);
+            }
+        });
+        
+        ActionEvent.register(eventBus, ActionNames.OK_AND_PREV_SETUP,
+                new ActionEvent.Handler(){
+            @Override
+            public void onAction(ActionEvent event) {
+                clientFactory.getFisView().addFisBtnClicked(
+                        SConstants.ADD_FIS_WITH_PREVIOUS_SETUP);
             }
         });
         
@@ -153,15 +163,21 @@ public class FisActivity extends AbstractActivity implements FisView.Presenter {
         clientFactory.getFisView().setFis(null, true);
     }
     
+    private void setAddFisShell() {
+        clientFactory.getShell().reset();
+        clientFactory.getShell().setHLb(constants.fisList() + ": " + constants.createNew());
+        clientFactory.getShell().setActBtn(0, constants.save(), ActionNames.OK, true);
+        clientFactory.getShell().setActBtn(1, constants.saveAndDefaultSetup(), ActionNames.OK_AND_DEFAULT_SETUP, true);
+        clientFactory.getShell().setActBtn(2, constants.saveAndPrevSetup(), ActionNames.OK_AND_PREV_SETUP, true);
+        clientFactory.getShell().setActBtn(3, constants.cancel(), ActionNames.CANCEL, true);
+    }
+    
     private void setEditFis(final String comKeyString, final String fisKeyString){
         
         assert(comKeyString != null && fisKeyString != null);
         
         // 1. set Shell
-        clientFactory.getShell().reset();
-        clientFactory.getShell().setHLb(constants.fisList() + ": " + constants.edit());
-        clientFactory.getShell().setActBtn(0, constants.save(), ActionNames.OK, true);
-        clientFactory.getShell().setActBtn(1, constants.cancel(), ActionNames.CANCEL, true);
+        setEditFisShell();
         
         // 2. add Shell handlers via EventBus
         ActionEvent.register(eventBus, ActionNames.OK, new ActionEvent.Handler(){
@@ -194,6 +210,13 @@ public class FisActivity extends AbstractActivity implements FisView.Presenter {
                 clientFactory.getFisView().setFis(result, true);
             }
         });
+    }
+    
+    private void setEditFisShell() {
+        clientFactory.getShell().reset();
+        clientFactory.getShell().setHLb(constants.fisList() + ": " + constants.edit());
+        clientFactory.getShell().setActBtn(0, constants.save(), ActionNames.OK, true);
+        clientFactory.getShell().setActBtn(1, constants.cancel(), ActionNames.CANCEL, true);
     }
     
     private void setViewFis(final String comKeyString, final String fisKeyString){

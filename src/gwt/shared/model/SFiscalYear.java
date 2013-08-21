@@ -310,6 +310,7 @@ public class SFiscalYear implements Serializable{
             SAccChart parentSAccChart = getSAccChart(
                     sAccChart.getParentAccChartKeyString());
             sAccChart.setParentAccChartNo(parentSAccChart.getNo());
+            sAccChart.setParentAccChartLevel(parentSAccChart.getLevel());
         }
     }
     

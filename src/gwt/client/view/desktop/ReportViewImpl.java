@@ -1,6 +1,8 @@
 package gwt.client.view.desktop;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import gwt.client.Print;
 import gwt.client.TCF;
@@ -22,6 +24,7 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable.FlexCellFormatter;
 import com.google.gwt.user.client.ui.Widget;
@@ -39,12 +42,10 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
 
     private Resources resources = GWT.create(Resources.class);
 
-    private static final String docTag = "<!doctype html>";
-    private static final String styleTag = "<link rel=stylesheet type=text/css media=all href=/css/printstyle-alpha.css>";
+    private static final String DOC_TAG = "<!doctype html>";
+    private static final String STYLE_TAG = "<link rel=stylesheet type=text/css media=all href=/css/printstyle-alpha.css>";
 
-    private static final String center = "center";
-    private static final String uline = "uline";
-    private static final String twoulines = "twoulines";
+    private static final String STYLE_NAME_CENTER = "center";
     
     private static final TConstants constants = TCF.get();
 
@@ -80,7 +81,7 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
 
     @Override
     public void onPrintBtnClicked() {
-        Print.it(docTag, styleTag, flexTable);
+        Print.it(DOC_TAG, STYLE_TAG, flexTable);
         Print.printFrame();
     }
 
@@ -105,7 +106,7 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
             String keyString = fisDef.getACKeyString(t, i);
 
             flexTable.setHTML(i, 0, fisDef.getACNo(t, keyString));
-            flexTable.setHTML(i, 1, genAccName(fisDef.getACName(t, keyString), fisDef.getACLevel(t, keyString)));
+            flexTable.setHTML(i, 1, genName(fisDef.getACName(t, keyString), fisDef.getACLevel(t, keyString)));
             flexTable.setHTML(i, 2, fisDef.getACAGName(t, keyString));
             flexTable.setHTML(i, 3, fisDef.getACLevel(t, keyString) + "");
 
@@ -204,8 +205,10 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
     }
 
     @Override
-    public void setLedgerData(T t, String comName, String beginAccChartKeyString, String endAccChartKeyString, int beginDay, int beginMonth,
-            int beginYear, int endDay, int endMonth, int endYear) {
+    public void setLedgerData(T t, String comName, String beginAccChartKeyString,
+            String endAccChartKeyString, int beginDay, int beginMonth,
+            int beginYear, int endDay, int endMonth, int endYear,
+            boolean doShowAll) {
         flexTable.setStyleName("flexTable ledger");
         
         // Set header
@@ -229,12 +232,16 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
         // Set content
         int row = 0;
         double beginning;
+        double amt;
         double debit;
         double credit;
         double debitTotal = 0;
         double creditTotal = 0;
         String beginAccNo = beginAccChartKeyString.equals(AllPlace.FIRST) ? AllPlace.FIRST : fisDef.getACNo(t, beginAccChartKeyString);
         String endAccNo = endAccChartKeyString.equals(AllPlace.LAST) ? AllPlace.LAST : fisDef.getACNo(t, endAccChartKeyString);
+        String formattedBeginning;
+        String formattedAmt;
+        boolean doesHaveData;
         for (int i = 0; i < fisDef.getACListSize(t); i++) {
             if (fisDef.getACIsEntry(t, i)) {
 
@@ -248,11 +255,46 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
                 }
 
                 String accChartKeyString = fisDef.getACKeyString(t, i);
+
+                // Check if there is data
+                doesHaveData = false;
+                for (int j = 0; j < fisDef.getJListSize(t); j++) {
+                    String journalKeyString = fisDef.getJKeyString(t, j);
+                    if ((beginDay > 0 && beginMonth > 0 && beginYear > 0)
+                            && (fisDef.getJCompareDate(t, journalKeyString,
+                                    beginDay, beginMonth, beginYear) < 0)) {
+                        continue;
+                    }
+                    if ((endDay > 0 && endMonth > 0 && endYear > 0)
+                            && (fisDef.getJCompareDate(t, journalKeyString,
+                                    endDay, endMonth, endYear) > 0)) {
+                        continue;
+                    }
+
+                    for (int k = 0; k < fisDef.getJItemListSize(t, journalKeyString); k++) {
+                        if (fisDef.getJItemACKeyString(t,
+                                journalKeyString, k).equals(accChartKeyString)) {
+                            doesHaveData = true;
+                            break;
+                        }
+                    }
+                    if (doesHaveData) break;
+                }
+                
                 beginning = fisDef.getACBeginning(t, accChartKeyString);
 
-                flexTable.setHTML(row, 0, accNo + "&nbsp;&nbsp;&nbsp;&nbsp;" + fisDef.getACName(t, accChartKeyString));
+                if (!doShowAll && Utils.isZero(beginning, 2) && !doesHaveData) {
+                    continue;
+                }
+                
+                formattedBeginning = NumberFormat.getFormat(
+                        "#,##0.00;(#,##0.00)").format(Math.abs(beginning));
+
+                flexTable.setHTML(row, 0, accNo + "&nbsp;&nbsp;&nbsp;&nbsp;"
+                        + fisDef.getACName(t, accChartKeyString));
                 flexCellFormatter.setColSpan(row, 0, 6);
-                flexTable.setHTML(row, 1, NumberFormat.getFormat("#,##0.00").format(beginning));
+                flexTable.setHTML(row, 1, formattedBeginning);
+                flexCellFormatter.addStyleName(row, 1, "right");
 
                 row += 1;
 
@@ -262,39 +304,48 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
                     String journalKeyString = fisDef.getJKeyString(t, j);
 
                     if ((beginDay > 0 && beginMonth > 0 && beginYear > 0)
-                            && (fisDef.getJCompareDate(t, journalKeyString, beginDay, beginMonth, beginYear) < 0)) {
+                            && (fisDef.getJCompareDate(t, journalKeyString, 
+                                    beginDay, beginMonth, beginYear) < 0)) {
                         continue;
                     }
 
-                    if ((endDay > 0 && endMonth > 0 && endYear > 0) && (fisDef.getJCompareDate(t, journalKeyString, endDay, endMonth, endYear) > 0)) {
+                    if ((endDay > 0 && endMonth > 0 && endYear > 0) 
+                            && (fisDef.getJCompareDate(t, journalKeyString, 
+                                    endDay, endMonth, endYear) > 0)) {
                         continue;
                     }
 
                     for (int k = 0; k < fisDef.getJItemListSize(t, journalKeyString); k++) {
                         if (fisDef.getJItemACKeyString(t, journalKeyString, k).equals(accChartKeyString)) {
 
-                            flexTable.setHTML(row, 0, fisDef.getJDay(t, journalKeyString) + "/" + fisDef.getJMonth(t, journalKeyString) + "/"
-                                            + fisDef.getJYear(t, journalKeyString));
-                            flexTable.setHTML(row, 1, fisDef.getJTShortName(t, fisDef.getJJTKeyString(t, journalKeyString)));
+                            flexTable.setHTML(row, 0, fisDef.getJDay(t, journalKeyString)
+                                    + "/" + fisDef.getJMonth(t, journalKeyString) + "/"
+                                    + fisDef.getJYear(t, journalKeyString));
+                            flexTable.setHTML(row, 1, fisDef.getJTShortName(t,
+                                    fisDef.getJJTKeyString(t, journalKeyString)));
                             flexTable.setHTML(row, 2, fisDef.getJNo(t, journalKeyString));
                             flexTable.setHTML(row, 3, fisDef.getJDesc(t, journalKeyString));
 
-                            if (fisDef.getJItemAmt(t, journalKeyString, k) > 0) {
-                                flexTable.setHTML(row, 4, NumberFormat.getFormat("#,##0.00").format(fisDef.getJItemAmt(t, journalKeyString, k)));
+                            amt = fisDef.getJItemAmt(t, journalKeyString, k);
+                            formattedAmt = NumberFormat.getFormat("#,##0.00").format(
+                                    Math.abs(amt));
+                            if (amt > 0) {
+                                flexTable.setHTML(row, 4, formattedAmt);
                                 flexTable.setHTML(row, 5, "&nbsp;");
 
-                                beginning += fisDef.getJItemAmt(t, journalKeyString, k);
-                                debit += fisDef.getJItemAmt(t, journalKeyString, k);
+                                beginning += amt;
+                                debit += amt;
                             } else {
                                 flexTable.setHTML(row, 4, "&nbsp;");
-                                flexTable.setHTML(row, 5,
-                                        NumberFormat.getFormat("#,##0.00").format(Math.abs(fisDef.getJItemAmt(t, journalKeyString, k))));
+                                flexTable.setHTML(row, 5, formattedAmt);
 
-                                beginning += fisDef.getJItemAmt(t, journalKeyString, k);
-                                credit += fisDef.getJItemAmt(t, journalKeyString, k);
+                                beginning += amt;
+                                credit += amt;
                             }
 
-                            flexTable.setHTML(row, 6, NumberFormat.getFormat("#,##0.00").format(beginning));
+                            formattedBeginning = NumberFormat.getFormat(
+                                    "#,##0.00;(#,##0.00)").format(Math.abs(beginning));
+                            flexTable.setHTML(row, 6, formattedBeginning);
                             row += 1;
                         }
                     }
@@ -325,7 +376,7 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
     }
 
     @Override
-    public void setTrialData(T t, String comName) {
+    public void setTrialData(T t, String comName, boolean doShowAll) {
         flexTable.setStyleName("flexTable trial");
         
         // Set header
@@ -340,37 +391,44 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
 
         // Set content
         int row = 0;
-        double debit;
-        double credit;
-        double debitTotal = 0;
-        double creditTotal = 0;
+        double amt;
+        double debitTotal = 0.0;
+        double creditTotal = 0.0;
+
+        String formatedAmt;
+        
         for (int i = 0; i < fisDef.getACListSize(t); i++) {
             if (fisDef.getACIsEntry(t, i)) {
                 String accChartKeyString = fisDef.getACKeyString(t, i);
 
-                debit = 0;
-                credit = 0;
+                amt = fisDef.getACBeginning(t, accChartKeyString);
                 for (int j = 0; j < fisDef.getJListSize(t); j++) {
                     String journalKeyString = fisDef.getJKeyString(t, j);
                     for (int k = 0; k < fisDef.getJItemListSize(t, journalKeyString); k++) {
                         if (fisDef.getJItemACKeyString(t, journalKeyString, k).equals(accChartKeyString)) {
-                            if (fisDef.getJItemAmt(t, journalKeyString, k) > 0) {
-                                debit += fisDef.getJItemAmt(t, journalKeyString, k);
-                            } else {
-                                credit += fisDef.getJItemAmt(t, journalKeyString, k);
-                            }
+                            amt += fisDef.getJItemAmt(t, journalKeyString, k);
                         }
                     }
                 }
 
+                if (!doShowAll && Utils.isZero(amt, 2)) {
+                    continue;
+                }
+                
+                formatedAmt = NumberFormat.getFormat("#,##0.00").format(
+                        Math.abs(amt));
+
                 flexTable.setHTML(row, 0, fisDef.getACNo(t, i));
                 flexTable.setHTML(row, 1, fisDef.getACName(t, i));
-                flexTable.setHTML(row, 2, NumberFormat.getFormat("#,##0.00").format(debit));
-                flexTable.setHTML(row, 3, NumberFormat.getFormat("#,##0.00").format(Math.abs(credit)));
+                flexTable.setHTML(row, 2, amt > 0 ? formatedAmt : "");
+                flexTable.setHTML(row, 3, amt > 0 ? "" : formatedAmt);
                 row += 1;
 
-                debitTotal += debit;
-                creditTotal += credit;
+                if (amt > 0) {
+                    debitTotal += amt;
+                } else {
+                    creditTotal += amt;
+                }
             }
         }
 
@@ -378,7 +436,397 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
         flexTable.setHTML(row, 1, constants.wholeTotal());
         flexTable.setHTML(row, 2, NumberFormat.getFormat("#,##0.00").format(debitTotal));
         flexTable.setHTML(row, 3, NumberFormat.getFormat("#,##0.00").format(Math.abs(creditTotal)));
+    }
+    
+    @Override
+    public void setBalanceData(final T t, final String comName,
+            String assetACKeyString, String debtACKeyString,
+            String shareholderACKeyString, String accruedProfitACKeyString,
+            String incomeACKeyString, String expenseACKeyString,
+            boolean doShowAll) {
+        flexTable.setStyleName("flexTable finance");
+        
+        // Set header
+        flexTable.setHeaderHTML(0, 0, 4, comName);
+        flexTable.setHeaderHTML(1, 0, 4, constants.balanceSheet());
+        int month = fisDef.getFEndMonth(t);
+        int year = fisDef.getFEndYear(t);
+        flexTable.setHeaderHTML(2, 0, 4, constants.end() + genFormalDate(Utils.getLastDay(month, year), month, year));
 
+        List<CumulativeAC<T>> assetCACs = getCumulativeACList(t,
+                assetACKeyString, null, 0.0);
+        List<CumulativeAC<T>> debtCACs = getCumulativeACList(t,
+                debtACKeyString, null, 0.0);
+        
+        List<CumulativeAC<T>> incomeCACs = getCumulativeACList(t,
+                incomeACKeyString, null, 0.0);
+        List<CumulativeAC<T>> expenseCACs = getCumulativeACList(t,
+                expenseACKeyString, null, 0.0);
+        
+        // Total profit (loss)
+        double profit = 0.0;
+        if (!incomeCACs.isEmpty()) {
+            profit = incomeCACs.get(0).amt;
+        }
+        if (!expenseCACs.isEmpty()) {
+            profit += expenseCACs.get(0).amt;
+        }
+        
+        List<CumulativeAC<T>> shareholderCACs = getCumulativeACList(
+                t, shareholderACKeyString, accruedProfitACKeyString, profit);
+
+        int row = 0;
+        row = printCACs(row, assetCACs, doShowAll, true, true);
+
+        row = printLine(row, constants.debtAndShareholder(), 0, false,
+                PrintStyle.CENTER, false);
+        // Blank line
+        row = printLine(row, "&nbsp;", 0.0, false, PrintStyle.BLANK,
+                false);
+        
+        row = printCACs(row, debtCACs, doShowAll, false, false);        
+        row = printSecondLevelCACs(row, shareholderCACs.get(0),
+                shareholderCACs, doShowAll, false, false);
+
+        CumulativeAC<T> debtCAC = debtCACs.get(0);
+        CumulativeAC<T> shareholderCAC = shareholderCACs.get(0);
+        
+        // Print total debts and shareholders
+        row = printLine(row, constants.total() + constants.debtAndShareholder(),
+                debtCAC.amt + shareholderCAC.amt, true, PrintStyle.BLANK,
+                false);
+        
+        
+        // Blank line
+        row = printLine(row, "&nbsp;", 0.0, false, PrintStyle.BLANK,
+                false);
+    }
+
+    @Override
+    public void setProfitData(T t, String comName, String incomeACKeyString,
+            String expenseACKeyString, boolean doShowAll) {
+
+        flexTable.setStyleName("flexTable finance");
+        
+        // Set header
+        flexTable.setHeaderHTML(0, 0, 4, comName);
+        flexTable.setHeaderHTML(1, 0, 4, constants.profitReport());
+        int month = fisDef.getFEndMonth(t);
+        int year = fisDef.getFEndYear(t);
+        flexTable.setHeaderHTML(2, 0, 4, constants.end() + genFormalDate(
+                Utils.getLastDay(month, year), month, year));
+
+        List<CumulativeAC<T>> incomeCACs = getCumulativeACList(t,
+                incomeACKeyString, null, 0.0);
+        List<CumulativeAC<T>> expenseCACs = getCumulativeACList(t,
+                expenseACKeyString, null, 0.0);
+        
+        // Total profit (loss)
+        double profit = 0.0;
+        if (!incomeCACs.isEmpty()) {
+            profit = incomeCACs.get(0).amt;
+        }
+        if (!expenseCACs.isEmpty()) {
+            profit += expenseCACs.get(0).amt;
+        }
+        
+        int row = 0;
+        row = printCACs(row, incomeCACs, doShowAll, true, false);
+        row = printCACs(row, expenseCACs, doShowAll, true, true);
+
+        // Print total profit
+        row = printLine(row, constants.profit(), profit, true,
+                PrintStyle.BLANK, false);
+
+        // Blank line
+        row = printLine(row, "&nbsp;", 0.0, false, PrintStyle.BLANK,
+                true);
+    }
+
+    @Override
+    public void setCostData(T t, String comName, String costACKeyString,
+            boolean doShowAll) {
+
+        flexTable.setStyleName("flexTable finance");
+        
+        // Set header
+        flexTable.setHeaderHTML(0, 0, 4, comName);
+        flexTable.setHeaderHTML(1, 0, 4, constants.costReport());
+        int month = fisDef.getFEndMonth(t);
+        int year = fisDef.getFEndYear(t);
+        flexTable.setHeaderHTML(2, 0, 4, constants.end() + genFormalDate(
+                Utils.getLastDay(month, year), month, year));
+
+        List<CumulativeAC<T>> costCACs = getCumulativeACList(t,
+                costACKeyString, null, 0.0);
+        int row = 0;
+        row = printSecondLevelCACs(row, costCACs.get(0), costCACs, doShowAll,
+                true, false);
+    }
+    
+    private static class CumulativeAC<T> {
+        String keyString;
+        //String no;
+        String name;
+        AccType type;
+        int level;
+        double beginning;
+        double amt;
+        
+        public CumulativeAC(FisDef<T> fisDef, T t, int i) {
+            this.keyString = fisDef.getACKeyString(t, i);
+            //this.no = fisDef.getACNo(t, i);
+            this.name = fisDef.getACName(t, i);
+            this.type = fisDef.getACType(t, i);
+            this.level = fisDef.getACLevel(t, i);
+            this.beginning = fisDef.getACBeginning(t, i);
+            this.amt = 0.0;
+        }
+    }
+
+    private List<CumulativeAC<T>> getCumulativeACList(T t,
+            String rootACKeyString, String adjustedACKeyString,
+            double adjustedValue) {
+        // Important that the account charts need to be sorted!!
+        //     as here we use level instead of parentACKeyString.
+
+        // Kind of a hack to have adjustedACKeyString and adjustedValue
+
+        // Try to find the root account chart (must be AccType.CONTROL).
+        int rootIndex = -1;
+        for (int i = 0; i < fisDef.getACListSize(t); i++) {
+            if (fisDef.getACKeyString(t, i).equals(rootACKeyString)) {
+                rootIndex = i;
+                break;
+            }
+        }
+        if (rootIndex == -1) {
+            return null;
+        }
+
+        List<CumulativeAC<T>> cACList = new ArrayList<CumulativeAC<T>>();
+
+        CumulativeAC<T> rootCAC = new CumulativeAC<T>(fisDef, t, rootIndex);
+        cACList.add(rootCAC);
+
+        for (int i = rootIndex + 1; i < fisDef.getACListSize(t); i++) {
+            if (fisDef.getACLevel(t, i) <= rootCAC.level) {
+                break;
+            }
+            
+            CumulativeAC<T> cAC = new CumulativeAC<T>(fisDef, t, i);
+            
+            // Populate values
+            if (cAC.type == AccType.ENTRY) {
+                cAC.amt = cAC.beginning;
+                for (int j = 0; j < fisDef.getJListSize(t); j++) {
+                    String journalKeyString = fisDef.getJKeyString(t, j);
+                    for (int k = 0; k < fisDef.getJItemListSize(t, journalKeyString); k++) {
+                        if (fisDef.getJItemACKeyString(t, journalKeyString, k).equals(
+                                cAC.keyString)) {
+                            cAC.amt += fisDef.getJItemAmt(t, journalKeyString, k);
+                        }
+                    }
+                }
+            }
+            
+            // Adjust values
+            if (adjustedACKeyString != null
+                    && adjustedACKeyString.equals(cAC.keyString)) {
+                cAC.amt += adjustedValue;
+            }
+            
+            cACList.add(cAC);
+        }
+
+        // Cumulate amounts to all parents
+        cumulateAmount(rootCAC, cACList);
+
+        return cACList;
+    }
+    
+    private double cumulateAmount(CumulativeAC<T> cAC,
+            List<CumulativeAC<T>> cACList) {
+        if (cAC.type == AccType.ENTRY) {
+            return cAC.amt;
+        }
+
+        cAC.amt = 0.0;
+        for (CumulativeAC<T> child : getDirectCACChildren(cAC, cACList)) {
+            cAC.amt += cumulateAmount(child, cACList);
+        }
+        return cAC.amt;
+    }
+    
+    private List<CumulativeAC<T>> getDirectCACChildren(CumulativeAC<T> parentCAC,
+            List<CumulativeAC<T>> cACList) {
+        
+        int parentIndex = cACList.indexOf(parentCAC);
+        if (parentIndex < 0) return null;
+        
+        List<CumulativeAC<T>> children = new ArrayList<CumulativeAC<T>>();
+        for (int i = parentIndex + 1; i < cACList.size(); i++) {
+            CumulativeAC<T> cAC = cACList.get(i);
+            if (cAC.level <= parentCAC.level) {
+                break;
+            }
+            
+            if (cAC.level == parentCAC.level + 1) {
+                children.add(cAC);
+            }
+        }
+        return children;
+    }
+
+    private int printCACs(int row, List<CumulativeAC<T>> cACs,
+            boolean doShowAll, boolean doesPrintRoot, boolean doesShowPlus) {
+        // Shareholder account chart groups is not working with this format of report
+        //     as it needs to have some values from other account chart groups.
+        //     Use printSecondLevelCACS instead.
+
+        // Print total for level 1 and level 2
+        
+        CumulativeAC<T> rootCAC = cACs.get(0);
+        if (doesPrintRoot) {
+            row = printLine(row, rootCAC.name, 0, false, PrintStyle.CENTER,
+                    doesShowPlus);
+            
+            // Blank line
+            row = printLine(row, "&nbsp;", 0.0, false, PrintStyle.BLANK,
+                    doesShowPlus);
+        }
+
+        List<CumulativeAC<T>> directCACChildren = getDirectCACChildren(
+                rootCAC, cACs);
+        for (CumulativeAC<T> directCACChild : directCACChildren) {
+            row = printSecondLevelCACs(row, directCACChild, cACs, doShowAll,
+                    doesShowPlus, true);
+        }
+
+        // Total for level 1
+        row = printLine(row, constants.total() + rootCAC.name, rootCAC.amt, true,
+                PrintStyle.BLANK, doesShowPlus);
+        
+        // Blank line
+        row = printLine(row, "&nbsp;", 0.0, false, PrintStyle.BLANK,
+                doesShowPlus);
+        
+        return row;
+    }
+
+    private int printSecondLevelCACs(int row, CumulativeAC<T> secondLevelCAC,
+            List<CumulativeAC<T>> cACs, boolean doShowAll, boolean doesShowPlus,
+            boolean doesAdjustLevel) {
+        int startIndex = cACs.indexOf(secondLevelCAC);
+        if (startIndex < 0) {
+            return row;
+        }
+
+        int startRow = row;
+
+        CumulativeAC<T> cAC;
+        int level;
+        for (int i = startIndex; i < cACs.size(); i++) {
+            cAC = cACs.get(i);
+            if (i != startIndex && cAC.level <= secondLevelCAC.level) {
+                break;
+            }
+
+            if (Utils.isZero(cAC.amt, 2)) {
+                // TODO: Find next i
+                continue;
+            }
+
+            level = doesAdjustLevel ? cAC.level - 1 : cAC.level;
+
+            if (doShowAll) {
+                if (cAC.type == AccType.CONTROL) {
+                    row = printLine(row, genName(cAC.name, level), 0,
+                            false, PrintStyle.BLANK, doesShowPlus);
+                } else if (cAC.type == AccType.ENTRY) {
+                    row = printLine(row, genName(cAC.name, level),
+                            cAC.amt, true, PrintStyle.BLANK, doesShowPlus);
+                } else {
+                    throw new AssertionError();
+                }
+            } else {
+                if (cAC.type == AccType.CONTROL) {
+                    if (isDeepestControlAC(cACs, i)) {
+                        // The control deepest level, print with value
+                        row = printLine(row, genName(cAC.name, level),
+                                cAC.amt, true, PrintStyle.BLANK, doesShowPlus);
+                    } else {
+                        // Print only name
+                        row = printLine(row, genName(cAC.name, level),
+                                0, false, PrintStyle.BLANK, doesShowPlus);
+                    }
+                } else if (cAC.type == AccType.ENTRY) {
+                    // Print if there are entries with AccType.CONTROL
+                    //     in the same level
+                    if (isThereSameLevelControlAC(cACs, i)) {
+                        row = printLine(row, genName(cAC.name, level),
+                                cAC.amt, true, PrintStyle.BLANK, doesShowPlus);
+                    }
+                } else {
+                    throw new AssertionError();
+                }
+            }
+        }
+
+        if (row > startRow) {
+            // Always at the first level
+            row = printLine(row, constants.total() + secondLevelCAC.name,
+                    secondLevelCAC.amt, true, PrintStyle.BLANK, doesShowPlus);
+            
+            // Blank line
+            row = printLine(row, "&nbsp;", 0.0, false, PrintStyle.BLANK,
+                    doesShowPlus);
+        }
+
+        return row;
+    }
+    
+    private boolean isDeepestControlAC(List<CumulativeAC<T>> cACs, int i) {
+        CumulativeAC<T> cAC = cACs.get(i);
+        for (int j = i + 1; j < cACs.size(); j++) {
+            CumulativeAC<T> tCAC = cACs.get(j);
+            if (tCAC.level <= cAC.level) {
+                break;
+            }
+            if (tCAC.type == AccType.CONTROL) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    private boolean isThereSameLevelControlAC(List<CumulativeAC<T>> cACs, int i) {
+        CumulativeAC<T> cAC = cACs.get(i);
+        // Look down
+        for (int j = i + 1; j < cACs.size(); j++) {
+            CumulativeAC<T> tCAC = cACs.get(j);
+            if (tCAC.level < cAC.level) {
+                break;
+            }
+            if (tCAC.level == cAC.level
+                    && tCAC.type == AccType.CONTROL) {
+                return true;
+            }
+        }
+        
+        // Look up
+        for (int j = i - 1; j >= 0; j--) {
+            CumulativeAC<T> tCAC = cACs.get(j);
+            if (tCAC.level < cAC.level) {
+                break;
+            }
+            if (tCAC.level == cAC.level
+                    && tCAC.type == AccType.CONTROL) {
+                return true;
+            }
+        }
+        
+        return false;
     }
     
     @Override
@@ -421,8 +869,20 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
                         }
                     }
                 }
-                
-                row = calPrint(printCon, row, fisDef.getACName(t, accChartKeyString), total, true, printStyle);
+
+                // The account chart might be deleted
+                // No check when deleting an account chart if still being used in FinItem)
+                // so need to check here.
+                String accChartName = "";
+                try {
+                	accChartName = fisDef.getACName(t, accChartKeyString);
+                } catch (NullPointerException e) {
+                	Window.alert("Some account charts used in this report were deleted./n"
+                			+ "Check the setup of this report.");
+                	e.printStackTrace();
+                }
+
+                row = calPrint(printCon, row, accChartName, total, true, printStyle);
                 
                 var1 = calOperateVar(calCon, fisDef.getFinItemVar1(t, finHeaderKeyString,
                         finItemKeyString), var1, total);
@@ -488,14 +948,13 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
         
     }
     
-    private int calPrint(PrintCon printCon, int row, String text, double value, boolean isValue, PrintStyle printStyle){
+    private int calPrint(PrintCon printCon, int row, String text, double value,
+            boolean isValue, PrintStyle printStyle){
         if(printCon.equals(PrintCon.PRINT)){
-            print(row, text, value, isValue, printStyle);
-            row += 1;
+            row = printLine(row, text, value, isValue, printStyle, true);
         }else if(printCon.equals(PrintCon.NOIFZERO)){
             if(value != 0){
-                print(row, text, value, isValue, printStyle);
-                row += 1;
+                row = printLine(row, text, value, isValue, printStyle, true);
             }
         }else if(printCon.equals(PrintCon.NOPRINT)){
             // Don't print
@@ -505,27 +964,54 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
         return row;
     }
     
-    private void print(int row, String text, double value, boolean isValue, PrintStyle printStyle){
-        flexTable.setHTML(row, 0, text);
-        if(isValue){
-            flexTable.setHTML(row, 1, NumberFormat.getFormat("#,##0.00;(#,##0.00)").format(value));
-        }else{
-            flexTable.setHTML(row, 1, "");
-        }
-        flexTable.setHTML(row, 2, "");
-        flexTable.setHTML(row, 3, "");
-        
-        if(printStyle.equals(PrintStyle.CENTER)){
-            flexCellFormatter.addStyleName(row, 0, center);
-        }else if(printStyle.equals(PrintStyle.ULINE)){
-            flexCellFormatter.addStyleName(row, 1, uline);
-        }else if(printStyle.equals(PrintStyle.TWOULINES)){
-            flexCellFormatter.addStyleName(row, 1, twoulines);
-        }else if(printStyle.equals(PrintStyle.BLANK)){
+    private int printLine(int row, String text, double value, boolean isValue,
+            PrintStyle printStyle, boolean doesShowPlus){
+        //String uLine = "";
+        if (printStyle == PrintStyle.CENTER) {
+            flexTable.setHTML(row, 0, text);
+            flexTable.setHTML(row, 1, "&nbsp;");
+            flexCellFormatter.addStyleName(row, 0, STYLE_NAME_CENTER);
+            /*row += 1;
+
+            for (int i = 0; i < text.length(); i++) {
+                uLine += "-";
+            }
             
-        }else{
-            throw new AssertionError(printStyle);
+            flexTable.setHTML(row, 0, uLine);
+            flexTable.setHTML(row, 1, "&nbsp;");
+            flexCellFormatter.addStyleName(row, 0, STYLE_NAME_CENTER);*/
+        } else {
+            flexTable.setHTML(row, 0, text);
+    
+            if(isValue){
+                value = doesShowPlus ? value : value * -1;
+                String formattedValue = NumberFormat.getFormat(
+                        "#,##0.00;(#,##0.00)").format(value);
+                
+                flexTable.setHTML(row, 1, formattedValue);
+    
+                /*if (printStyle.equals(PrintStyle.ULINE)
+                        || printStyle.equals(PrintStyle.TWOULINES)) {
+                    row += 1;
+
+                    if (printStyle.equals(PrintStyle.ULINE)) {
+                        uLine = "--------------";
+                    } else if (printStyle.equals(PrintStyle.TWOULINES)) {
+                        uLine = "==============";
+                    }
+
+                    flexTable.setHTML(row, 0, "&nbsp;");
+                    flexTable.setHTML(row, 1, uLine);
+                }*/
+            }else{
+                flexTable.setHTML(row, 1, "&nbsp;");
+            }
         }
+
+        //flexTable.setHTML(row, 2, "");
+        //flexTable.setHTML(row, 3, "");
+
+        return row + 1;
     }
     
     private double calOperateVar(CalCon calCon, Operand operand, double var, double operator){
@@ -562,12 +1048,12 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
         }
     }
 
-    private String genAccName(String accName, int level) {
-        String s = accName;
+    private String genName(String name, int level) {
+        String s = "";
         for (int i = 1; i < level; i++) {
-            s = "&nbsp;&nbsp;&nbsp;&nbsp;" + s;
+            s += "&nbsp;&nbsp;&nbsp;&nbsp;";
         }
-        return s;
+        return s + name;
     }
     
     private String genTodayDate(){

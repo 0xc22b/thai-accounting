@@ -57,14 +57,23 @@ public class DocTypeActivity extends AbstractActivity implements DocTypeView.Pre
     }
     
     @Override
+    public boolean isDocTypeCodeDuplicate(String keyString, String code) {
+        return clientFactory.getModel().isDocTypeCodeDuplicate(
+                place.getComKeyString(), place.getFisKeyString(),
+                keyString, code);
+    }
+    
+    @Override
     public void addDocType(String journalTypeKeyString, String code, String name, String journalDesc) {
         
         SDocType sDocType = new SDocType(null, journalTypeKeyString, code, name, journalDesc, new Date());
-        
+
+        clientFactory.getShell().setLoading();
         clientFactory.getModel().addDocType(place.getComKeyString(), place.getFisKeyString(), sDocType, new AsyncCallback<String>() {
             @Override
             public void onFailure(Throwable caught) {
                 Window.alert(caught.getMessage());
+                setAddDocTypeShell();
             }
             @Override
             public void onSuccess(String result) {
@@ -78,10 +87,12 @@ public class DocTypeActivity extends AbstractActivity implements DocTypeView.Pre
         
         SDocType sDocType = new SDocType(keyString, journalTypeKeyString, code, name, journalDesc, null);
         
+        clientFactory.getShell().setLoading();
         clientFactory.getModel().editDocType(place.getComKeyString(), place.getFisKeyString(), sDocType, new AsyncCallback<String>() {
             @Override
             public void onFailure(Throwable caught) {
                 Window.alert(caught.getMessage());
+                setEditDocTypeShell();
             }
             @Override
             public void onSuccess(String result) {
@@ -114,10 +125,7 @@ public class DocTypeActivity extends AbstractActivity implements DocTypeView.Pre
         assert(comKeyString != null && fisKeyString != null);
         
         // 1. set Shell
-        clientFactory.getShell().reset();
-        clientFactory.getShell().setHLb(constants.docType() + ": " + constants.createNew());
-        clientFactory.getShell().setActBtn(0, constants.save(), ActionNames.OK, true);
-        clientFactory.getShell().setActBtn(1, constants.cancel(), ActionNames.CANCEL, true);
+        setAddDocTypeShell();
         
         // 2. add Shell handlers via EventBus
         ActionEvent.register(eventBus, ActionNames.OK, new ActionEvent.Handler(){
@@ -151,16 +159,20 @@ public class DocTypeActivity extends AbstractActivity implements DocTypeView.Pre
         });
     }
     
+    private void setAddDocTypeShell() {
+        clientFactory.getShell().reset();
+        clientFactory.getShell().setHLb(constants.docType() + ": " + constants.createNew());
+        clientFactory.getShell().setActBtn(0, constants.save(), ActionNames.OK, true);
+        clientFactory.getShell().setActBtn(1, constants.cancel(), ActionNames.CANCEL, true);
+    }
+    
     private void setEditDocType(final String comKeyString, final String fisKeyString,
             final String docTypeKeyString){
         
         assert(comKeyString != null && fisKeyString != null && docTypeKeyString != null);
         
         // 1. set Shell
-        clientFactory.getShell().reset();
-        clientFactory.getShell().setHLb(constants.docType() + ": " + constants.edit());
-        clientFactory.getShell().setActBtn(0, constants.save(), ActionNames.OK, true);
-        clientFactory.getShell().setActBtn(1, constants.cancel(), ActionNames.CANCEL, true);
+        setEditDocTypeShell();
         
         // 2. add Shell handlers via EventBus
         ActionEvent.register(eventBus, ActionNames.OK, new ActionEvent.Handler(){
@@ -194,6 +206,13 @@ public class DocTypeActivity extends AbstractActivity implements DocTypeView.Pre
                         docTypeKeyString, true);
             }
         });
+    }
+    
+    private void setEditDocTypeShell() {
+        clientFactory.getShell().reset();
+        clientFactory.getShell().setHLb(constants.docType() + ": " + constants.edit());
+        clientFactory.getShell().setActBtn(0, constants.save(), ActionNames.OK, true);
+        clientFactory.getShell().setActBtn(1, constants.cancel(), ActionNames.CANCEL, true);
     }
     
     private void setViewDocType(final String comKeyString,

@@ -21,6 +21,7 @@ import gwt.server.user.UserManager;
 import gwt.server.user.model.User;
 import gwt.server.user.model.UserData;
 import gwt.shared.NotLoggedInException;
+import gwt.shared.SConstants;
 import gwt.shared.Utils;
 import gwt.shared.model.SAccChart;
 import gwt.shared.model.SAccGrp;
@@ -146,6 +147,15 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
         PersistenceManager pm = PMF.get().getPersistenceManager();
         try{
             final User user = UserManager.checkLoggedInAndGetUser(sSID, sID);
+
+            List<Key> comKeyList = new ArrayList<Key>();
+            comKeyList.add(KeyFactory.stringToKey(keyString));
+
+            List<FiscalYear> fisList = Db.getFiscalYears(pm, comKeyList);
+            for (FiscalYear fis : fisList) {
+                Db.deleteFis(pm, fis.getKeyString());
+            }
+
             Db<Com> db = new Db<Com>();
             db.delete(pm, Com.class, keyString, new DbDeleteCallback<Com>(){
                 @Override
@@ -156,9 +166,6 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
                 }
             });
             
-            //TODO Delete all children - fiscal year, doc type, acc grp, acc chart, journal
-            
-            
             return keyString;
         }finally{
             pm.close();
@@ -166,7 +173,8 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
     }
 
     @Override
-    public String addFis(String sSID, String sID, final String comKeyString, final SFiscalYear sFis, final boolean isSetup) throws NotLoggedInException {
+    public String addFis(String sSID, String sID, final String comKeyString,
+            final int setupType, final SFiscalYear sFis) throws NotLoggedInException {
         PersistenceManager pm = PMF.get().getPersistenceManager();
         try{
             User user = UserManager.checkLoggedInAndGetUser(sSID, sID);
@@ -178,13 +186,15 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
                 }
             });
             
-            if(isSetup){
+            if(setupType == SConstants.ADD_FIS_WITH_DEFAULT_SETUP){
                 UserData userData = UserManager.getUserData(user.getKey());
                 if (userData.getLang().equals("th")) {
                     CreateSetup.createInThai(pm, fis.getKeyString());
                 } else {
                     CreateSetup.createInEnglish(pm, fis.getKeyString());
                 }
+            } else if (setupType == SConstants.ADD_FIS_WITH_PREVIOUS_SETUP) {
+                CreateSetup.createFromPrev(pm, comKeyString, fis.getKeyString());
             }
             return KeyFactory.keyToString(fis.getKey());
         }finally{
@@ -236,126 +246,21 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
         PersistenceManager pm = PMF.get().getPersistenceManager();
         try{
             UserManager.checkLoggedInAndGetUser(sSID, sID);
-            Db<FiscalYear> db = new Db<FiscalYear>();
-            db.delete(pm, FiscalYear.class, keyString, new DbDeleteCallback<FiscalYear>() {
-                @Override
-                public void check(FiscalYear t) {
-                    
-                }
-            });
-            return keyString;
+            return Db.deleteFis(pm, keyString);
         }finally{
             pm.close();
         }
-        
-        //TODO Delete all children - doc type, acc grp, acc chart, journal
-        
     }
 
     @Override
     public SFiscalYear getSetup(String sSID, String sID, final String fisKeyString) throws NotLoggedInException {
-        SFiscalYear sFis = new SFiscalYear();
         PersistenceManager pm = PMF.get().getPersistenceManager();
         try{
             UserManager.checkLoggedInAndGetUser(sSID, sID);
-            Db<JournalType> dbJour = new Db<JournalType>();
-            List<JournalType> journalTypeList = dbJour.get(pm, JournalType.class, fisKeyString, new DbGetCallback() {
-                @Override
-                public void setQuery(Query query) {
-                    query.setFilter("fisKey == fisKeyParam");
-                    query.declareParameters("com.google.appengine.api.datastore.Key fisKeyParam");
-                    query.setOrdering("createDate asc");
-                }
-            });
-            if(journalTypeList.size() > 0){
-                for(JournalType journalType : journalTypeList){
-                    SJournalType sJournalType = new SJournalType(journalType.getKeyString(), journalType.getName(), 
-                            journalType.getShortName(), journalType.getCreateDate());
-                    sFis.addSJournalType(sJournalType);
-                }
-            }
-            
-            Db<DocType> dbDocType = new Db<DocType>();
-            List<DocType> docTypeList = dbDocType.get(pm, DocType.class, fisKeyString, new DbGetCallback() {
-                @Override
-                public void setQuery(Query query) {
-                    query.setFilter("fisKey == fisKeyParam");
-                    query.declareParameters("com.google.appengine.api.datastore.Key fisKeyParam");
-                    query.setOrdering("createDate asc");
-                }
-            });
-            if(docTypeList.size() > 0){
-                for(DocType docType : docTypeList){
-                    SDocType sDocType = new SDocType(docType.getKeyString(), docType.getJournalTypeKeyString(), docType.getCode(), docType.getName(), 
-                            docType.getJournalDesc(), docType.getCreateDate());
-                    sFis.addSDocType(sDocType);
-                    
-                }
-            }
-            
-            Db<AccGroup> dbAccGrp = new Db<AccGroup>();
-            List<AccGroup> accGrpList = dbAccGrp.get(pm, AccGroup.class, fisKeyString, new DbGetCallback() {
-                @Override
-                public void setQuery(Query query) {
-                    query.setFilter("fisKey == fisKeyParam");
-                    query.declareParameters("com.google.appengine.api.datastore.Key fisKeyParam");
-                    query.setOrdering("createDate asc");
-                }
-            });
-            if(accGrpList.size() > 0){
-                for(AccGroup accGrp : accGrpList){
-                    SAccGrp sAccGrp = new SAccGrp(accGrp.getKeyString(), accGrp.getName(), accGrp.getCreateDate());
-                    sFis.addSAccGrp(sAccGrp);
-                }
-            }
-            
-            Db<AccChart> dbAccChart = new Db<AccChart>();
-            List<AccChart> accChartList = dbAccChart.get(pm, AccChart.class, fisKeyString, new DbGetCallback() {
-                @Override
-                public void setQuery(Query query) {
-                    query.setFilter("fisKey == fisKeyParam");
-                    query.declareParameters("com.google.appengine.api.datastore.Key fisKeyParam");
-                }
-            });
-            if(accChartList.size() > 0){
-                for(AccChart accChart : accChartList){
-                    SAccChart sAccChart = new SAccChart(accChart.getKeyString(), accChart.getAccGroupKeyString(), 
-                            accChart.getParentAccChartKeyString(), accChart.getNo(), accChart.getName(), accChart.getType(), accChart.getLevel(), 
-                            accChart.getBeginning());
-                    sFis.addSAccChart(sAccChart);
-                }
-            }
-            
-            Db<FinHeader> db = new Db<FinHeader>();
-            List<FinHeader> finList = db.get(pm, FinHeader.class, fisKeyString, new DbGetCallback() {
-                @Override
-                public void setQuery(Query query) {
-                    query.setFilter("fisKey == fisKeyParam");
-                    query.declareParameters("com.google.appengine.api.datastore.Key fisKeyParam");
-                    query.setOrdering("createDate asc");
-                }
-            });
-            if(finList.size() > 0){
-                for(FinHeader finHeader : finList){
-                    SFinHeader sFinHeader = new SFinHeader(finHeader.getKeyString(),
-                            finHeader.getName(), finHeader.getCreateDate());
-                    
-                    for(FinItem finItem : finHeader.getItemSet()){
-                        SFinItem sFinItem = new SFinItem(finItem.getKeyString(),
-                                finItem.getSeq(), finItem.getComm(), finItem.getArg(), 
-                                finItem.getCalCon(), finItem.getPrintCon(),
-                                finItem.getPrintStyle(), finItem.getVar1(), 
-                                finItem.getVar2(), finItem.getVar3(), finItem.getVar4());
-                        sFinHeader.addSFinItem(sFinItem);
-                    }
-                    
-                    sFis.addSFinHeader(sFinHeader);
-                }
-            }
+            return Db.getSetup(pm, fisKeyString);
         }finally{
             pm.close();
         }
-        return sFis;
     }
 
     @Override
@@ -605,7 +510,6 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
                     accChart.setName(sAccChart.getName());
                     accChart.setType(sAccChart.getType());
                     accChart.setLevel(sAccChart.getLevel());
-                    accChart.setBeginning(sAccChart.getBeginning());
                 }
             });
             return KeyFactory.keyToString(accChart.getKey());
@@ -632,6 +536,9 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
             if(jKey != null){
                 throw new IllegalArgumentException("Deletion abort! This acc chart is still used by some journals.");
             }
+            
+            // This account chart might still be using in financial statements (in table FinItem).
+            //     Alert will be shown when using that fin item.
             
             // Delete
             Db<AccChart> db = new Db<AccChart>();

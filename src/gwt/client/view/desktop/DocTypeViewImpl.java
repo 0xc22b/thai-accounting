@@ -5,6 +5,7 @@ import gwt.client.TConstants;
 import gwt.client.def.FisDef;
 import gwt.client.ui.CustomListBox;
 import gwt.client.view.DocTypeView;
+import gwt.shared.Utils;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.CssResource;
@@ -130,21 +131,27 @@ public class DocTypeViewImpl<T> extends Composite implements DocTypeView<T> {
         boolean isValid = true;
         
         if(journalTypeLB.getValue().isEmpty()){
-            errJournalTypeLb.setText(constants.invalid());
+            errJournalTypeLb.setText(constants.invalidMsg());
             isValid = false;
         }else{
             errJournalTypeLb.setText("");
         }
         
-        if(codeTB.getValue().isEmpty()){
-            errCodeLb.setText(constants.invalid());
+        if(codeTB.getValue().isEmpty() || Utils.hasSpace(codeTB.getValue())){
+            errCodeLb.setText(constants.invalidMsg());
             isValid = false;
         }else{
-            errCodeLb.setText("");
+            // Check duplicate code.
+            if (presenter.isDocTypeCodeDuplicate(keyString, codeTB.getValue())) {
+                errCodeLb.setText(constants.duplicateNameMsg());
+                isValid = false;
+            } else {
+                errCodeLb.setText("");
+            }
         }
         
         if(nameTB.getValue().isEmpty()){
-            errNameLb.setText(constants.invalid());
+            errNameLb.setText(constants.invalidMsg());
             isValid = false;
         }else{
             errNameLb.setText("");

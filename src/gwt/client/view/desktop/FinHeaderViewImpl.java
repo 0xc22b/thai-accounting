@@ -104,7 +104,7 @@ public class FinHeaderViewImpl<T> extends Composite implements FinHeaderView<T> 
         boolean isValid = true;
         
         if(nameTB.getValue().isEmpty()){
-            errNameLb.setText(constants.invalid());
+            errNameLb.setText(constants.invalidMsg());
             isValid = false;
         }else{
             errNameLb.setText("");

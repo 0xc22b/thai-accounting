@@ -39,4 +39,28 @@ public class UtilsTest {
         assertEquals(30, Utils.getLastDay(11, 2013));
         assertEquals(31, Utils.getLastDay(12, 2013));
     }
+    
+    @Test
+    public void testIsZero() {
+        assertEquals(true, Utils.isZero(0.00, 2));
+        assertEquals(true, Utils.isZero(0.00005, 2));
+        assertEquals(false, Utils.isZero(0.010005, 2));
+        assertEquals(false, Utils.isZero(22.010005, 2));
+        
+        assertEquals(true, Utils.isZero(-0.00, 2));
+        assertEquals(true, Utils.isZero(-0.00005, 2));
+        assertEquals(false, Utils.isZero(-0.010005, 2));
+        assertEquals(false, Utils.isZero(-22.010005, 2));
+    }
+    
+    @Test
+    public void testHasSpace() {
+        assertEquals(true, Utils.hasSpace(" "));
+        assertEquals(true, Utils.hasSpace(" test"));
+        assertEquals(true, Utils.hasSpace("test "));
+        assertEquals(true, Utils.hasSpace("te st"));
+        
+        assertEquals(false, Utils.hasSpace("test"));
+        assertEquals(false, Utils.hasSpace("no_space_here"));
+    }
 }

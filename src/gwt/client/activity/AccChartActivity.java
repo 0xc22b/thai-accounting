@@ -54,17 +54,49 @@ public class AccChartActivity extends AbstractActivity implements AccChartView.P
     public void onStop() {
         eventBus.removeHandlers();
     }
+
+    @Override
+    public boolean isAccChartNoDuplicate(String keyString,
+            String no) {
+        return clientFactory.getModel().isAccChartNoDuplicate(
+                place.getComKeyString(), place.getFisKeyString(),
+                keyString, no);
+    }
+
+    @Override
+    public boolean isAccChartNameDuplicate(String keyString,
+            String name) {
+        return clientFactory.getModel().isAccChartNameDuplicate(
+                place.getComKeyString(), place.getFisKeyString(),
+                keyString, name);
+    }
+
+    @Override
+    public boolean isAccChartTypeValid(String keyString, AccType accType) {
+        return clientFactory.getModel().isAccChartTypeValid(
+                place.getComKeyString(), place.getFisKeyString(), keyString,
+                accType);
+    }
+
+    @Override
+    public boolean isAccChartLevelValid(String parentKeyString, int level) {
+        return clientFactory.getModel().isAccChartLevelValid(
+                place.getComKeyString(), place.getFisKeyString(),
+                parentKeyString, level);
+    }
     
     @Override
-    public void addAccChart(String accGroupKeyString, String parentAccChartKeyString, String no, String name, 
-            AccType type, int level) {
+    public void addAccChart(String accGroupKeyString, String parentAccChartKeyString,
+            String no, String name, AccType type, int level) {
         
         SAccChart sAccChart = new SAccChart(null, accGroupKeyString, parentAccChartKeyString, no, name, type, level, 0);
         
+        clientFactory.getShell().setLoading();
         clientFactory.getModel().addAccChart(place.getComKeyString(), place.getFisKeyString(), sAccChart, new AsyncCallback<String>() {
             @Override
             public void onFailure(Throwable caught) {
                 Window.alert(caught.getMessage());
+                setAddAccChartShell();
             }
             @Override
             public void onSuccess(String result) {
@@ -74,15 +106,20 @@ public class AccChartActivity extends AbstractActivity implements AccChartView.P
     }
 
     @Override
-    public void editAccChart(String keyString, String accGroupKeyString, String parentAccChartKeyString, String no, String name, 
+    public void editAccChart(String keyString, String accGroupKeyString,
+            String parentAccChartKeyString, String no, String name,
             AccType type, int level) {
         
-        SAccChart sAccChart = new SAccChart(keyString, accGroupKeyString, parentAccChartKeyString, no, name, type, level, 0);
+        SAccChart sAccChart = new SAccChart(keyString, accGroupKeyString,
+                parentAccChartKeyString, no, name, type, level, 0);
         
-        clientFactory.getModel().editAccChart(place.getComKeyString(), place.getFisKeyString(), sAccChart, new AsyncCallback<String>() {
+        clientFactory.getShell().setLoading();
+        clientFactory.getModel().editAccChart(place.getComKeyString(),
+                place.getFisKeyString(), sAccChart, new AsyncCallback<String>() {
             @Override
             public void onFailure(Throwable caught) {
                 Window.alert(caught.getMessage());
+                setEditAccChartShell();
             }
             @Override
             public void onSuccess(String result) {
@@ -94,28 +131,30 @@ public class AccChartActivity extends AbstractActivity implements AccChartView.P
     private void processToken(){
         if(!place.getAction().isEmpty()){
             if(place.getAction().equals(AllPlace.NEW)){
-                setAddAccChart(place.getComKeyString(), place.getFisKeyString(), place.getKeyString());
+                setAddAccChart(place.getComKeyString(), place.getFisKeyString(),
+                        place.getKeyString(), place.getKeyString2());
                 return;
             }else if(place.getAction().equals(AllPlace.EDIT)){
-                setEditAccChart(place.getComKeyString(), place.getFisKeyString(), place.getKeyString());
+                setEditAccChart(place.getComKeyString(), place.getFisKeyString(),
+                        place.getKeyString());
                 return;
             }else if(place.getAction().equals(AllPlace.VIEW)){
-                setViewAccChart(place.getComKeyString(), place.getFisKeyString(), place.getKeyString());
+                setViewAccChart(place.getComKeyString(), place.getFisKeyString(),
+                        place.getKeyString());
                 return;
             }
         }
-        clientFactory.getPlaceController().goTo(new AllPlace(AllPlace.CHART, AllPlace.LIST, place.getComKeyString(), place.getFisKeyString()));
+        clientFactory.getPlaceController().goTo(new AllPlace(AllPlace.CHART,
+                AllPlace.LIST, place.getComKeyString(), place.getFisKeyString()));
     }
     
-    private void setAddAccChart(final String comKeyString, final String fisKeyString, final String accChartKeyString){
+    private void setAddAccChart(final String comKeyString, final String fisKeyString,
+            final String accChartKeyString, final String newType){
         
         assert(comKeyString != null && fisKeyString != null);
         
         // 1. set Shell
-        clientFactory.getShell().reset();
-        clientFactory.getShell().setHLb(constants.accChart() + ": " + constants.createNew());
-        clientFactory.getShell().setActBtn(0, constants.save(), ActionNames.OK, true);
-        clientFactory.getShell().setActBtn(1, constants.cancel(), ActionNames.CANCEL, true);
+        setAddAccChartShell();
         
         // 2. add Shell handlers via EventBus
         ActionEvent.register(eventBus, ActionNames.OK, new ActionEvent.Handler(){
@@ -133,17 +172,27 @@ public class AccChartActivity extends AbstractActivity implements AccChartView.P
         });
         
         // 3. Update view
-        clientFactory.getModel().getAccChart(comKeyString, fisKeyString, null, new AsyncCallback<SFiscalYear>() {
+        clientFactory.getModel().getAccChart(comKeyString, fisKeyString, null,
+                new AsyncCallback<SFiscalYear>() {
             @Override
             public void onFailure(Throwable caught) {
                 Window.alert(caught.getMessage());
-                clientFactory.getPlaceController().goTo(new AllPlace(AllPlace.CHART, AllPlace.LIST, comKeyString, fisKeyString));
+                clientFactory.getPlaceController().goTo(new AllPlace(
+                        AllPlace.CHART, AllPlace.LIST, comKeyString, fisKeyString));
             }
             @Override
             public void onSuccess(SFiscalYear result) {
-                clientFactory.getAccChartView().setAccChart(result, AllPlace.NEW, accChartKeyString);
+                clientFactory.getAccChartView().setAccChart(result, AllPlace.NEW,
+                        accChartKeyString, newType);
             }
         });
+    }
+    
+    private void setAddAccChartShell() {
+        clientFactory.getShell().reset();
+        clientFactory.getShell().setHLb(constants.accChart() + ": " + constants.createNew());
+        clientFactory.getShell().setActBtn(0, constants.save(), ActionNames.OK, true);
+        clientFactory.getShell().setActBtn(1, constants.cancel(), ActionNames.CANCEL, true);
     }
     
     private void setEditAccChart(final String comKeyString, final String fisKeyString, final String accChartKeyString){
@@ -151,10 +200,7 @@ public class AccChartActivity extends AbstractActivity implements AccChartView.P
         assert(comKeyString != null && fisKeyString != null && accChartKeyString != null);
         
         // 1. set Shell
-        clientFactory.getShell().reset();
-        clientFactory.getShell().setHLb(constants.accChart() + ": " + constants.createNew());
-        clientFactory.getShell().setActBtn(0, constants.save(), ActionNames.OK, true);
-        clientFactory.getShell().setActBtn(1, constants.cancel(), ActionNames.CANCEL, true);
+        setEditAccChartShell();
         
         // 2. add Shell handlers via EventBus
         ActionEvent.register(eventBus, ActionNames.OK, new ActionEvent.Handler(){
@@ -181,9 +227,17 @@ public class AccChartActivity extends AbstractActivity implements AccChartView.P
             @Override
             public void onSuccess(SFiscalYear result) {
                 // 4. Update view
-                clientFactory.getAccChartView().setAccChart(result, AllPlace.EDIT, accChartKeyString);
+                clientFactory.getAccChartView().setAccChart(result, AllPlace.EDIT,
+                        accChartKeyString, null);
             }
         });
+    }
+    
+    private void setEditAccChartShell() {
+        clientFactory.getShell().reset();
+        clientFactory.getShell().setHLb(constants.accChart() + ": " + constants.createNew());
+        clientFactory.getShell().setActBtn(0, constants.save(), ActionNames.OK, true);
+        clientFactory.getShell().setActBtn(1, constants.cancel(), ActionNames.CANCEL, true);
     }
     
     private void setViewAccChart(final String comKeyString, final String fisKeyString, final String accChartKeyString){
@@ -221,7 +275,8 @@ public class AccChartActivity extends AbstractActivity implements AccChartView.P
             @Override
             public void onSuccess(SFiscalYear result) {
                 // 4. Update view
-                clientFactory.getAccChartView().setAccChart(result, AllPlace.VIEW, accChartKeyString);
+                clientFactory.getAccChartView().setAccChart(result, AllPlace.VIEW,
+                        accChartKeyString, null);
             }
         });
     }

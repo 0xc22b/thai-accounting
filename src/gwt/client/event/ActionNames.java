@@ -13,7 +13,8 @@ public interface ActionNames {
     final String DELETE = "delete";
     final String VIEW = "view";
     final String OK = "ok";
-    final String OKANDSETUP = "okandsetup";
+    final String OK_AND_DEFAULT_SETUP = "okAndDefaultSetup";
+    final String OK_AND_PREV_SETUP = "okAndPrevSetup";
     final String CANCEL = "cancel";
     final String BACK = "back";
     
@@ -22,6 +23,7 @@ public interface ActionNames {
     final String REPORT = "report";
     
     final String CHILD = "child";
+    final String SIBLING = "sibling";
     final String ITEM = "item";
     final String PRINT = "print";
 }

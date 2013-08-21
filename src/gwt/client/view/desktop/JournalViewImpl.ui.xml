@@ -100,6 +100,7 @@
         <div class='{style.row}'>
             <g:Label ui:field="noLb" styleName='{style.label}'></g:Label>
             <g:TextBox ui:field="noTB" styleName='{style.input}' visibleLength='15'></g:TextBox>
+            <g:Button ui:field="suggestedNoBtn"></g:Button>
             <g:Label ui:field="errNoLb" styleName='{style.errMsg}'></g:Label>
         </div>
         <div class='{style.row}'>

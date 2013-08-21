@@ -8,6 +8,7 @@ import gwt.client.ui.CustomListBox;
 import gwt.client.ui.CustomSuggestBox;
 import gwt.client.view.AccChartView;
 import gwt.shared.InvalidValueException;
+import gwt.shared.Utils;
 import gwt.shared.model.SAccChart.AccType;
 
 import com.google.gwt.core.client.GWT;
@@ -88,7 +89,7 @@ public class AccChartViewImpl<T> extends Composite implements AccChartView<T> {
         nameLb.setText(constants.accName());
         typeLb.setText(constants.accType());
         levelLb.setText(constants.level());
-        
+
         noSB.addTextBoxStyleName(style.noSB());
         nameSB.addTextBoxStyleName(style.nameSB());
         parentAccNoSB.addTextBoxStyleName(style.parentAccNoSB());
@@ -119,8 +120,8 @@ public class AccChartViewImpl<T> extends Composite implements AccChartView<T> {
     }
 
     @Override
-    public void setAccChart(T t, String action, String keyString) {
-        
+    public void setAccChart(T t, String action, String keyString, String newType) {
+
         for(int i=0; i<fisDef.getACListSize(t); i++){
             noSB.add(fisDef.getACNo(t, i), fisDef.getACNo(t, i));
             nameSB.add(fisDef.getACName(t, i), fisDef.getACName(t, i));
@@ -155,9 +156,20 @@ public class AccChartViewImpl<T> extends Composite implements AccChartView<T> {
             accGrpLB.setSelectedValue(fisDef.getACAGKeyString(t, keyString));
             
         }else if(action.equals(AllPlace.NEW) && keyString != null){
-            parentAccNoSB.setKey(keyString);
-            levelLB.setSelectedValue((fisDef.getACLevel(t, keyString) + 1) + "");
-            accGrpLB.setSelectedValue(fisDef.getACAGKeyString(t, keyString));
+            if (newType.equals(AllPlace.CHILD)) {
+                if (fisDef.getACType(t, keyString).equals(AccType.CONTROL)) {
+                    parentAccNoSB.setKey(keyString);
+                    levelLB.setSelectedValue((fisDef.getACLevel(t, keyString) + 1) + "");
+                    accGrpLB.setSelectedValue(fisDef.getACAGKeyString(t, keyString));
+                }
+            } else if (newType.equals(AllPlace.SIBLING)) {
+                String pKeyString = fisDef.getACParentACKeyString(t, keyString);
+                parentAccNoSB.setKey(pKeyString);
+                levelLB.setSelectedValue(fisDef.getACLevel(t, keyString) + "");
+                accGrpLB.setSelectedValue(fisDef.getACAGKeyString(t, keyString));
+                
+                typeLB.setSelectedValue(fisDef.getACType(t, keyString).name());
+            }
         }
         
         if(action.equals(AllPlace.EDIT) || action.equals(AllPlace.NEW)){
@@ -191,54 +203,81 @@ public class AccChartViewImpl<T> extends Composite implements AccChartView<T> {
     
     private boolean validateInputs(){
         boolean isValid = true;
+
         
-        if(noSB.getValue().isEmpty()){
-            errNoLb.setText(constants.invalid());
+        if(noSB.getValue().isEmpty() || Utils.hasSpace(noSB.getValue())){
+            errNoLb.setText(constants.invalidMsg());
             isValid = false;
         }else{
-            //TODO Check duplicate no.
-            
-            errNoLb.setText("");
+        	// Check duplicate acc no.
+        	if (presenter.isAccChartNoDuplicate(keyString, noSB.getValue())) {
+        	    errNoLb.setText(constants.duplicateAccChartNoMsg());
+                isValid = false;
+        	} else {
+        	    errNoLb.setText("");
+        	}
         }
         
         if(nameSB.getValue().isEmpty()){
-            errNameLb.setText(constants.invalid());
+            errNameLb.setText(constants.invalidMsg());
             isValid = false;
         }else{
-            //TODO Check duplicate name 
-            
-            errNameLb.setText("");
+        	// Check duplicate name.
+        	if (presenter.isAccChartNameDuplicate(keyString, nameSB.getValue())) {
+        	    errNameLb.setText(constants.duplicateNameMsg());
+        	    isValid = false;
+        	} else {
+        	    errNameLb.setText("");
+        	}
         }
         
         try{
             parentAccNoSB.getKey();
             errParentAccNoLb.setText("");
         }catch(InvalidValueException e){
-            errParentAccNoLb.setText(constants.invalid());
+            errParentAccNoLb.setText(constants.invalidMsg());
             isValid = false;
         }
         
         if(typeLB.getValue().isEmpty()){
-            errTypeLb.setText(constants.invalid());
+            errTypeLb.setText(constants.invalidMsg());
             isValid = false;
         }else{
             errTypeLb.setText("");
         }
         
         if(levelLB.getValue().isEmpty()){
-            errLevelLb.setText(constants.invalid());
+            errLevelLb.setText(constants.invalidMsg());
             isValid = false;
         }else{
             errLevelLb.setText("");
         }
         
         if(accGrpLB.getValue().isEmpty()){
-            errAccGrpLb.setText(constants.invalid());
+            errAccGrpLb.setText(constants.invalidMsg());
             isValid = false;
         }else{
             errAccGrpLb.setText("");
         }
         
+        if (isValid) {
+            // Level is greater than parent's
+            if (!presenter.isAccChartLevelValid(parentAccNoSB.getKey(),
+                    Integer.parseInt(levelLB.getValue()))) {
+                errLevelLb.setText(constants.invalidMsg());
+                isValid = false;
+            }
+            
+            if (keyString != null) {
+                // Check type changes
+                if (!presenter.isAccChartTypeValid(keyString,
+                        AccType.valueOf(typeLB.getValue()))) {
+                    errTypeLb.setText(constants.invalidMsg());
+                    isValid = false;
+                }
+            }
+        }
+
         return isValid;
     }
 

@@ -335,7 +335,7 @@ public class DbTest {
         try {
             SFinItem sFinItem = new SFinItem(finItem.getKeyString(), 3,
                     Comm.TXT, "Text", CalCon.CALIFPOS, PrintCon.PRINT,
-                    PrintStyle.ULINE, Operand.BLANK, Operand.MINUS, Operand.PLUS,
+                    PrintStyle.BLANK, Operand.BLANK, Operand.MINUS, Operand.PLUS,
                     Operand.CLEAR);
             finItem = Db.editFinItem(pm2, sFinItem);
             
@@ -344,7 +344,7 @@ public class DbTest {
             assertEquals("Text", finItem.getArg());
             assertEquals(CalCon.CALIFPOS, finItem.getCalCon());
             assertEquals(PrintCon.PRINT, finItem.getPrintCon());
-            assertEquals(PrintStyle.ULINE, finItem.getPrintStyle());
+            assertEquals(PrintStyle.BLANK, finItem.getPrintStyle());
             assertEquals(Operand.BLANK, finItem.getVar1());
             assertEquals(Operand.MINUS, finItem.getVar2());
             assertEquals(Operand.PLUS, finItem.getVar3());
@@ -363,7 +363,7 @@ public class DbTest {
             assertEquals("Text", finItem_tmp.getArg());
             assertEquals(CalCon.CALIFPOS, finItem_tmp.getCalCon());
             assertEquals(PrintCon.PRINT, finItem_tmp.getPrintCon());
-            assertEquals(PrintStyle.ULINE, finItem_tmp.getPrintStyle());
+            assertEquals(PrintStyle.BLANK, finItem_tmp.getPrintStyle());
             assertEquals(Operand.BLANK, finItem_tmp.getVar1());
             assertEquals(Operand.MINUS, finItem_tmp.getVar2());
             assertEquals(Operand.PLUS, finItem_tmp.getVar3());

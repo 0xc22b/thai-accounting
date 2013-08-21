@@ -24,20 +24,39 @@
         }
         
         .noSB {
-            width: 100px;
+            width: 350px;
         }
         
         .nameSB {
-            width: 150px;
+            width: 350px;
         }
         
         .parentAccNoSB {
-            width: 300px;
+            width: 350px;
         }
+        
+        .bottomSpace {
+	        margin-bottom: 45px;
+	    }
     </ui:style>
 
     
     <g:HTMLPanel>
+        <div class='{style.row}'>
+            <g:Label ui:field="parentAccNoLb" styleName='{style.label}'></g:Label>
+            <c:CustomSuggestBox ui:field="parentAccNoSB" styleName='{style.input}'></c:CustomSuggestBox>
+            <g:Label ui:field="errParentAccNoLb" styleName='{style.errMsg}'></g:Label>
+        </div>
+        <div class='{style.row}'>
+            <g:Label ui:field="levelLb" styleName='{style.label}'></g:Label>
+            <c:CustomListBox ui:field="levelLB" styleName='{style.input}'></c:CustomListBox>
+            <g:Label ui:field="errLevelLb" styleName='{style.errMsg}'></g:Label>
+        </div>
+        <div class='{style.row} {style.bottomSpace}'>
+            <g:Label ui:field="accGrpLb" styleName='{style.label}'></g:Label>
+            <c:CustomListBox ui:field="accGrpLB" styleName='{style.input}'></c:CustomListBox>
+            <g:Label ui:field="errAccGrpLb" styleName='{style.errMsg}'></g:Label>
+        </div>
         <div class='{style.row}'>
             <g:Label ui:field="noLb" styleName='{style.label}'></g:Label>
             <c:CustomSuggestBox ui:field="noSB" styleName='{style.input}'></c:CustomSuggestBox>
@@ -49,25 +68,9 @@
             <g:Label ui:field="errNameLb" styleName='{style.errMsg}'></g:Label>
         </div>
         <div class='{style.row}'>
-            <g:Label ui:field="parentAccNoLb" styleName='{style.label}'></g:Label>
-            <c:CustomSuggestBox ui:field="parentAccNoSB" styleName='{style.input}'></c:CustomSuggestBox>
-            <g:Label ui:field="errParentAccNoLb" styleName='{style.errMsg}'></g:Label>
-        </div>
-        <div class='{style.row}'>
             <g:Label ui:field="typeLb" styleName='{style.label}'></g:Label>
             <c:CustomListBox ui:field="typeLB" styleName='{style.input}'></c:CustomListBox>
             <g:Label ui:field="errTypeLb" styleName='{style.errMsg}'></g:Label>
         </div>
-        <div class='{style.row}'>
-            <g:Label ui:field="levelLb" styleName='{style.label}'></g:Label>
-            <c:CustomListBox ui:field="levelLB" styleName='{style.input}'></c:CustomListBox>
-            <g:Label ui:field="errLevelLb" styleName='{style.errMsg}'></g:Label>
-        </div>
-        <div class='{style.row}'>
-            <g:Label ui:field="accGrpLb" styleName='{style.label}'></g:Label>
-            <c:CustomListBox ui:field="accGrpLB" styleName='{style.input}'></c:CustomListBox>
-            <g:Label ui:field="errAccGrpLb" styleName='{style.errMsg}'></g:Label>
-        </div>
     </g:HTMLPanel>
-    
 </ui:UiBinder>

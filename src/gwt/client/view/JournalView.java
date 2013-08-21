@@ -20,7 +20,9 @@ public interface JournalView<T> extends IsWidget {
         }
     }
     
-    public interface Presenter {      
+    public interface Presenter {
+        boolean isJournalNoDuplicate(String keyString, String docTypeKeyString,
+                String no);
         void addJournal(String docTypeKeyString, String no, int day, int month, int year, String desc, ArrayList<ItemData> itemDataList);
         void editJournal(String keyString, String docTypeKeyString, String no, int day, int month, int year, 
                 String desc, ArrayList<ItemData> itemDataList);

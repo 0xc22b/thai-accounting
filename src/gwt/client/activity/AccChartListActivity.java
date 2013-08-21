@@ -23,7 +23,7 @@ public class AccChartListActivity extends AbstractActivity implements ListView.P
     private AllPlace place;
     private ClientFactory clientFactory;
     private ResettableEventBus eventBus;
-    
+
     public AccChartListActivity(AllPlace place, ClientFactory clientFactory) {
         this.place = place;
         this.clientFactory = clientFactory;
@@ -46,6 +46,7 @@ public class AccChartListActivity extends AbstractActivity implements ListView.P
 
     @Override
     public String mayStop() {
+        clientFactory.getAccChartListView().saveFirstVisibleIndex();
         return null;
     }
 
@@ -79,26 +80,31 @@ public class AccChartListActivity extends AbstractActivity implements ListView.P
         clientFactory.getShell().setActBtn(3, constants.delete(), ActionNames.DELETE, false);
         clientFactory.getShell().setActBtn(4, constants.back(), ActionNames.BACK, true);
         clientFactory.getShell().setActBtn(5, constants.newChild(), ActionNames.CHILD, false);
+        clientFactory.getShell().setActBtn(6, constants.newSibling(), ActionNames.SIBLING, false);
         
         ActionEvent.register(eventBus, ActionNames.ADD, new ActionEvent.Handler(){
             @Override
             public void onAction(ActionEvent event) {
-                clientFactory.getPlaceController().goTo(new AllPlace(AllPlace.CHART, AllPlace.NEW, place.getComKeyString(), 
-                        place.getFisKeyString()));
+                clientFactory.getPlaceController().goTo(new AllPlace(AllPlace.CHART,
+                        AllPlace.NEW, place.getComKeyString(), place.getFisKeyString()));
             }
         });
         ActionEvent.register(eventBus, ActionNames.VIEW, new ActionEvent.Handler(){
             @Override
             public void onAction(ActionEvent event) {
-                clientFactory.getPlaceController().goTo(new AllPlace(AllPlace.CHART, AllPlace.VIEW, place.getComKeyString(), 
-                        place.getFisKeyString(), clientFactory.getAccChartListView().getSelectedItemKeyString()));
+                clientFactory.getPlaceController().goTo(new AllPlace(AllPlace.CHART,
+                        AllPlace.VIEW, place.getComKeyString(), 
+                        place.getFisKeyString(),
+                        clientFactory.getAccChartListView().getSelectedItemKeyString()));
             }
         });
         ActionEvent.register(eventBus, ActionNames.EDIT, new ActionEvent.Handler(){
             @Override
             public void onAction(ActionEvent event) {
-                clientFactory.getPlaceController().goTo(new AllPlace(AllPlace.CHART, AllPlace.EDIT, place.getComKeyString(),
-                        place.getFisKeyString(), clientFactory.getAccChartListView().getSelectedItemKeyString()));
+                clientFactory.getPlaceController().goTo(new AllPlace(AllPlace.CHART,
+                        AllPlace.EDIT, place.getComKeyString(),
+                        place.getFisKeyString(),
+                        clientFactory.getAccChartListView().getSelectedItemKeyString()));
             }
         });
         ActionEvent.register(eventBus, ActionNames.DELETE, new ActionEvent.Handler(){
@@ -118,8 +124,19 @@ public class AccChartListActivity extends AbstractActivity implements ListView.P
         ActionEvent.register(eventBus, ActionNames.CHILD, new ActionEvent.Handler(){
             @Override
             public void onAction(ActionEvent event) {
-                clientFactory.getPlaceController().goTo(new AllPlace(AllPlace.CHART, AllPlace.NEW, place.getComKeyString(),
-                        place.getFisKeyString(), clientFactory.getAccChartListView().getSelectedItemKeyString()));
+                clientFactory.getPlaceController().goTo(new AllPlace(AllPlace.CHART,
+                        AllPlace.NEW, place.getComKeyString(), place.getFisKeyString(),
+                        clientFactory.getAccChartListView().getSelectedItemKeyString(),
+                        AllPlace.CHILD));
+            }
+        });
+        ActionEvent.register(eventBus, ActionNames.SIBLING, new ActionEvent.Handler(){
+            @Override
+            public void onAction(ActionEvent event) {
+                clientFactory.getPlaceController().goTo(new AllPlace(AllPlace.CHART,
+                        AllPlace.NEW, place.getComKeyString(), place.getFisKeyString(),
+                        clientFactory.getAccChartListView().getSelectedItemKeyString(),
+                        AllPlace.SIBLING));
             }
         });
     }
@@ -131,6 +148,7 @@ public class AccChartListActivity extends AbstractActivity implements ListView.P
         clientFactory.getShell().setActBtnVisible(3, !visible);
         clientFactory.getShell().setActBtnVisible(4, visible);
         clientFactory.getShell().setActBtnVisible(5, !visible);
+        clientFactory.getShell().setActBtnVisible(6, !visible);
     }
     
     private void getAccChartList(){

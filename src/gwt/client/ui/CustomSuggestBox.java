@@ -17,6 +17,8 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.SuggestBox;
+import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.SuggestBox.DefaultSuggestionDisplay;
 import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 
 public class CustomSuggestBox extends Composite{
@@ -31,7 +33,8 @@ public class CustomSuggestBox extends Composite{
     private FlowPanel panel;
     private SuggestBox suggestBox;
     private Button showAllBtn;
-    
+
+    private DefaultSuggestionDisplay suggestionDisplay;
     private MultiWordSuggestOracle suggest;
     
     private ArrayList<String> valueList;
@@ -44,10 +47,12 @@ public class CustomSuggestBox extends Composite{
         valueList = new ArrayList<String>();
         
         suggest = new MultiWordSuggestOracle();
-        suggestBox = new SuggestBox(suggest);
-        suggestBox.getTextBox().addKeyUpHandler(suggestBoxKeyUpHandler);
-        suggestBox.getTextBox().addValueChangeHandler(suggestBoxValueChangeHandler);
+        suggestionDisplay = new DefaultSuggestionDisplay();
+        suggestBox = new SuggestBox(suggest, new TextBox(), suggestionDisplay);
+        suggestBox.getValueBox().addKeyUpHandler(suggestBoxKeyUpHandler);
+        suggestBox.getValueBox().addValueChangeHandler(suggestBoxValueChangeHandler);
         suggestBox.addSelectionHandler(suggestBoxSelectionHandler);
+        suggestBox.setLimit(1000);
         
         showAllBtn = new Button("show");
         showAllBtn.addClickHandler(showAllBtnClickHandler);
@@ -108,12 +113,16 @@ public class CustomSuggestBox extends Composite{
     }
     
     public void setEnabled(boolean enabled){
-        suggestBox.getTextBox().setEnabled(enabled);
+        suggestBox.getValueBox().setEnabled(enabled);
     }
     
     public void addTextBoxStyleName(String style){
         suggestBox.addStyleName(style);
     }
+    
+    /*public void setPopupStyleName(String style) {
+        suggestionDisplay.setPopupStyleName(style);
+    }*/
     
     public void addSuggestBoxCallback(SuggestBoxCallback callback){
         this.callback = callback;

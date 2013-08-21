@@ -54,15 +54,36 @@ public class BeginActivity extends AbstractActivity implements BeginView.Present
     }
 
     @Override
-    public void setBegin(String keyString, double beginning) {
-        
+    public void addBegin(String keyString, double beginning) {
+
+        clientFactory.getShell().setLoading();
         clientFactory.getModel().setBeginning(place.getComKeyString(),
                 place.getFisKeyString(), keyString, beginning, 
                 new AsyncCallback<String>() {
             @Override
             public void onFailure(Throwable caught) {
-                // TODO Auto-generated method stub
                 Window.alert(caught.getMessage());
+                setAddBeginShell();
+            }
+            @Override
+            public void onSuccess(String result) {
+                clientFactory.getPlaceController().goTo(new AllPlace(
+                        AllPlace.BEGIN, AllPlace.LIST, place.getComKeyString(), place.getFisKeyString()));
+            }
+        });
+    }
+    
+    @Override
+    public void editBegin(String keyString, double beginning) {
+
+        clientFactory.getShell().setLoading();
+        clientFactory.getModel().setBeginning(place.getComKeyString(),
+                place.getFisKeyString(), keyString, beginning, 
+                new AsyncCallback<String>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                Window.alert(caught.getMessage());
+                setEditBeginShell();
             }
             @Override
             public void onSuccess(String result) {
@@ -96,16 +117,13 @@ public class BeginActivity extends AbstractActivity implements BeginView.Present
         assert(comKeyString != null && fisKeyString != null);
         
         // 1. set Shell
-        clientFactory.getShell().reset();
-        clientFactory.getShell().setHLb(constants.beginning() + ": " + constants.createNew());
-        clientFactory.getShell().setActBtn(0, constants.save(), ActionNames.OK, true);
-        clientFactory.getShell().setActBtn(1, constants.cancel(), ActionNames.CANCEL, true);
+        setAddBeginShell();
         
         // 2. add Shell handlers via EventBus
         ActionEvent.register(eventBus, ActionNames.OK, new ActionEvent.Handler(){
             @Override
             public void onAction(ActionEvent event) {
-                clientFactory.getBeginView().setBeginBtnClicked();
+                clientFactory.getBeginView().addBeginBtnClicked();
             }
         });
         
@@ -133,22 +151,26 @@ public class BeginActivity extends AbstractActivity implements BeginView.Present
         });
     }
     
+    private void setAddBeginShell() {
+        clientFactory.getShell().reset();
+        clientFactory.getShell().setHLb(constants.beginning() + ": " + constants.createNew());
+        clientFactory.getShell().setActBtn(0, constants.save(), ActionNames.OK, true);
+        clientFactory.getShell().setActBtn(1, constants.cancel(), ActionNames.CANCEL, true);
+    }
+    
     private void setEditBegin(final String comKeyString, final String fisKeyString,
             final String accChartKeyString){
         
         assert(comKeyString != null && fisKeyString != null && accChartKeyString != null);
         
         // 1. set Shell
-        clientFactory.getShell().reset();
-        clientFactory.getShell().setHLb(constants.beginning() + ": " + constants.edit());
-        clientFactory.getShell().setActBtn(0, constants.save(), ActionNames.OK, true);
-        clientFactory.getShell().setActBtn(1, constants.cancel(), ActionNames.CANCEL, true);
+        setEditBeginShell();
         
         // 2. add Shell handlers via EventBus
         ActionEvent.register(eventBus, ActionNames.OK, new ActionEvent.Handler(){
             @Override
             public void onAction(ActionEvent event) {
-                clientFactory.getBeginView().setBeginBtnClicked();
+                clientFactory.getBeginView().editBeginBtnClicked();
             }
         });
         
@@ -176,6 +198,13 @@ public class BeginActivity extends AbstractActivity implements BeginView.Present
                         true);
             }
         });
+    }
+    
+    private void setEditBeginShell() {
+        clientFactory.getShell().reset();
+        clientFactory.getShell().setHLb(constants.beginning() + ": " + constants.edit());
+        clientFactory.getShell().setActBtn(0, constants.save(), ActionNames.OK, true);
+        clientFactory.getShell().setActBtn(1, constants.cancel(), ActionNames.CANCEL, true);
     }
     
     private void setViewBegin(final String comKeyString, final String fisKeyString,

@@ -14,4 +14,5 @@ public interface ListView<L, E> extends IsWidget {
     void init(Presenter presenter);
     void setData(L l);
     String getSelectedItemKeyString();
+    void saveFirstVisibleIndex();
 }

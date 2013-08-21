@@ -4,8 +4,12 @@ import gwt.server.account.Db.DbAddCallback;
 import gwt.server.account.model.AccChart;
 import gwt.server.account.model.AccGroup;
 import gwt.server.account.model.DocType;
-import gwt.server.account.model.FinHeader;
+import gwt.server.account.model.FiscalYear;
 import gwt.server.account.model.JournalType;
+import gwt.shared.Utils;
+import gwt.shared.model.SAccChart;
+import gwt.shared.model.SAccGrp;
+import gwt.shared.model.SDocType;
 import gwt.shared.model.SFinHeader;
 import gwt.shared.model.SFinItem;
 import gwt.shared.model.SAccChart.AccType;
@@ -14,10 +18,17 @@ import gwt.shared.model.SFinItem.Comm;
 import gwt.shared.model.SFinItem.Operand;
 import gwt.shared.model.SFinItem.PrintCon;
 import gwt.shared.model.SFinItem.PrintStyle;
+import gwt.shared.model.SFiscalYear;
+import gwt.shared.model.SJournalType;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import javax.jdo.PersistenceManager;
+
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 
 public class CreateSetup {
     
@@ -99,74 +110,6 @@ public class CreateSetup {
         AccChart aC106 = addAC(aCDb, pm, fisKeyString, "53-00-00-00", "managing expenses", eAG.getKeyString(), 2, AccType.CONTROL, aC91.getKeyString());
         AccChart aC107 = addAC(aCDb, pm, fisKeyString, "53-01-00-00", "employee expenses", eAG.getKeyString(), 3, AccType.CONTROL, aC106.getKeyString());
         AccChart aC108 = addAC(aCDb, pm, fisKeyString, "53-01-01-00", "salary", eAG.getKeyString(), 4, AccType.ENTRY, aC107.getKeyString());
-        
-        SFinHeader sBal = new SFinHeader(null, "trail", d);
-        addFinItem(sBal, 100, Comm.TXT, "assets", CalCon.CAL, PrintCon.PRINT, PrintStyle.CENTER, Operand.BLANK, Operand.BLANK, Operand.BLANK, Operand.BLANK);
-        addFinItem(sBal, 120, Comm.TXT, "live assets", CalCon.CAL, PrintCon.PRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.BLANK, Operand.BLANK);
-        addFinItem(sBal, 130, Comm.ACCNO, aC4.getKeyString(), CalCon.CAL, PrintCon.NOIFZERO, PrintStyle.BLANK, Operand.PLUS, Operand.BLANK, Operand.BLANK, Operand.BLANK);
-        addFinItem(sBal, 141, Comm.ACCNO, aC6.getKeyString(), CalCon.CALIFPOS, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 151, Comm.ACCNO, aC10.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 170, Comm.PVAR3, "bank account", CalCon.CAL, PrintCon.NOIFZERO, PrintStyle.BLANK, Operand.PLUS, Operand.BLANK, Operand.CLEAR, Operand.BLANK);
-        addFinItem(sBal, 190, Comm.PVAR3, "debtors and checks", CalCon.CAL, PrintCon.NOIFZERO, PrintStyle.BLANK, Operand.PLUS, Operand.BLANK, Operand.CLEAR, Operand.BLANK);
-        addFinItem(sBal, 201, Comm.ACCNO, aC23.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 210, Comm.PVAR3, "remaining products", CalCon.CAL, PrintCon.NOIFZERO, PrintStyle.BLANK, Operand.PLUS, Operand.BLANK, Operand.CLEAR, Operand.BLANK);
-        addFinItem(sBal, 221, Comm.ACCNO, aC28.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 222, Comm.ACCNO, aC29.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 223, Comm.ACCNO, aC30.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 240, Comm.PVAR3, "other live assets", CalCon.CAL, PrintCon.NOIFZERO, PrintStyle.ULINE, Operand.PLUS, Operand.BLANK, Operand.CLEAR, Operand.BLANK);
-        addFinItem(sBal, 250, Comm.PVAR1, "total of live assets", CalCon.CAL, PrintCon.PRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.BLANK, Operand.BLANK);
-        addFinItem(sBal, 270, Comm.PVAR3, "lands, buildings and equipments", CalCon.CAL, PrintCon.NOIFZERO, PrintStyle.ULINE, Operand.PLUS, Operand.BLANK, Operand.CLEAR, Operand.BLANK);
-        addFinItem(sBal, 280, Comm.PVAR1, "total of assets", CalCon.CAL, PrintCon.PRINT, PrintStyle.TWOULINES, Operand.CLEAR, Operand.BLANK, Operand.BLANK, Operand.BLANK);
-        
-        addFinItem(sBal, 290, Comm.TXT, "debts and shareholders", CalCon.CAL, PrintCon.PRINT, PrintStyle.CENTER, Operand.BLANK, Operand.BLANK, Operand.BLANK, Operand.BLANK);
-        addFinItem(sBal, 300, Comm.TXT, "live debts", CalCon.CAL, PrintCon.PRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.BLANK, Operand.BLANK);
-        addFinItem(sBal, 311, Comm.ACCNO, aC6.getKeyString(), CalCon.CALIFNE, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 320, Comm.PVAR3, "exceeded withdrawal   999-9-99999-1", CalCon.CAL, PrintCon.NOIFZERO, PrintStyle.BLANK, Operand.PLUS, Operand.BLANK, Operand.CLEAR, Operand.BLANK);
-        addFinItem(sBal, 331, Comm.ACCNO, aC60.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 332, Comm.ACCNO, aC61.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 340, Comm.PVAR3, "creditor and checks", CalCon.CAL, PrintCon.NOIFZERO, PrintStyle.BLANK, Operand.PLUS, Operand.BLANK, Operand.CLEAR, Operand.BLANK);
-        addFinItem(sBal, 351, Comm.ACCNO, aC64.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 352, Comm.ACCNO, aC65.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 360, Comm.PVAR3, "other live debts", CalCon.CAL, PrintCon.PRINT, PrintStyle.ULINE, Operand.PLUS, Operand.BLANK, Operand.CLEAR, Operand.BLANK);
-        addFinItem(sBal, 370, Comm.PVAR1, "total of live debts", CalCon.CAL, PrintCon.PRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.BLANK, Operand.BLANK);
-        addFinItem(sBal, 380, Comm.TXT, " ", CalCon.CAL, PrintCon.PRINT, PrintStyle.ULINE, Operand.BLANK, Operand.BLANK, Operand.BLANK, Operand.BLANK);
-        addFinItem(sBal, 390, Comm.PVAR1, "total of live debts", CalCon.CAL, PrintCon.PRINT, PrintStyle.ULINE, Operand.BLANK, Operand.BLANK, Operand.BLANK, Operand.BLANK);
-        addFinItem(sBal, 400, Comm.TXT, "shareholders", CalCon.CAL, PrintCon.PRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.BLANK, Operand.BLANK);
-        addFinItem(sBal, 411, Comm.ACCNO, aC74.getKeyString(), CalCon.CAL, PrintCon.PRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 412, Comm.ACCNO, aC75.getKeyString(), CalCon.CAL, PrintCon.PRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 413, Comm.ACCNO, aC76.getKeyString(), CalCon.CAL, PrintCon.PRINT, PrintStyle.ULINE, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 420, Comm.PVAR3, "total of shareholders", CalCon.CAL, PrintCon.PRINT, PrintStyle.ULINE, Operand.PLUS, Operand.BLANK, Operand.CLEAR, Operand.BLANK);
-        addFinItem(sBal, 430, Comm.PVAR1, "total of live debts and shareholders", CalCon.CAL, PrintCon.PRINT, PrintStyle.TWOULINES, Operand.CLEAR, Operand.BLANK, Operand.BLANK, Operand.BLANK);
-        
-        FinHeader bal = Db.addFinHeader(pm, fisKeyString, sBal);
-        
-        SFinHeader sPro = new SFinHeader(null, "profit and loss", d);
-        addFinItem(sPro, 100, Comm.TXT, "income", CalCon.CAL, PrintCon.PRINT, PrintStyle.CENTER, Operand.BLANK, Operand.BLANK, Operand.BLANK, Operand.BLANK);
-        addFinItem(sPro, 111, Comm.ACCNO, aC79.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sPro, 112, Comm.ACCNO, aC80.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sPro, 113, Comm.ACCNO, aC81.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sPro, 120, Comm.PVAR3, "income from sale", CalCon.CAL, PrintCon.PRINT, PrintStyle.BLANK, Operand.PLUS, Operand.BLANK, Operand.CLEAR, Operand.BLANK);
-        addFinItem(sPro, 131, Comm.ACCNO, aC83.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sPro, 132, Comm.ACCNO, aC84.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sPro, 140, Comm.PVAR3, "other income", CalCon.CAL, PrintCon.PRINT, PrintStyle.ULINE, Operand.PLUS, Operand.BLANK, Operand.CLEAR, Operand.BLANK);
-        addFinItem(sPro, 150, Comm.PVAR1, "totol of income", CalCon.CAL, PrintCon.PRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.BLANK, Operand.BLANK);
-        addFinItem(sPro, 160, Comm.TXT, "expenses", CalCon.CAL, PrintCon.PRINT, PrintStyle.CENTER, Operand.BLANK, Operand.BLANK, Operand.BLANK, Operand.BLANK);
-        addFinItem(sPro, 171, Comm.ACCNO, aC93.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sPro, 172, Comm.ACCNO, aC95.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sPro, 180, Comm.PVAR3, "cost of sale", CalCon.CAL, PrintCon.PRINT, PrintStyle.BLANK, Operand.BLANK, Operand.PLUS, Operand.CLEAR, Operand.BLANK);
-        addFinItem(sPro, 191, Comm.ACCNO, aC100.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sPro, 192, Comm.ACCNO, aC101.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sPro, 196, Comm.ACCNO, aC105.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sPro, 200, Comm.PVAR3, "sale expenses", CalCon.CAL, PrintCon.PRINT, PrintStyle.BLANK, Operand.BLANK, Operand.PLUS, Operand.CLEAR, Operand.BLANK);
-        addFinItem(sPro, 210, Comm.TXT, "managing expenses", CalCon.CAL, PrintCon.PRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.BLANK, Operand.BLANK);
-        addFinItem(sPro, 221, Comm.ACCNO, aC108.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sPro, 230, Comm.PVAR3, "employee expenses", CalCon.CAL, PrintCon.PRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.CLEAR, Operand.PLUS);
-        addFinItem(sPro, 250, Comm.PVAR3, "office expenses", CalCon.CAL, PrintCon.PRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.CLEAR, Operand.PLUS);
-        addFinItem(sPro, 260, Comm.PVAR4, "totla of managing expenses", CalCon.CAL, PrintCon.PRINT, PrintStyle.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK, Operand.CLEAR);
-        addFinItem(sPro, 270, Comm.PVAR2, "total of expenses", CalCon.CAL, PrintCon.PRINT, PrintStyle.BLANK, Operand.MINUS, Operand.CLEAR, Operand.BLANK, Operand.BLANK);
-        addFinItem(sPro, 280, Comm.PVAR1, "profit (loss)", CalCon.CAL, PrintCon.PRINT, PrintStyle.BLANK, Operand.CLEAR, Operand.BLANK, Operand.BLANK, Operand.BLANK);
-        
-        FinHeader pro = Db.addFinHeader(pm, fisKeyString, sPro);
     }
     
     @SuppressWarnings("unused")
@@ -206,10 +149,10 @@ public class CreateSetup {
         AccChart aC6 = addAC(aCDb, pm, fisKeyString, "11-01-02-01", "เงินฝากกระแสรายวัน    999-9-9999-1", wAG.getKeyString(), 5, AccType.ENTRY, aC5.getKeyString());
         AccChart aC7 = addAC(aCDb, pm, fisKeyString, "11-01-02-02", "เงินฝากกระแสรายวัน    999-9-9999-2", wAG.getKeyString(), 5, AccType.ENTRY, aC5.getKeyString());
         AccChart aC8 = addAC(aCDb, pm, fisKeyString, "11-01-02-03", "เงินฝากกระแสรายวัน    999-9-9999-3", wAG.getKeyString(), 5, AccType.ENTRY, aC5.getKeyString());
-        AccChart aC9 = addAC(aCDb, pm, fisKeyString, "11-01-03-00", "เงินฝากออกทรัพย์", wAG.getKeyString(), 4, AccType.CONTROL, aC3.getKeyString());
-        AccChart aC10 = addAC(aCDb, pm, fisKeyString, "11-01-03-01", "เงินฝากออกทรัพย์     999-9-9999-1", wAG.getKeyString(), 5, AccType.ENTRY, aC9.getKeyString());
-        AccChart aC11 = addAC(aCDb, pm, fisKeyString, "11-01-03-02", "เงินฝากออกทรัพย์     999-9-9999-2", wAG.getKeyString(), 5, AccType.ENTRY, aC9.getKeyString());
-        AccChart aC12 = addAC(aCDb, pm, fisKeyString, "11-01-03-03", "เงินฝากออกทรัพย์     999-9-9999-3", wAG.getKeyString(), 5, AccType.ENTRY, aC9.getKeyString());
+        AccChart aC9 = addAC(aCDb, pm, fisKeyString, "11-01-03-00", "เงินฝากออมทรัพย์", wAG.getKeyString(), 4, AccType.CONTROL, aC3.getKeyString());
+        AccChart aC10 = addAC(aCDb, pm, fisKeyString, "11-01-03-01", "เงินฝากออมทรัพย์     999-9-9999-1", wAG.getKeyString(), 5, AccType.ENTRY, aC9.getKeyString());
+        AccChart aC11 = addAC(aCDb, pm, fisKeyString, "11-01-03-02", "เงินฝากออมทรัพย์     999-9-9999-2", wAG.getKeyString(), 5, AccType.ENTRY, aC9.getKeyString());
+        AccChart aC12 = addAC(aCDb, pm, fisKeyString, "11-01-03-03", "เงินฝากออมทรัพย์     999-9-9999-3", wAG.getKeyString(), 5, AccType.ENTRY, aC9.getKeyString());
         AccChart aC13 = addAC(aCDb, pm, fisKeyString, "11-01-04-00", "เงินฝากประจำ", wAG.getKeyString(), 4, AccType.CONTROL, aC3.getKeyString());
         AccChart aC14 = addAC(aCDb, pm, fisKeyString, "11-01-04-01", "เงินฝากประจำ     999-9-9999-1 ", wAG.getKeyString(), 5, AccType.ENTRY, aC13.getKeyString());
         AccChart aC15 = addAC(aCDb, pm, fisKeyString, "11-01-04-02", "เงินฝากประจำ     999-9-9999-2 ", wAG.getKeyString(), 5, AccType.ENTRY, aC13.getKeyString());
@@ -236,24 +179,26 @@ public class CreateSetup {
         AccChart aC36 = addAC(aCDb, pm, fisKeyString, "11-05-04-03", "ภาษีขาย-รอเรียกเก็บ", wAG.getKeyString(), 5, AccType.ENTRY, aC33.getKeyString());
         AccChart aC37 = addAC(aCDb, pm, fisKeyString, "11-05-04-04", "ภาษีซื้อ-ยังไม่ถึงกำหนด", wAG.getKeyString(), 5, AccType.ENTRY, aC33.getKeyString());
         AccChart aC38 = addAC(aCDb, pm, fisKeyString, "11-05-05-00", "ลูกหนี้-กรมสรรพากร", wAG.getKeyString(), 4, AccType.ENTRY, aC26.getKeyString());
-        AccChart aC39 = addAC(aCDb, pm, fisKeyString, "12-00-00-00", "ลูกหนี้เงินให้กู้ยืมแก่กรรมการและลูกจ้าง", wAG.getKeyString(), 2, AccType.CONTROL, aC1.getKeyString());
-        AccChart aC40 = addAC(aCDb, pm, fisKeyString, "12-01-00-00", "ลูกหนี้เงินให้กู้ยืม-นาย...", wAG.getKeyString(), 3, AccType.ENTRY, aC39.getKeyString());
-        AccChart aC41 = addAC(aCDb, pm, fisKeyString, "13-00-00-00", "เงินลงทุนในบริษัทในเครือ", wAG.getKeyString(), 2, AccType.CONTROL, aC1.getKeyString());
-        AccChart aC42 = addAC(aCDb, pm, fisKeyString, "14-00-00-00", "ที่ดิน อาคารและอุปกรณ์สิทธิ", wAG.getKeyString(), 2, AccType.CONTROL, aC1.getKeyString());
-        AccChart aC43 = addAC(aCDb, pm, fisKeyString, "14-01-00-00", "ที่ดิน อาคาร ยานพาหนะและอุปกรณ์สิทธิ", wAG.getKeyString(), 3, AccType.CONTROL, aC42.getKeyString());
-        AccChart aC44 = addAC(aCDb, pm, fisKeyString, "14-01-01-00", "ที่ดิน", wAG.getKeyString(), 4, AccType.ENTRY, aC43.getKeyString());
-        AccChart aC45 = addAC(aCDb, pm, fisKeyString, "14-01-02-00", "อาคาร", wAG.getKeyString(), 4, AccType.ENTRY, aC43.getKeyString());
-        AccChart aC46 = addAC(aCDb, pm, fisKeyString, "14-01-03-00", "อุปกรณ์สำนักงาน", wAG.getKeyString(), 4, AccType.ENTRY, aC43.getKeyString());
-        AccChart aC47 = addAC(aCDb, pm, fisKeyString, "14-01-04-00", "ยานพาหนะ", wAG.getKeyString(), 4, AccType.ENTRY, aC43.getKeyString());
-        AccChart aC48 = addAC(aCDb, pm, fisKeyString, "14-02-00-00", "ค่าเสื่อมราคาสะสม", wAG.getKeyString(), 3, AccType.CONTROL, aC42.getKeyString());
-        AccChart aC49 = addAC(aCDb, pm, fisKeyString, "14-02-01-00", "ค่าเสื่อมราคาสะสม-อาคาร", wAG.getKeyString(), 4, AccType.ENTRY, aC48.getKeyString());
-        AccChart aC50 = addAC(aCDb, pm, fisKeyString, "14-02-02-00", "ค่าเสื่อมราคาสะสม-อุปกรณ์สำนักงาน", wAG.getKeyString(), 4, AccType.ENTRY, aC48.getKeyString());
-        AccChart aC51 = addAC(aCDb, pm, fisKeyString, "14-02-03-00", "ค่าเสื่อมราคาสะสม-ยานพาหนะ", wAG.getKeyString(), 4, AccType.ENTRY, aC48.getKeyString());
-        AccChart aC52 = addAC(aCDb, pm, fisKeyString, "15-00-00-00", "สินทรัพย์อื่นๆ", wAG.getKeyString(), 2, AccType.CONTROL, aC1.getKeyString());
-        AccChart aC53 = addAC(aCDb, pm, fisKeyString, "15-01-00-00", "กรมธรรม์ประกันอัคคีภัย-สินค้าและอาคาร", wAG.getKeyString(), 3, AccType.ENTRY, aC52.getKeyString());
-        AccChart aC54 = addAC(aCDb, pm, fisKeyString, "15-02-00-00", "กรมธรรม์ประกันอัคคีภัย-ยานพาหนะ", wAG.getKeyString(), 3, AccType.ENTRY, aC52.getKeyString());
-        AccChart aC55 = addAC(aCDb, pm, fisKeyString, "15-03-00-00", "กรมธรรม์ประกันอุบัติเหตุพนักงาน", wAG.getKeyString(), 3, AccType.ENTRY, aC52.getKeyString());
-        AccChart aC56 = addAC(aCDb, pm, fisKeyString, "15-04-00-00", "พันธบัตรโทรศัพท์", wAG.getKeyString(), 3, AccType.ENTRY, aC52.getKeyString());
+
+        AccChart aC39N = addAC(aCDb, pm, fisKeyString, "12-00-00-00", "สินทรัพย์ไม่หมุนเวียน", wAG.getKeyString(), 2, AccType.CONTROL, aC1.getKeyString());
+        AccChart aC39 = addAC(aCDb, pm, fisKeyString, "12-01-00-00", "ลูกหนี้เงินให้กู้ยืมแก่กรรมการและลูกจ้าง", wAG.getKeyString(), 3, AccType.CONTROL, aC39N.getKeyString());
+        AccChart aC40 = addAC(aCDb, pm, fisKeyString, "12-01-01-00", "ลูกหนี้เงินให้กู้ยืม-นาย...", wAG.getKeyString(), 4, AccType.ENTRY, aC39.getKeyString());
+        AccChart aC41 = addAC(aCDb, pm, fisKeyString, "12-03-00-00", "เงินลงทุนในบริษัทในเครือ", wAG.getKeyString(), 3, AccType.CONTROL, aC39N.getKeyString());
+        AccChart aC42 = addAC(aCDb, pm, fisKeyString, "12-04-00-00", "ที่ดิน อาคารและอุปกรณ์สิทธิ", wAG.getKeyString(), 3, AccType.CONTROL, aC39N.getKeyString());
+        AccChart aC43 = addAC(aCDb, pm, fisKeyString, "12-04-01-00", "ที่ดิน อาคาร ยานพาหนะและอุปกรณ์สิทธิ", wAG.getKeyString(), 4, AccType.CONTROL, aC42.getKeyString());
+        AccChart aC44 = addAC(aCDb, pm, fisKeyString, "12-04-01-01", "ที่ดิน", wAG.getKeyString(), 5, AccType.ENTRY, aC43.getKeyString());
+        AccChart aC45 = addAC(aCDb, pm, fisKeyString, "12-04-01-02", "อาคาร", wAG.getKeyString(), 5, AccType.ENTRY, aC43.getKeyString());
+        AccChart aC46 = addAC(aCDb, pm, fisKeyString, "12-04-01-03", "อุปกรณ์สำนักงาน", wAG.getKeyString(), 5, AccType.ENTRY, aC43.getKeyString());
+        AccChart aC47 = addAC(aCDb, pm, fisKeyString, "12-04-01-04", "ยานพาหนะ", wAG.getKeyString(), 5, AccType.ENTRY, aC43.getKeyString());
+        AccChart aC48 = addAC(aCDb, pm, fisKeyString, "12-04-02-00", "ค่าเสื่อมราคาสะสม", wAG.getKeyString(), 4, AccType.CONTROL, aC42.getKeyString());
+        AccChart aC49 = addAC(aCDb, pm, fisKeyString, "12-04-02-01", "ค่าเสื่อมราคาสะสม-อาคาร", wAG.getKeyString(), 5, AccType.ENTRY, aC48.getKeyString());
+        AccChart aC50 = addAC(aCDb, pm, fisKeyString, "12-04-02-02", "ค่าเสื่อมราคาสะสม-อุปกรณ์สำนักงาน", wAG.getKeyString(), 5, AccType.ENTRY, aC48.getKeyString());
+        AccChart aC51 = addAC(aCDb, pm, fisKeyString, "12-04-02-03", "ค่าเสื่อมราคาสะสม-ยานพาหนะ", wAG.getKeyString(), 5, AccType.ENTRY, aC48.getKeyString());
+        AccChart aC52 = addAC(aCDb, pm, fisKeyString, "12-05-00-00", "สินทรัพย์อื่นๆ", wAG.getKeyString(), 3, AccType.CONTROL, aC39N.getKeyString());
+        AccChart aC53 = addAC(aCDb, pm, fisKeyString, "12-05-01-00", "กรมธรรม์ประกันอัคคีภัย-สินค้าและอาคาร", wAG.getKeyString(), 4, AccType.ENTRY, aC52.getKeyString());
+        AccChart aC54 = addAC(aCDb, pm, fisKeyString, "12-05-02-00", "กรมธรรม์ประกันอัคคีภัย-ยานพาหนะ", wAG.getKeyString(), 4, AccType.ENTRY, aC52.getKeyString());
+        AccChart aC55 = addAC(aCDb, pm, fisKeyString, "12-05-03-00", "กรมธรรม์ประกันอุบัติเหตุพนักงาน", wAG.getKeyString(), 4, AccType.ENTRY, aC52.getKeyString());
+        AccChart aC56 = addAC(aCDb, pm, fisKeyString, "12-05-04-00", "พันธบัตรโทรศัพท์", wAG.getKeyString(), 4, AccType.ENTRY, aC52.getKeyString());
         
         AccChart aC57 = addAC(aCDb, pm, fisKeyString, "20-00-00-00", "หนี้สิน", dAG.getKeyString(), 1, AccType.CONTROL, null);
         AccChart aC58 = addAC(aCDb, pm, fisKeyString, "21-00-00-00", "หนี้สินหมุนเวียน", dAG.getKeyString(), 2, AccType.CONTROL, aC57.getKeyString());
@@ -273,9 +218,11 @@ public class CreateSetup {
         AccChart aC72 = addAC(aCDb, pm, fisKeyString, "22-01-00-00", "หนี้สินอื่นๆ", dAG.getKeyString(), 3, AccType.ENTRY, aC71.getKeyString());
         
         AccChart aC73 = addAC(aCDb, pm, fisKeyString, "30-00-00-00", "ส่วนของผู้ถือหุ้น", fAG.getKeyString(), 1, AccType.CONTROL, null);
-        AccChart aC74 = addAC(aCDb, pm, fisKeyString, "31-00-00-00", "ทุน", fAG.getKeyString(), 2, AccType.ENTRY, aC73.getKeyString());
+        AccChart aC74 = addAC(aCDb, pm, fisKeyString, "31-00-00-00", "ทุน", fAG.getKeyString(), 2, AccType.CONTROL, aC73.getKeyString());
+        AccChart aC74_1 = addAC(aCDb, pm, fisKeyString, "31-00-00-01", "ทุน-นาย ก.", fAG.getKeyString(), 3, AccType.ENTRY, aC74.getKeyString());
+        AccChart aC74_2 = addAC(aCDb, pm, fisKeyString, "31-00-00-02", "ทุน-นาย ข.", fAG.getKeyString(), 3, AccType.ENTRY, aC74.getKeyString());
         AccChart aC75 = addAC(aCDb, pm, fisKeyString, "32-00-00-00", "กำไร(ขาดทุน)สะสม", fAG.getKeyString(), 2, AccType.ENTRY, aC73.getKeyString());
-        AccChart aC76 = addAC(aCDb, pm, fisKeyString, "33-00-00-00", "กำไร(ขาดทุน)", fAG.getKeyString(), 2, AccType.ENTRY, aC73.getKeyString());
+        //AccChart aC76 = addAC(aCDb, pm, fisKeyString, "33-00-00-00", "กำไร(ขาดทุน)", fAG.getKeyString(), 2, AccType.ENTRY, aC73.getKeyString());
         
         AccChart aC77 = addAC(aCDb, pm, fisKeyString, "40-00-00-00", "รายได้", rAG.getKeyString(), 1, AccType.CONTROL, null);
         AccChart aC78 = addAC(aCDb, pm, fisKeyString, "41-00-00-00", "รายได้จากการขายสินค้า-สุทธิ", rAG.getKeyString(), 2, AccType.CONTROL, aC77.getKeyString());
@@ -331,141 +278,148 @@ public class CreateSetup {
         AccChart aC127 = addAC(aCDb, pm, fisKeyString, "53-04-02-00", "ค่าประกันอุบัติเหตุ", eAG.getKeyString(), 4, AccType.ENTRY, aC125.getKeyString());
         AccChart aC128 = addAC(aCDb, pm, fisKeyString, "53-05-00-00", "ค่าใช้จ่ายอื่นๆ", eAG.getKeyString(), 3, AccType.CONTROL, aC106.getKeyString());
         AccChart aC129 = addAC(aCDb, pm, fisKeyString, "53-05-01-00", "ดอกเบี้ยจ่าย", eAG.getKeyString(), 4, AccType.ENTRY, aC128.getKeyString());
-        AccChart aC130 = addAC(aCDb, pm, fisKeyString, "53-05-01-00", "ค่าใช้จ่ายเบ็ดเตล็ด", eAG.getKeyString(), 4, AccType.ENTRY, aC128.getKeyString());
-        AccChart aC131 = addAC(aCDb, pm, fisKeyString, "53-05-01-00", "ส่วนลดเงินสดจ่าย", eAG.getKeyString(), 4, AccType.ENTRY, aC128.getKeyString());
-        AccChart aC132 = addAC(aCDb, pm, fisKeyString, "53-05-01-00", "ค่ารับรอง", eAG.getKeyString(), 4, AccType.ENTRY, aC128.getKeyString());
-        AccChart aC133 = addAC(aCDb, pm, fisKeyString, "53-05-01-00", "ค่าการกุศล", eAG.getKeyString(), 4, AccType.ENTRY, aC128.getKeyString());
-        AccChart aC134 = addAC(aCDb, pm, fisKeyString, "53-05-01-00", "ค่ารับรองลูกค้า", eAG.getKeyString(), 4, AccType.ENTRY, aC128.getKeyString());
-        
-        SFinHeader sBal = new SFinHeader(null, "งบดุล", d);
-        addFinItem(sBal, 100, Comm.TXT, "สินทรัพย์", CalCon.CAL, PrintCon.PRINT, PrintStyle.CENTER, Operand.BLANK, Operand.BLANK, Operand.BLANK, Operand.BLANK);
-        addFinItem(sBal, 120, Comm.TXT, "สินทรัพย์หมุนเวียน", CalCon.CAL, PrintCon.PRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.BLANK, Operand.BLANK);
-        addFinItem(sBal, 130, Comm.ACCNO, aC4.getKeyString(), CalCon.CAL, PrintCon.NOIFZERO, PrintStyle.BLANK, Operand.PLUS, Operand.BLANK, Operand.BLANK, Operand.BLANK);
-        addFinItem(sBal, 141, Comm.ACCNO, aC6.getKeyString(), CalCon.CALIFPOS, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 142, Comm.ACCNO, aC7.getKeyString(), CalCon.CALIFPOS, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 143, Comm.ACCNO, aC8.getKeyString(), CalCon.CALIFPOS, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 151, Comm.ACCNO, aC10.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 152, Comm.ACCNO, aC11.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 153, Comm.ACCNO, aC12.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 161, Comm.ACCNO, aC14.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 162, Comm.ACCNO, aC15.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 163, Comm.ACCNO, aC16.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 170, Comm.PVAR3, "เงินฝากธนาคาร", CalCon.CAL, PrintCon.NOIFZERO, PrintStyle.BLANK, Operand.PLUS, Operand.BLANK, Operand.CLEAR, Operand.BLANK);
-        addFinItem(sBal, 181, Comm.ACCNO, aC18.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 182, Comm.ACCNO, aC19.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 183, Comm.ACCNO, aC20.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 184, Comm.ACCNO, aC21.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 190, Comm.PVAR3, "ลูกหนี้และตั๋วเงินรับ", CalCon.CAL, PrintCon.NOIFZERO, PrintStyle.BLANK, Operand.PLUS, Operand.BLANK, Operand.CLEAR, Operand.BLANK);
-        addFinItem(sBal, 201, Comm.ACCNO, aC23.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 202, Comm.ACCNO, aC24.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 203, Comm.ACCNO, aC25.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 210, Comm.PVAR3, "สินค้าคงเหลือ", CalCon.CAL, PrintCon.NOIFZERO, PrintStyle.BLANK, Operand.PLUS, Operand.BLANK, Operand.CLEAR, Operand.BLANK);
-        addFinItem(sBal, 221, Comm.ACCNO, aC28.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 222, Comm.ACCNO, aC29.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 223, Comm.ACCNO, aC30.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 224, Comm.ACCNO, aC31.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 225, Comm.ACCNO, aC32.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 226, Comm.ACCNO, aC34.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 227, Comm.ACCNO, aC35.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 228, Comm.ACCNO, aC36.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 229, Comm.ACCNO, aC37.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 230, Comm.ACCNO, aC38.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 240, Comm.PVAR3, "สินทรัพย์หมุนเวียนอื่นๆ", CalCon.CAL, PrintCon.NOIFZERO, PrintStyle.ULINE, Operand.PLUS, Operand.BLANK, Operand.CLEAR, Operand.BLANK);
-        addFinItem(sBal, 250, Comm.PVAR1, "รวมสินทรัพย์หมุนเวียน", CalCon.CAL, PrintCon.PRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.BLANK, Operand.BLANK);
-        addFinItem(sBal, 261, Comm.ACCNO, aC44.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 262, Comm.ACCNO, aC45.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 263, Comm.ACCNO, aC46.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 264, Comm.ACCNO, aC47.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 265, Comm.ACCNO, aC49.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 266, Comm.ACCNO, aC50.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 267, Comm.ACCNO, aC51.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 270, Comm.PVAR3, "ที่ดิน อาคารและอุปกรณ์", CalCon.CAL, PrintCon.NOIFZERO, PrintStyle.ULINE, Operand.PLUS, Operand.BLANK, Operand.CLEAR, Operand.BLANK);
-        addFinItem(sBal, 280, Comm.PVAR1, "รวมสินทรัพย์", CalCon.CAL, PrintCon.PRINT, PrintStyle.TWOULINES, Operand.CLEAR, Operand.BLANK, Operand.BLANK, Operand.BLANK);
-        
-        addFinItem(sBal, 290, Comm.TXT, "หนี้สินและส่วนของผู้ถือหุ้น", CalCon.CAL, PrintCon.PRINT, PrintStyle.CENTER, Operand.BLANK, Operand.BLANK, Operand.BLANK, Operand.BLANK);
-        addFinItem(sBal, 300, Comm.TXT, "หนี้สินหมุนเวียน", CalCon.CAL, PrintCon.PRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.BLANK, Operand.BLANK);
-        addFinItem(sBal, 311, Comm.ACCNO, aC6.getKeyString(), CalCon.CALIFNE, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 312, Comm.ACCNO, aC7.getKeyString(), CalCon.CALIFNE, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 313, Comm.ACCNO, aC8.getKeyString(), CalCon.CALIFNE, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 320, Comm.PVAR3, "เงินเบิกเกินบัญชี    999-9-99999-1", CalCon.CAL, PrintCon.NOIFZERO, PrintStyle.BLANK, Operand.PLUS, Operand.BLANK, Operand.CLEAR, Operand.BLANK);
-        addFinItem(sBal, 331, Comm.ACCNO, aC60.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 332, Comm.ACCNO, aC61.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 340, Comm.PVAR3, "เจ้าหนี้การค้าและตั๋วจ่ายเงิน", CalCon.CAL, PrintCon.NOIFZERO, PrintStyle.BLANK, Operand.PLUS, Operand.BLANK, Operand.CLEAR, Operand.BLANK);
-        addFinItem(sBal, 351, Comm.ACCNO, aC64.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 352, Comm.ACCNO, aC65.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 353, Comm.ACCNO, aC66.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 354, Comm.ACCNO, aC67.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 355, Comm.ACCNO, aC68.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 356, Comm.ACCNO, aC69.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 357, Comm.ACCNO, aC70.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 360, Comm.PVAR3, "หนี้สินหมุนเวียนอื่นๆ", CalCon.CAL, PrintCon.PRINT, PrintStyle.ULINE, Operand.PLUS, Operand.BLANK, Operand.CLEAR, Operand.BLANK);
-        addFinItem(sBal, 370, Comm.PVAR1, "รวมหนี้สินหมุนเวียน", CalCon.CAL, PrintCon.PRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.BLANK, Operand.BLANK);
-        addFinItem(sBal, 380, Comm.TXT, " ", CalCon.CAL, PrintCon.PRINT, PrintStyle.ULINE, Operand.BLANK, Operand.BLANK, Operand.BLANK, Operand.BLANK);
-        addFinItem(sBal, 390, Comm.PVAR1, "รวมหนี้สินหมุนเวียน", CalCon.CAL, PrintCon.PRINT, PrintStyle.ULINE, Operand.BLANK, Operand.BLANK, Operand.BLANK, Operand.BLANK);
-        addFinItem(sBal, 400, Comm.TXT, "ส่วนของผู้ถือหุ้น", CalCon.CAL, PrintCon.PRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.BLANK, Operand.BLANK);
-        addFinItem(sBal, 411, Comm.ACCNO, aC74.getKeyString(), CalCon.CAL, PrintCon.PRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 412, Comm.ACCNO, aC75.getKeyString(), CalCon.CAL, PrintCon.PRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 413, Comm.ACCNO, aC76.getKeyString(), CalCon.CAL, PrintCon.PRINT, PrintStyle.ULINE, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sBal, 420, Comm.PVAR3, "รวมส่วนของผู้ถือหุ้น", CalCon.CAL, PrintCon.PRINT, PrintStyle.ULINE, Operand.PLUS, Operand.BLANK, Operand.CLEAR, Operand.BLANK);
-        addFinItem(sBal, 430, Comm.PVAR1, "รวมหนี้สินและส่วนของผู้ถือหุ้น", CalCon.CAL, PrintCon.PRINT, PrintStyle.TWOULINES, Operand.CLEAR, Operand.BLANK, Operand.BLANK, Operand.BLANK);
-        
-        FinHeader bal = Db.addFinHeader(pm, fisKeyString, sBal);
-        
-        SFinHeader sPro = new SFinHeader(null, "งบกำไรขาดทุน", d);
-        addFinItem(sPro, 100, Comm.TXT, "รายได้", CalCon.CAL, PrintCon.PRINT, PrintStyle.CENTER, Operand.BLANK, Operand.BLANK, Operand.BLANK, Operand.BLANK);
-        addFinItem(sPro, 111, Comm.ACCNO, aC79.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sPro, 112, Comm.ACCNO, aC80.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sPro, 113, Comm.ACCNO, aC81.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sPro, 120, Comm.PVAR3, "รายได้จากการขาย", CalCon.CAL, PrintCon.PRINT, PrintStyle.BLANK, Operand.PLUS, Operand.BLANK, Operand.CLEAR, Operand.BLANK);
-        addFinItem(sPro, 131, Comm.ACCNO, aC83.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sPro, 132, Comm.ACCNO, aC84.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sPro, 133, Comm.ACCNO, aC85.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sPro, 134, Comm.ACCNO, aC86.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sPro, 135, Comm.ACCNO, aC87.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sPro, 136, Comm.ACCNO, aC88.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sPro, 137, Comm.ACCNO, aC89.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sPro, 138, Comm.ACCNO, aC90.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sPro, 140, Comm.PVAR3, "รายได้อื่นๆ", CalCon.CAL, PrintCon.PRINT, PrintStyle.ULINE, Operand.PLUS, Operand.BLANK, Operand.CLEAR, Operand.BLANK);
-        addFinItem(sPro, 150, Comm.PVAR1, "รวมรายได้", CalCon.CAL, PrintCon.PRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.BLANK, Operand.BLANK);
-        addFinItem(sPro, 160, Comm.TXT, "ค่าใช้จ่าย", CalCon.CAL, PrintCon.PRINT, PrintStyle.CENTER, Operand.BLANK, Operand.BLANK, Operand.BLANK, Operand.BLANK);
-        addFinItem(sPro, 171, Comm.ACCNO, aC93.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sPro, 172, Comm.ACCNO, aC95.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sPro, 173, Comm.ACCNO, aC96.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sPro, 174, Comm.ACCNO, aC97.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sPro, 175, Comm.ACCNO, aC98.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sPro, 180, Comm.PVAR3, "ต้นทุนขายสุทธิ", CalCon.CAL, PrintCon.PRINT, PrintStyle.BLANK, Operand.BLANK, Operand.PLUS, Operand.CLEAR, Operand.BLANK);
-        addFinItem(sPro, 191, Comm.ACCNO, aC100.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sPro, 192, Comm.ACCNO, aC101.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sPro, 193, Comm.ACCNO, aC102.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sPro, 194, Comm.ACCNO, aC103.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sPro, 195, Comm.ACCNO, aC104.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sPro, 196, Comm.ACCNO, aC105.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sPro, 200, Comm.PVAR3, "ค่าใช้จ่ายในการขาย", CalCon.CAL, PrintCon.PRINT, PrintStyle.BLANK, Operand.BLANK, Operand.PLUS, Operand.CLEAR, Operand.BLANK);
-        addFinItem(sPro, 210, Comm.TXT, "ค่าใช้จ่ายในการบริหาร", CalCon.CAL, PrintCon.PRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.BLANK, Operand.BLANK);
-        addFinItem(sPro, 221, Comm.ACCNO, aC108.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sPro, 222, Comm.ACCNO, aC109.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sPro, 223, Comm.ACCNO, aC110.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sPro, 224, Comm.ACCNO, aC111.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sPro, 225, Comm.ACCNO, aC112.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sPro, 230, Comm.PVAR3, "ค่าใช้จ่ายเกี่ยวกับพนักงาน", CalCon.CAL, PrintCon.PRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.CLEAR, Operand.PLUS);
-        addFinItem(sPro, 241, Comm.ACCNO, aC119.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sPro, 242, Comm.ACCNO, aC120.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sPro, 243, Comm.ACCNO, aC121.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sPro, 244, Comm.ACCNO, aC122.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sPro, 245, Comm.ACCNO, aC123.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sPro, 246, Comm.ACCNO, aC124.getKeyString(), CalCon.CAL, PrintCon.NOPRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK);
-        addFinItem(sPro, 250, Comm.PVAR3, "ค่าใช้จ่ายสำนักงาน", CalCon.CAL, PrintCon.PRINT, PrintStyle.BLANK, Operand.BLANK, Operand.BLANK, Operand.CLEAR, Operand.PLUS);
-        addFinItem(sPro, 260, Comm.PVAR4, "รวมค่าใช้จ่ายในการบริหาร", CalCon.CAL, PrintCon.PRINT, PrintStyle.BLANK, Operand.BLANK, Operand.PLUS, Operand.BLANK, Operand.CLEAR);
-        addFinItem(sPro, 270, Comm.PVAR2, "รวมค่าใช้จ่าย", CalCon.CAL, PrintCon.PRINT, PrintStyle.BLANK, Operand.MINUS, Operand.CLEAR, Operand.BLANK, Operand.BLANK);
-        addFinItem(sPro, 280, Comm.PVAR1, "กำไร (ขาดทุน)", CalCon.CAL, PrintCon.PRINT, PrintStyle.BLANK, Operand.CLEAR, Operand.BLANK, Operand.BLANK, Operand.BLANK);
-        
-        FinHeader pro = Db.addFinHeader(pm, fisKeyString, sPro);
+        AccChart aC130 = addAC(aCDb, pm, fisKeyString, "53-05-02-00", "ค่าใช้จ่ายเบ็ดเตล็ด", eAG.getKeyString(), 4, AccType.ENTRY, aC128.getKeyString());
+        AccChart aC131 = addAC(aCDb, pm, fisKeyString, "53-05-03-00", "ส่วนลดเงินสดจ่าย", eAG.getKeyString(), 4, AccType.ENTRY, aC128.getKeyString());
+        AccChart aC132 = addAC(aCDb, pm, fisKeyString, "53-05-04-00", "ค่ารับรอง", eAG.getKeyString(), 4, AccType.ENTRY, aC128.getKeyString());
+        AccChart aC133 = addAC(aCDb, pm, fisKeyString, "53-05-05-00", "ค่าการกุศล", eAG.getKeyString(), 4, AccType.ENTRY, aC128.getKeyString());
+        AccChart aC134 = addAC(aCDb, pm, fisKeyString, "53-05-06-00", "ค่ารับรองลูกค้า", eAG.getKeyString(), 4, AccType.ENTRY, aC128.getKeyString());
     }
-    
-    private static void addFinItem(SFinHeader sFin, int seq, Comm comm, String arg, CalCon calCon, PrintCon printCon, PrintStyle printStyle, 
-            Operand var1, Operand var2, Operand var3, Operand var4){
-        SFinItem sFinItem = new SFinItem(null, seq, comm, arg, calCon, printCon, printStyle, var1, var2, var3, var4);
-        sFin.addSFinItem(sFinItem);
+
+    public static void createFromPrev(PersistenceManager pm,
+            String comKeyString, String fisKeyString) {
+        // Retrieve existing fiscal years
+        List<Key> comKeyList = new ArrayList<Key>();
+        comKeyList.add(KeyFactory.stringToKey(comKeyString));
+        List<FiscalYear> dbFisList = Db.getFiscalYears(pm, comKeyList);
+
+        // Get the latest one
+        FiscalYear dbFis = null;
+        for (FiscalYear fis : dbFisList) {
+            if (!fis.getKeyString().equals(fisKeyString)){
+                if (dbFis == null) {
+                    dbFis = fis;
+                } else {
+                    if (Utils.compareDate(1, fis.getBeginMonth(),
+                            fis.getBeginYear(), 30, dbFis.getBeginMonth(),
+                            dbFis.getBeginYear()) > 0) {
+                        dbFis = fis;
+                    }
+                }
+            }
+        }
+        
+        // copy setups to this fiscal year
+        if (dbFis != null) {
+
+            Date d = new Date();
+            
+            String dbFisKeyString = dbFis.getKeyString();
+            SFiscalYear sDbFis = Db.getSetup(pm, dbFisKeyString);
+
+            ArrayList<JournalType> jTList = new ArrayList<JournalType>();
+            ArrayList<DocType> dTList = new ArrayList<DocType>();
+            ArrayList<AccGroup> aGList = new ArrayList<AccGroup>();
+            ArrayList<AccChart> aCList = new ArrayList<AccChart>();
+
+            Db<JournalType> jTDb = new Db<JournalType>();
+            for(SJournalType sJT : sDbFis.getSJournalTypeList()){
+                jTList.add(addJT(jTDb, pm, fisKeyString, sJT.getName(), 
+                        sJT.getShortName(), d));
+            }
+            
+            Db<DocType> dTDb = new Db<DocType>();
+            for(SDocType sDT : sDbFis.getSDocTypeList()){
+                
+                String jTName = null;
+                for (SJournalType sJT : sDbFis.getSJournalTypeList()) {
+                    if (sJT.getKeyString().equals(sDT.getJournalTypeKeyString())) {
+                        jTName = sJT.getName();
+                        break;
+                    }
+                }
+                
+                String jTKeyString = null;
+                for (JournalType jT : jTList) {
+                    if (jT.getName().equals(jTName)){
+                        jTKeyString = jT.getKeyString();
+                    }
+                }
+                
+                dTList.add(addDT(dTDb, pm, fisKeyString, jTKeyString,
+                        sDT.getCode(), sDT.getName(),
+                        sDT.getJournalDesc(), d));
+            }
+            
+            Db<AccGroup> aGDb = new Db<AccGroup>();
+            for(SAccGrp sAG : sDbFis.getSAccGrpList()){
+                aGList.add(addAG(aGDb, pm, fisKeyString, sAG.getName(), d));
+            }
+
+            // Need to sort first to make sure that parents are created before children
+            sDbFis.sortSAccChartList();
+            Db<AccChart> aCDb = new Db<AccChart>();
+            for(SAccChart sAC : sDbFis.getSAccChartList()){
+                String aGName = null;
+                for (SAccGrp sAG : sDbFis.getSAccGrpList()) {
+                    if (sAG.getKeyString().equals(sAC.getAccGroupKeyString())) {
+                        aGName = sAG.getName();
+                    }
+                }
+                String aGKeyString = null;
+                for (AccGroup aG : aGList) {
+                    if (aG.getName().equals(aGName)) {
+                        aGKeyString = aG.getKeyString();
+                    }
+                }
+
+                String parentACNo = null;
+                for (SAccChart sParentAC : sDbFis.getSAccChartList()) {
+                    if (sParentAC.getKeyString().equals(
+                            sAC.getParentAccChartKeyString())) {
+                        parentACNo = sParentAC.getNo();
+                    }
+                }
+                String parentACKeyString = null;
+                for (AccChart aC : aCList) {
+                    if (aC.getNo().equals(parentACNo)) {
+                        parentACKeyString = aC.getKeyString();
+                    }
+                }
+                
+                aCList.add(addAC(aCDb, pm, fisKeyString, sAC.getNo(), sAC.getName(),
+                        aGKeyString, sAC.getLevel(),
+                        sAC.getType(), parentACKeyString));
+            }
+            
+            for(SFinHeader sFH : sDbFis.getSFinHeaderList()){
+                SFinHeader sNewFH = new SFinHeader(null,
+                        sFH.getName(), d);
+                
+                for(SFinItem sFI : sFH.getSFinItemList()){
+                    String arg = sFI.getArg();
+                    if (sFI.getComm() == Comm.ACCNO) {
+                        String aCNo = null;
+                        for (SAccChart sAC : sDbFis.getSAccChartList()) {
+                            if (sAC.getKeyString().equals(arg)) {
+                                aCNo = sAC.getNo();
+                            }
+                        }
+                        
+                        for (AccChart ac : aCList) {
+                            if (ac.getNo().equals(aCNo)) {
+                                arg = ac.getKeyString();
+                            }
+                        }
+                    }
+                    addFinItem(sNewFH, sFI.getSeq(), sFI.getComm(),
+                            arg,  sFI.getCalCon(), sFI.getPrintCon(),
+                            sFI.getPrintStyle(), sFI.getVar1(), 
+                            sFI.getVar2(), sFI.getVar3(), sFI.getVar4());
+                }
+                
+                Db.addFinHeader(pm, fisKeyString, sNewFH);
+            }
+        }
     }
 
     private static JournalType addJT(Db<JournalType> jTDb, PersistenceManager pm, final String fisKeyString, final String name, 
@@ -480,7 +434,8 @@ public class CreateSetup {
         return jT;
     }
 
-    private static DocType addDT(Db<DocType> dTDb, PersistenceManager pm, final String fisKeyString, final String jTKeyString, final String code, 
+    private static DocType addDT(Db<DocType> dTDb, PersistenceManager pm,
+            final String fisKeyString, final String jTKeyString, final String code, 
             final String name, final String jDesc, final Date d){
         DocType dT = dTDb.add(pm, new DbAddCallback<DocType>() {
             @Override
@@ -512,5 +467,12 @@ public class CreateSetup {
             }
         });
         return aC;
+    }
+
+    private static void addFinItem(SFinHeader sFin, int seq, Comm comm, String arg,
+            CalCon calCon, PrintCon printCon, PrintStyle printStyle, 
+            Operand var1, Operand var2, Operand var3, Operand var4){
+        SFinItem sFinItem = new SFinItem(null, seq, comm, arg, calCon, printCon, printStyle, var1, var2, var3, var4);
+        sFin.addSFinItem(sFinItem);
     }
 }

@@ -57,15 +57,24 @@ public class AccGrpActivity extends AbstractActivity implements AccGrpView.Prese
     }
     
     @Override
+    public boolean isAccGrpNameDuplicate(String keyString, String name) {
+        return clientFactory.getModel().isAccGrpNameDuplicate(
+                place.getComKeyString(), place.getFisKeyString(),
+                keyString, name);
+    }
+    
+    @Override
     public void addAccGrp(String name) {
         
         SAccGrp sAccGrp = new SAccGrp(null, name, new Date());
-        
+
+        clientFactory.getShell().setLoading();
         clientFactory.getModel().addAccGrp(place.getComKeyString(),
                 place.getFisKeyString(), sAccGrp, new AsyncCallback<String>() {
             @Override
             public void onFailure(Throwable caught) {
                 Window.alert(caught.getMessage());
+                setAddAccGrpShell();
             }
             @Override
             public void onSuccess(String result) {
@@ -79,12 +88,14 @@ public class AccGrpActivity extends AbstractActivity implements AccGrpView.Prese
     public void editAccGrp(String keyString,  String name) {
         
         SAccGrp sAccGrp = new SAccGrp(keyString, name, null);
-        
+
+        clientFactory.getShell().setLoading();
         clientFactory.getModel().editAccGrp(place.getComKeyString(),
                 place.getFisKeyString(), sAccGrp, new AsyncCallback<String>() {
             @Override
             public void onFailure(Throwable caught) {
                 Window.alert(caught.getMessage());
+                setEditAccGrpShell();
             }
             @Override
             public void onSuccess(String result) {
@@ -118,10 +129,7 @@ public class AccGrpActivity extends AbstractActivity implements AccGrpView.Prese
         assert(comKeyString != null && fisKeyString != null);
         
         // 1. set Shell
-        clientFactory.getShell().reset();
-        clientFactory.getShell().setHLb(constants.accGrp() + ": " + constants.createNew());
-        clientFactory.getShell().setActBtn(0, constants.save(), ActionNames.OK, true);
-        clientFactory.getShell().setActBtn(1, constants.cancel(), ActionNames.CANCEL, true);
+        setAddAccGrpShell();
         
         // 2. add Shell handlers via EventBus
         ActionEvent.register(eventBus, ActionNames.OK, new ActionEvent.Handler(){
@@ -155,16 +163,20 @@ public class AccGrpActivity extends AbstractActivity implements AccGrpView.Prese
         });
     }
     
+    private void setAddAccGrpShell() {
+        clientFactory.getShell().reset();
+        clientFactory.getShell().setHLb(constants.accGrp() + ": " + constants.createNew());
+        clientFactory.getShell().setActBtn(0, constants.save(), ActionNames.OK, true);
+        clientFactory.getShell().setActBtn(1, constants.cancel(), ActionNames.CANCEL, true);
+    }
+    
     private void setEditAccGrp(final String comKeyString, final String fisKeyString,
             final String accGrpKeyString){
         
         assert(comKeyString != null && fisKeyString != null && accGrpKeyString != null);
         
         // 1. set Shell
-        clientFactory.getShell().reset();
-        clientFactory.getShell().setHLb(constants.accGrp() + ": " + constants.edit());
-        clientFactory.getShell().setActBtn(0, constants.save(), ActionNames.OK, true);
-        clientFactory.getShell().setActBtn(1, constants.cancel(), ActionNames.CANCEL, true);
+        setEditAccGrpShell();
         
         // 2. add Shell handlers via EventBus
         ActionEvent.register(eventBus, ActionNames.OK, new ActionEvent.Handler(){
@@ -198,6 +210,13 @@ public class AccGrpActivity extends AbstractActivity implements AccGrpView.Prese
                         true);
             }
         });
+    }
+    
+    private void setEditAccGrpShell() {
+        clientFactory.getShell().reset();
+        clientFactory.getShell().setHLb(constants.accGrp() + ": " + constants.edit());
+        clientFactory.getShell().setActBtn(0, constants.save(), ActionNames.OK, true);
+        clientFactory.getShell().setActBtn(1, constants.cancel(), ActionNames.CANCEL, true);
     }
     
     private void setViewAccGrp(final String comKeyString, final String fisKeyString,

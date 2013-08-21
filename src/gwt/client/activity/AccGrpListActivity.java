@@ -46,6 +46,7 @@ public class AccGrpListActivity extends AbstractActivity implements ListView.Pre
 
     @Override
     public String mayStop() {
+        clientFactory.getAccGrpListView().saveFirstVisibleIndex();
         return null;
     }
 

@@ -55,16 +55,25 @@ public class JournalTypeActivity extends AbstractActivity implements JournalType
     public void onStop() {
         eventBus.removeHandlers();
     }
+
+    @Override
+    public boolean isJournalTypeNameDuplicate(String keyString, String name) {
+        return clientFactory.getModel().isJournalTypeNameDuplicate(
+                place.getComKeyString(), place.getFisKeyString(),
+                keyString, name);
+    }
     
     @Override
     public void addJournalType(String desc, String shortDesc) {
         
         SJournalType sJournalType = new SJournalType(null, desc, shortDesc, new Date());
-        
+
+        clientFactory.getShell().setLoading();
         clientFactory.getModel().addJournalType(place.getComKeyString(), place.getFisKeyString(), sJournalType, new AsyncCallback<String>() {
             @Override
             public void onFailure(Throwable caught) {
                 Window.alert(caught.getMessage());
+                setAddJournalTypeShell();
             }
             @Override
             public void onSuccess(String result) {
@@ -77,11 +86,13 @@ public class JournalTypeActivity extends AbstractActivity implements JournalType
     public void editJournalType(String keyString, String desc, String shortDesc) {
         
         SJournalType sJournalType = new SJournalType(keyString, desc, shortDesc, null);
-        
+
+        clientFactory.getShell().setLoading();
         clientFactory.getModel().editJournalType(place.getComKeyString(), place.getFisKeyString(), sJournalType, new AsyncCallback<String>() {
             @Override
             public void onFailure(Throwable caught) {
                 Window.alert(caught.getMessage());
+                setEditJournalTypeShell();
             }
             @Override
             public void onSuccess(String result) {
@@ -111,10 +122,7 @@ public class JournalTypeActivity extends AbstractActivity implements JournalType
         assert(comKeyString != null && fisKeyString != null);
         
         // 1. set Shell
-        clientFactory.getShell().reset();
-        clientFactory.getShell().setHLb(constants.journalType() + ": " + constants.createNew());
-        clientFactory.getShell().setActBtn(0, constants.save(), ActionNames.OK, true);
-        clientFactory.getShell().setActBtn(1, constants.cancel(), ActionNames.CANCEL, true);
+        setAddJournalTypeShell();
         
         // 2. add Shell handlers via EventBus
         ActionEvent.register(eventBus, ActionNames.OK, new ActionEvent.Handler(){
@@ -148,6 +156,13 @@ public class JournalTypeActivity extends AbstractActivity implements JournalType
         });
     }
     
+    private void setAddJournalTypeShell() {
+        clientFactory.getShell().reset();
+        clientFactory.getShell().setHLb(constants.journalType() + ": " + constants.createNew());
+        clientFactory.getShell().setActBtn(0, constants.save(), ActionNames.OK, true);
+        clientFactory.getShell().setActBtn(1, constants.cancel(), ActionNames.CANCEL, true);
+    }
+    
     private void setEditJournalType(final String comKeyString,
             final String fisKeyString, final String journalTypeKeyString){
         
@@ -155,10 +170,7 @@ public class JournalTypeActivity extends AbstractActivity implements JournalType
                 && journalTypeKeyString != null);
         
         // 1. set Shell
-        clientFactory.getShell().reset();
-        clientFactory.getShell().setHLb(constants.journalType() + ": " + constants.edit());
-        clientFactory.getShell().setActBtn(0, constants.save(), ActionNames.OK, true);
-        clientFactory.getShell().setActBtn(1, constants.cancel(), ActionNames.CANCEL, true);
+        setEditJournalTypeShell();
         
         // 2. add Shell handlers via EventBus
         ActionEvent.register(eventBus, ActionNames.OK, new ActionEvent.Handler(){
@@ -192,6 +204,13 @@ public class JournalTypeActivity extends AbstractActivity implements JournalType
                         journalTypeKeyString, true);
             }
         });
+    }
+    
+    private void setEditJournalTypeShell() {
+        clientFactory.getShell().reset();
+        clientFactory.getShell().setHLb(constants.journalType() + ": " + constants.edit());
+        clientFactory.getShell().setActBtn(0, constants.save(), ActionNames.OK, true);
+        clientFactory.getShell().setActBtn(1, constants.cancel(), ActionNames.CANCEL, true);
     }
     
     private void setViewJournalType(final String comKeyString,

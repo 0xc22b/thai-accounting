@@ -55,8 +55,7 @@ public class ReportActivity extends AbstractActivity implements ReportView.Prese
     
     private void getData(){
         // 1. Waiting for getting data
-        clientFactory.getShell().reset();
-        clientFactory.getShell().setHLb(constants.loading());
+        clientFactory.getShell().setLoading();
         
         // 2. Get data
         clientFactory.getModel().getCom(place.getComKeyString(),
@@ -119,25 +118,43 @@ public class ReportActivity extends AbstractActivity implements ReportView.Prese
         // some cases ask period!
         String action = place.getAction();
         
-        if(action.equals(AllPlace.CHART)){
+        if (action.equals(AllPlace.CHART)) {
             clientFactory.getReportView().setChartData(sFis, comName);
-        }else if(action.equals(AllPlace.JOUR)){
+        } else if (action.equals(AllPlace.JOUR)) {
             int[] date = extractJournalDate();
             clientFactory.getReportView().setJourData(sFis, comName,
                     place.getKeyString(), date[0], date[1], date[2], date[3],
                     date[4], date[5]);
-        }else if(action.equals(AllPlace.LEDGER)){
+        } else if (action.equals(AllPlace.LEDGER)) {
             int[] date = extractLedgerDate();
+            boolean doShowAll = place.getKeyString9().equals(AllPlace.SHOW_ALL);
             clientFactory.getReportView().setLedgerData(sFis, comName,
                     place.getKeyString(), place.getKeyString2(), date[0],
-                    date[1], date[2], 
-                    date[3], date[4], date[5]);
-        }else if(action.equals(AllPlace.TRIAL)){
-            clientFactory.getReportView().setTrialData(sFis, comName);
-        }else if(action.equals(AllPlace.FIN)){
+                    date[1], date[2], date[3], date[4], date[5], doShowAll);
+        } else if (action.equals(AllPlace.TRIAL)){
+            boolean doShowAll = place.getKeyString().equals(AllPlace.SHOW_ALL);
+            clientFactory.getReportView().setTrialData(sFis, comName,
+                    doShowAll);
+        } else if (action.equals(AllPlace.BALANCE)) {
+            boolean doShowAll = place.getKeyString7().equals(AllPlace.SHOW_ALL);
+            clientFactory.getReportView().setBalanceData(sFis, comName,
+                    place.getKeyString(), place.getKeyString2(),
+                    place.getKeyString3(), place.getKeyString4(),
+                    place.getKeyString5(), place.getKeyString6(), doShowAll);
+        } else if (action.equals(AllPlace.PROFIT)) {
+            boolean doShowAll = place.getKeyString3().equals(AllPlace.SHOW_ALL);
+            clientFactory.getReportView().setProfitData(sFis, comName,
+                    place.getKeyString(), place.getKeyString2(), doShowAll);
+        } else if (action.equals(AllPlace.COST)) {
+            boolean doShowAll = place.getKeyString2().equals(AllPlace.SHOW_ALL);
+            clientFactory.getReportView().setCostData(sFis, comName,
+                    place.getKeyString(), doShowAll);
+        } else if (action.equals(AllPlace.WORK_SHEET)) {
+            
+        } else if (action.equals(AllPlace.FIN)) {
             clientFactory.getReportView().setFinData(sFis, comName,
                     place.getKeyString());
-        }else{
+        } else {
             throw new AssertionError(action);
         }
     }
@@ -157,14 +174,12 @@ public class ReportActivity extends AbstractActivity implements ReportView.Prese
     
     private int[] extractLedgerDate(){
         int[] date = new int[6];
-        if(place.getKeyString3() != null){
-            date[0] = Integer.parseInt(place.getKeyString3());
-            date[1] = Integer.parseInt(place.getKeyString4());
-            date[2] = Integer.parseInt(place.getKeyString5());
-            date[3] = Integer.parseInt(place.getKeyString6());
-            date[4] = Integer.parseInt(place.getKeyString7());
-            date[5] = Integer.parseInt(place.getKeyString8());
-        }
+        date[0] = Integer.parseInt(place.getKeyString3());
+        date[1] = Integer.parseInt(place.getKeyString4());
+        date[2] = Integer.parseInt(place.getKeyString5());
+        date[3] = Integer.parseInt(place.getKeyString6());
+        date[4] = Integer.parseInt(place.getKeyString7());
+        date[5] = Integer.parseInt(place.getKeyString8());
         return date;
     }
 }

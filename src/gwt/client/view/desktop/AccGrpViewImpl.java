@@ -4,6 +4,7 @@ import gwt.client.TCF;
 import gwt.client.TConstants;
 import gwt.client.def.FisDef;
 import gwt.client.view.AccGrpView;
+import gwt.shared.Utils;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.CssResource;
@@ -93,11 +94,17 @@ public class AccGrpViewImpl<T> extends Composite implements AccGrpView<T> {
     private boolean validateInputs(){
         boolean isValid = true;
         
-        if(nameTB.getValue().isEmpty()){
-            errNameLb.setText(constants.invalid());
+        if(nameTB.getValue().isEmpty() || Utils.hasSpace(nameTB.getValue())){
+            errNameLb.setText(constants.invalidMsg());
             isValid = false;
         }else{
-            errNameLb.setText("");
+            // Check duplicate name.
+            if (presenter.isAccGrpNameDuplicate(keyString, nameTB.getValue())) {
+                errNameLb.setText(constants.duplicateNameMsg());
+                isValid = false;
+            } else {
+                errNameLb.setText("");
+            }
         }
         
         return isValid;

@@ -46,6 +46,7 @@ public class DocTypeListActivity extends AbstractActivity implements ListView.Pr
 
     @Override
     public String mayStop() {
+        clientFactory.getDocTypeListView().saveFirstVisibleIndex();
         return null;
     }
 

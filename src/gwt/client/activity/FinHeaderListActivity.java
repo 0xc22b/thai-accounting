@@ -40,6 +40,7 @@ public class FinHeaderListActivity extends AbstractActivity implements ListView.
 
     @Override
     public String mayStop() {
+        clientFactory.getFinHeaderListView().saveFirstVisibleIndex();
         return null;
     }
 
@@ -67,8 +68,7 @@ public class FinHeaderListActivity extends AbstractActivity implements ListView.
     
     private void getFinHeaderList(){
         // 1. Waiting for getting data
-        clientFactory.getShell().reset();
-        clientFactory.getShell().setHLb(constants.loading());
+        clientFactory.getShell().setLoading();
         
         // 2. Get data
         clientFactory.getModel().getFinHeader(place.getComKeyString(),

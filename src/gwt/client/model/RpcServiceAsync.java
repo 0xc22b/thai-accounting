@@ -24,7 +24,7 @@ public interface RpcServiceAsync {
 	void editCom(String sSID, String sID, SCom sCom, AsyncCallback<String> callback);
 	void deleteCom(String sSID, String sID, String keyString, AsyncCallback<String> callback);
 	
-    void addFis(String sSID, String sID, String comKeyString, SFiscalYear sFis, boolean isSetup, AsyncCallback<String> callback);
+    void addFis(String sSID, String sID, String comKeyString, int setupType, SFiscalYear sFis, AsyncCallback<String> callback);
     void editFis(String sSID, String sID, SFiscalYear sFis, AsyncCallback<String> callback);
     void deleteFis(String sSID, String sID, String keyString, AsyncCallback<String> callback);
     

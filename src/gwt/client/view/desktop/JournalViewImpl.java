@@ -18,11 +18,14 @@ import gwt.shared.Utils;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiTemplate;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -89,6 +92,10 @@ public class JournalViewImpl<T> extends Composite implements JournalView<T> {
             debitDB.setEnabled(enabled);
             creditDB.setEnabled(enabled);
         }
+        
+        public void setErrText(String text) {
+            errLb.setText(text);
+        }
 
         public String getACKeyString() {
             return accNoSB.getKey();
@@ -105,7 +112,7 @@ public class JournalViewImpl<T> extends Composite implements JournalView<T> {
         private DoubleBoxCallback doubleBoxCallback = new DoubleBoxCallback() {
             @Override
             public void onInvalidInput(String input) {
-                errLb.setText(constants.invalid());
+                errLb.setText(constants.invalidMsg());
             }
 
             @Override
@@ -127,24 +134,24 @@ public class JournalViewImpl<T> extends Composite implements JournalView<T> {
                         double credit = getCredit();
 
                         if (debit == 0 && credit == 0) {
-                            errLb.setText(constants.invalid());
+                            errLb.setText(constants.invalidMsg());
                             isValid = false;
                         } else if (debit != 0 && credit != 0) {
-                            errLb.setText(constants.invalid());
+                            errLb.setText(constants.invalidMsg());
                             isValid = false;
                         } else {
                             errLb.setText("");
                         }
                     } catch (NumberFormatException e) {
-                        errLb.setText(constants.invalid());
+                        errLb.setText(constants.invalidNumberMsg());
                         isValid = false;
                     } catch (InvalidValueException e) {
-                        errLb.setText(constants.invalid());
+                        errLb.setText(constants.invalidNumberMsg());
                         isValid = false;
                     }
                 }
             } catch (InvalidValueException e) {
-                errLb.setText(constants.invalid());
+                errLb.setText(constants.invalidMsg());
                 isValid = false;
             }
             
@@ -191,6 +198,8 @@ public class JournalViewImpl<T> extends Composite implements JournalView<T> {
     Label noLb;
     @UiField
     TextBox noTB;
+    @UiField
+    Button suggestedNoBtn;
     @UiField
     Label errNoLb;
     @UiField
@@ -258,8 +267,9 @@ public class JournalViewImpl<T> extends Composite implements JournalView<T> {
 
         dayIB.setRange(1, 31);
         monthIB.setRange(1, 12);
-        
+
         docTypeLB.addChangeHandler(docTypeChangeHandler);
+        suggestedNoBtn.addClickHandler(suggestedNoBtnClickHandler);
     }
 
     @Override
@@ -280,11 +290,18 @@ public class JournalViewImpl<T> extends Composite implements JournalView<T> {
         docTypeLB.clear();
         journalTypeLb.setText("");
         journalTypeInputLb.setText("");
-        noTB.setText("");
+
+        // Don't reset here as it will be used for suggestion later.
+        //noTB.setText("");
+
+        suggestedNoBtn.setVisible(false);
         errNoLb.setText("");
         dayIB.clear();
-        monthIB.clear();
-        yearIB.clear();
+
+        // Leave them here as suggestions.
+        //monthIB.clear();
+        //yearIB.clear();
+
         errDateLb.setText("");
         descTB.setText("");
         errDescLb.setText("");
@@ -316,6 +333,16 @@ public class JournalViewImpl<T> extends Composite implements JournalView<T> {
         yearIB.setRange(fisDef.getFBeginYear(t), fisDef.getFEndYear(t));
 
         if (keyString == null) {
+            // Try to get suggested no.
+            String no = noTB.getValue();
+            try {
+                int n = Integer.parseInt(no) + 1;
+                suggestedNoBtn.setText(n + "");
+                suggestedNoBtn.setVisible(true);
+            } catch (NumberFormatException e) {
+            }
+            noTB.setText("");
+            
             itemPanel.add(new Item(t));
             itemPanel.add(new Item(t));
             itemPanel.add(new Item(t));
@@ -395,11 +422,18 @@ public class JournalViewImpl<T> extends Composite implements JournalView<T> {
     private boolean validateInputs() {
         boolean isValid = true;
 
-        if (noTB.getValue().isEmpty()) {
-            errNoLb.setText(constants.invalid());
+        if (noTB.getValue().isEmpty() || Utils.hasSpace(noTB.getValue())) {
+            errNoLb.setText(constants.invalidMsg());
             isValid = false;
         } else {
-            errNoLb.setText("");
+            // Check duplicate journal no.
+            if (presenter.isJournalNoDuplicate(keyString, docTypeLB.getValue(),
+                    noTB.getValue())) {
+                errNoLb.setText(constants.duplicateJournalNoMsg());
+                isValid = false;
+            } else {
+                errNoLb.setText("");
+            }
         }
 
         try {
@@ -409,23 +443,22 @@ public class JournalViewImpl<T> extends Composite implements JournalView<T> {
 
             if (Utils.compareDate(day, month, year, 1, beginMonth, beginYear) < 0
                     || Utils.compareDate(day, month, year, Utils.getLastDay(endMonth, endYear), endMonth, endYear) > 0) {
-                errDateLb.setText(constants.invalid());
+                errDateLb.setText(constants.invalidMsg());
                 isValid = false;
             } else {
                 errDateLb.setText("");
             }
         } catch (NumberFormatException e) {
-            errDateLb.setText(constants.invalid());
+            errDateLb.setText(constants.invalidNumberMsg());
             isValid = false;
         } catch (InvalidValueException e) {
-            errDateLb.setText(constants.invalid());
+            errDateLb.setText(constants.invalidNumberMsg());
             isValid = false;
         }
 
         for (int i = 0; i < itemPanel.getWidgetCount(); i++) {
             @SuppressWarnings("unchecked")
             Item item = (Item) itemPanel.getWidget(i);
-
             if (!item.validateInputs()) {
                 isValid = false;
             }
@@ -435,6 +468,24 @@ public class JournalViewImpl<T> extends Composite implements JournalView<T> {
             isValid = false;
         }
 
+        // Items are required
+        if (isValid) {
+            boolean doHaveItems = false;
+            for (int i = 0; i < itemPanel.getWidgetCount(); i++) {
+                @SuppressWarnings("unchecked")
+                Item item = (Item) itemPanel.getWidget(i);
+                if (item.getACKeyString() != null) {
+                    doHaveItems = true;
+                    break;
+                }
+            }
+            if (!doHaveItems) {
+                isValid = false;
+                @SuppressWarnings("unchecked")
+                Item item = (Item) itemPanel.getWidget(0);
+                item.setErrText(constants.invalidMsg());
+            }
+        }
         return isValid;
     }
 
@@ -462,14 +513,14 @@ public class JournalViewImpl<T> extends Composite implements JournalView<T> {
             if (debitText.equals(creditText)){
                 errTotalLb.setText("");
             }else{
-                errTotalLb.setText(constants.invalid());
+                errTotalLb.setText(constants.invalidMsg());
                 isValid = false;
             }
         } catch (NumberFormatException e) {
-            errTotalLb.setText(constants.invalid());
+            errTotalLb.setText(constants.invalidMsg());
             isValid = false;
         } catch (InvalidValueException e) {
-            errTotalLb.setText(constants.invalid());
+            errTotalLb.setText(constants.invalidMsg());
             isValid = false;
         }
         return isValid;
@@ -499,6 +550,13 @@ public class JournalViewImpl<T> extends Composite implements JournalView<T> {
         @Override
         public void onChange(ChangeEvent event) {
             presenter.onDocTypeChanged();
+        }
+    };
+    
+    private ClickHandler suggestedNoBtnClickHandler = new ClickHandler(){
+        @Override
+        public void onClick(ClickEvent event) {
+            noTB.setText(suggestedNoBtn.getText());
         }
     };
 }

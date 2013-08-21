@@ -126,29 +126,76 @@ public class MenuActivity extends AbstractActivity implements MenuView.Presenter
     @Override
     public void goToLedgerRep(String beginAccChartKeyString,
             String endAccChartKeyString, int beginDay, int beginMonth, int beginYear, 
-            int endDay, int endMonth, int endYear) {
-        
+            int endDay, int endMonth, int endYear, boolean doShowAll) {
+
+        String doShowAllString = doShowAll ? AllPlace.SHOW_ALL : null;
+
         if(beginDay == 0 && beginMonth == 0 && beginYear == 0 && endDay == 0
                 && endMonth == 0 && endYear == 0){
             clientFactory.getPlaceController().goTo(new AllPlace(AllPlace.REPORT,
                     AllPlace.LEDGER, place.getComKeyString(), place.getFisKeyString(),
-                    beginAccChartKeyString, endAccChartKeyString));
+                    beginAccChartKeyString, endAccChartKeyString, 0 + "",
+                    0 + "", 0 + "", 0 + "", 0 + "", 0 + "", doShowAllString));
         }else if(beginDay != 0 && beginMonth != 0 && beginYear != 0 && endDay != 0
                 && endMonth != 0 && endYear != 0){
             clientFactory.getPlaceController().goTo(new AllPlace(AllPlace.REPORT,
                     AllPlace.LEDGER, place.getComKeyString(), place.getFisKeyString(),
                     beginAccChartKeyString, endAccChartKeyString, beginDay + "",
                     beginMonth + "", beginYear + "", endDay + "", endMonth + "", 
-                    endYear + ""));
+                    endYear + "", doShowAllString));
         }else{
             throw new AssertionError();
         }
     }
 
     @Override
-    public void goToTrialRep() {
+    public void goToTrialRep(boolean doShowAll) {
+        String doShowAllString = doShowAll ? AllPlace.SHOW_ALL : null;
         clientFactory.getPlaceController().goTo(new AllPlace(AllPlace.REPORT,
-                AllPlace.TRIAL, place.getComKeyString(), place.getFisKeyString()));
+                AllPlace.TRIAL, place.getComKeyString(), place.getFisKeyString(),
+                doShowAllString));
+    }
+    
+    @Override
+    public void goToBalanceRep(String assetACKeyString, String debtACKeyString,
+            String shareholderACKeyString, String accruedProfitACKeyString,
+            String incomeACKeyString, String expenseACKeyString, boolean doShowAll) {
+        String doShowAllString = doShowAll ? AllPlace.SHOW_ALL : null;
+        clientFactory.getPlaceController().goTo(new AllPlace(AllPlace.REPORT,
+                AllPlace.BALANCE, place.getComKeyString(), place.getFisKeyString(),
+                assetACKeyString, debtACKeyString, shareholderACKeyString,
+                accruedProfitACKeyString, incomeACKeyString, expenseACKeyString,
+                doShowAllString));
+    }
+
+    @Override
+    public void goToProfitRep(String incomeACKeyString,
+            String expenseACKeyString, boolean doShowAll) {
+        String doShowAllString = doShowAll ? AllPlace.SHOW_ALL : null;
+        clientFactory.getPlaceController().goTo(new AllPlace(AllPlace.REPORT,
+                AllPlace.PROFIT, place.getComKeyString(), place.getFisKeyString(),
+                incomeACKeyString, expenseACKeyString, doShowAllString));
+    }
+
+    @Override
+    public void goToCostRep(String costACKeyString, boolean doShowAll) {
+        String doShowAllString = doShowAll ? AllPlace.SHOW_ALL : null;
+        clientFactory.getPlaceController().goTo(new AllPlace(AllPlace.REPORT,
+                AllPlace.COST, place.getComKeyString(), place.getFisKeyString(),
+                costACKeyString, doShowAllString));
+    }
+
+    @Override
+    public void goToWorkSheet(String assetACKeyString, String debtACKeyString,
+            String shareholderACKeyString, String accruedProfitACKeyString,
+            String incomeACKeyString, String expenseACKeyString,
+            String costACKeyString, boolean doShowAll) {
+        String doShowAllString = doShowAll ? AllPlace.SHOW_ALL : null;
+        clientFactory.getPlaceController().goTo(new AllPlace(AllPlace.REPORT,
+                AllPlace.WORK_SHEET, place.getComKeyString(), place.getFisKeyString(),
+                assetACKeyString, debtACKeyString, shareholderACKeyString,
+                accruedProfitACKeyString, incomeACKeyString, expenseACKeyString,
+                costACKeyString, doShowAllString));
     }
     
     @Override
@@ -160,8 +207,7 @@ public class MenuActivity extends AbstractActivity implements MenuView.Presenter
     
     private void getSetup(){
         // 1. Waiting for getting data
-        clientFactory.getShell().reset();
-        clientFactory.getShell().setHLb(constants.loading());
+        clientFactory.getShell().setLoading();
         
         // 2. Get data
         clientFactory.getModel().getSetup(place.getComKeyString(),
@@ -256,5 +302,4 @@ public class MenuActivity extends AbstractActivity implements MenuView.Presenter
             }
         });
     }
-
 }

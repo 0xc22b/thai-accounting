@@ -1,15 +1,23 @@
 package gwt.server.account;
 
 import gwt.server.account.model.AccChart;
+import gwt.server.account.model.AccGroup;
+import gwt.server.account.model.DocType;
 import gwt.server.account.model.FinHeader;
 import gwt.server.account.model.FinItem;
 import gwt.server.account.model.FiscalYear;
 import gwt.server.account.model.JournalHeader;
 import gwt.server.account.model.JournalItem;
+import gwt.server.account.model.JournalType;
+import gwt.shared.model.SAccChart;
+import gwt.shared.model.SAccGrp;
+import gwt.shared.model.SDocType;
 import gwt.shared.model.SFinHeader;
 import gwt.shared.model.SFinItem;
+import gwt.shared.model.SFiscalYear;
 import gwt.shared.model.SJournalHeader;
 import gwt.shared.model.SJournalItem;
+import gwt.shared.model.SJournalType;
 
 import java.util.List;
 
@@ -26,7 +34,8 @@ public class Db<T> {
     }
     
     @SuppressWarnings("unchecked")
-    public List<T> get(PersistenceManager pm, Class<T> cl, String keyString, DbGetCallback callback){
+    public List<T> get(PersistenceManager pm, Class<T> cl, String keyString,
+            DbGetCallback callback){
         Key key = KeyFactory.stringToKey(keyString);
         List<T> list = null;
         Query query = pm.newQuery(cl);
@@ -40,7 +49,8 @@ public class Db<T> {
     }
     
     @SuppressWarnings("unchecked")
-    public Key getSingleKey(PersistenceManager pm, Class<T> cl, String keyString, DbGetCallback callback){
+    public Key getSingleKey(PersistenceManager pm, Class<T> cl, String keyString,
+            DbGetCallback callback){
         Key key = KeyFactory.stringToKey(keyString);
         List<Key> list = null;
         Query query = pm.newQuery("select key from " + cl.getName());
@@ -67,7 +77,8 @@ public class Db<T> {
         void edit(T t);
     }
     
-    public T edit(PersistenceManager pm, Class<T> cl, String keyString, DbEditCallback<T> callback){
+    public T edit(PersistenceManager pm, Class<T> cl, String keyString,
+            DbEditCallback<T> callback){
         Key key = KeyFactory.stringToKey(keyString);
         T t = pm.getObjectById(cl, key);
         callback.edit(t);
@@ -78,7 +89,8 @@ public class Db<T> {
         void check(T t);
     }
     
-    public String delete(PersistenceManager pm, Class<T> cl, String keyString, DbDeleteCallback<T> callback){
+    public String delete(PersistenceManager pm, Class<T> cl, String keyString,
+            DbDeleteCallback<T> callback){
         Key key = KeyFactory.stringToKey(keyString);
         T t = pm.getObjectById(cl, key);
         callback.check(t);
@@ -87,7 +99,8 @@ public class Db<T> {
     }
     
     @SuppressWarnings("unchecked")
-    public static List<FiscalYear> getFiscalYears(PersistenceManager pm, List<Key> comKeyList){
+    public static List<FiscalYear> getFiscalYears(PersistenceManager pm,
+            List<Key> comKeyList){
         List<FiscalYear> fisList = null;        
         Query query = pm.newQuery(FiscalYear.class);
         query.setFilter(":p.contains(comKey)");
@@ -98,6 +111,108 @@ public class Db<T> {
             query.closeAll();
         }
         return fisList;
+    }
+    
+    public static SFiscalYear getSetup(PersistenceManager pm, String fisKeyString) {
+        SFiscalYear sFis = new SFiscalYear();
+
+        Db<JournalType> dbJour = new Db<JournalType>();
+        List<JournalType> journalTypeList = dbJour.get(pm, JournalType.class,
+                fisKeyString, new DbGetCallback() {
+            @Override
+            public void setQuery(Query query) {
+                query.setFilter("fisKey == fisKeyParam");
+                query.declareParameters("com.google.appengine.api.datastore.Key fisKeyParam");
+                query.setOrdering("createDate asc");
+            }
+        });
+        if(journalTypeList.size() > 0){
+            for(JournalType journalType : journalTypeList){
+                SJournalType sJournalType = new SJournalType(
+                        journalType.getKeyString(), journalType.getName(), 
+                        journalType.getShortName(), journalType.getCreateDate());
+                sFis.addSJournalType(sJournalType);
+            }
+        }
+        
+        Db<DocType> dbDocType = new Db<DocType>();
+        List<DocType> docTypeList = dbDocType.get(pm, DocType.class, fisKeyString, new DbGetCallback() {
+            @Override
+            public void setQuery(Query query) {
+                query.setFilter("fisKey == fisKeyParam");
+                query.declareParameters("com.google.appengine.api.datastore.Key fisKeyParam");
+                query.setOrdering("createDate asc");
+            }
+        });
+        if(docTypeList.size() > 0){
+            for(DocType docType : docTypeList){
+                SDocType sDocType = new SDocType(docType.getKeyString(), docType.getJournalTypeKeyString(), docType.getCode(), docType.getName(), 
+                        docType.getJournalDesc(), docType.getCreateDate());
+                sFis.addSDocType(sDocType);
+                
+            }
+        }
+        
+        Db<AccGroup> dbAccGrp = new Db<AccGroup>();
+        List<AccGroup> accGrpList = dbAccGrp.get(pm, AccGroup.class, fisKeyString, new DbGetCallback() {
+            @Override
+            public void setQuery(Query query) {
+                query.setFilter("fisKey == fisKeyParam");
+                query.declareParameters("com.google.appengine.api.datastore.Key fisKeyParam");
+                query.setOrdering("createDate asc");
+            }
+        });
+        if(accGrpList.size() > 0){
+            for(AccGroup accGrp : accGrpList){
+                SAccGrp sAccGrp = new SAccGrp(accGrp.getKeyString(), accGrp.getName(), accGrp.getCreateDate());
+                sFis.addSAccGrp(sAccGrp);
+            }
+        }
+        
+        Db<AccChart> dbAccChart = new Db<AccChart>();
+        List<AccChart> accChartList = dbAccChart.get(pm, AccChart.class, fisKeyString, new DbGetCallback() {
+            @Override
+            public void setQuery(Query query) {
+                query.setFilter("fisKey == fisKeyParam");
+                query.declareParameters("com.google.appengine.api.datastore.Key fisKeyParam");
+            }
+        });
+        if(accChartList.size() > 0){
+            for(AccChart accChart : accChartList){
+                SAccChart sAccChart = new SAccChart(accChart.getKeyString(), accChart.getAccGroupKeyString(), 
+                        accChart.getParentAccChartKeyString(), accChart.getNo(), accChart.getName(), accChart.getType(), accChart.getLevel(), 
+                        accChart.getBeginning());
+                sFis.addSAccChart(sAccChart);
+            }
+        }
+        
+        Db<FinHeader> db = new Db<FinHeader>();
+        List<FinHeader> finList = db.get(pm, FinHeader.class, fisKeyString, new DbGetCallback() {
+            @Override
+            public void setQuery(Query query) {
+                query.setFilter("fisKey == fisKeyParam");
+                query.declareParameters("com.google.appengine.api.datastore.Key fisKeyParam");
+                query.setOrdering("createDate asc");
+            }
+        });
+        if(finList.size() > 0){
+            for(FinHeader finHeader : finList){
+                SFinHeader sFinHeader = new SFinHeader(finHeader.getKeyString(),
+                        finHeader.getName(), finHeader.getCreateDate());
+                
+                for(FinItem finItem : finHeader.getItemSet()){
+                    SFinItem sFinItem = new SFinItem(finItem.getKeyString(),
+                            finItem.getSeq(), finItem.getComm(), finItem.getArg(), 
+                            finItem.getCalCon(), finItem.getPrintCon(),
+                            finItem.getPrintStyle(), finItem.getVar1(), 
+                            finItem.getVar2(), finItem.getVar3(), finItem.getVar4());
+                    sFinHeader.addSFinItem(sFinItem);
+                }
+                
+                sFis.addSFinHeader(sFinHeader);
+            }
+        }
+        return sFis;
     }
     
     public static AccChart setBeginning(PersistenceManager pm, String accChartKeyString, double beginning){
@@ -193,5 +308,83 @@ public class Db<T> {
         }
         
         return journal;
+    }
+    
+    public static String deleteFis(PersistenceManager pm, String fisKeyString) {
+        // Delete all children - journal type, doc type, acc grp, 
+        //     acc chart, fin, journal
+        Db<JournalType> dbJour = new Db<JournalType>();
+        List<JournalType> journalTypeList = dbJour.get(pm, JournalType.class,
+                fisKeyString, new DbGetCallback() {
+            @Override
+            public void setQuery(Query query) {
+                query.setFilter("fisKey == fisKeyParam");
+                query.declareParameters("com.google.appengine.api.datastore.Key fisKeyParam");
+            }
+        });
+        pm.deletePersistentAll(journalTypeList);
+        
+        Db<DocType> dbDocType = new Db<DocType>();
+        List<DocType> docTypeList = dbDocType.get(pm, DocType.class, fisKeyString,
+                new DbGetCallback() {
+            @Override
+            public void setQuery(Query query) {
+                query.setFilter("fisKey == fisKeyParam");
+                query.declareParameters("com.google.appengine.api.datastore.Key fisKeyParam");
+            }
+        });
+        pm.deletePersistentAll(docTypeList);
+        
+        Db<AccGroup> dbAccGrp = new Db<AccGroup>();
+        List<AccGroup> accGrpList = dbAccGrp.get(pm, AccGroup.class, fisKeyString, new DbGetCallback() {
+            @Override
+            public void setQuery(Query query) {
+                query.setFilter("fisKey == fisKeyParam");
+                query.declareParameters("com.google.appengine.api.datastore.Key fisKeyParam");
+                query.setOrdering("createDate asc");
+            }
+        });
+        pm.deletePersistentAll(accGrpList);
+        
+        Db<AccChart> dbAccChart = new Db<AccChart>();
+        List<AccChart> accChartList = dbAccChart.get(pm, AccChart.class, fisKeyString, new DbGetCallback() {
+            @Override
+            public void setQuery(Query query) {
+                query.setFilter("fisKey == fisKeyParam");
+                query.declareParameters("com.google.appengine.api.datastore.Key fisKeyParam");
+            }
+        });
+        pm.deletePersistentAll(accChartList);
+        
+        Db<FinHeader> dbFin = new Db<FinHeader>();
+        List<FinHeader> finList = dbFin.get(pm, FinHeader.class, fisKeyString, new DbGetCallback() {
+            @Override
+            public void setQuery(Query query) {
+                query.setFilter("fisKey == fisKeyParam");
+                query.declareParameters("com.google.appengine.api.datastore.Key fisKeyParam");
+                query.setOrdering("createDate asc");
+            }
+        });
+        pm.deletePersistentAll(finList);
+        
+        Db<JournalHeader> dbJournal = new Db<JournalHeader>();
+        List<JournalHeader> journalList = dbJournal.get(pm, JournalHeader.class,
+                fisKeyString, new DbGetCallback() {
+            @Override
+            public void setQuery(Query query) {
+                query.setFilter("fisKey == fisKeyParam");
+                query.declareParameters("com.google.appengine.api.datastore.Key fisKeyParam");
+            }
+        });
+        pm.deletePersistentAll(journalList);
+        
+        Db<FiscalYear> dbFis = new Db<FiscalYear>();
+        dbFis.delete(pm, FiscalYear.class, fisKeyString, new DbDeleteCallback<FiscalYear>() {
+            @Override
+            public void check(FiscalYear t) {
+                
+            }
+        });
+        return fisKeyString;
     }
 }

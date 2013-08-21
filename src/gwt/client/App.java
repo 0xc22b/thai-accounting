@@ -1,15 +1,12 @@
 package gwt.client;
 
 import com.google.gwt.activity.shared.ActivityManager;
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.place.shared.PlaceHistoryHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.web.bindery.event.shared.EventBus;
-import com.google.web.bindery.event.shared.UmbrellaException;
 
 import gwt.client.place.AllPlace;
 import gwt.client.place.AppPlaceHistoryMapper;
@@ -17,15 +14,12 @@ import gwt.client.event.ActionEvent;
 import gwt.client.event.ActionNames;
 import gwt.client.view.Shell;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 /**
  * The heart of the applicaiton, mainly concerned with bootstrapping.
  */
 public class App {
     
-    private static final Logger log = Logger.getLogger(App.class.getName());
+    //private static final Logger log = Logger.getLogger(App.class.getName());
 
     private final EventBus eventBus;
     private final PlaceController placeController;

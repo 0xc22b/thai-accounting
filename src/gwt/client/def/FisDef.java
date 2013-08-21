@@ -49,6 +49,8 @@ public abstract class FisDef<T> {
     public abstract String getACNo(T t, int i);
     public abstract String getACName(T t, int i);
     public abstract AccType getACType(T t, int i);
+    public abstract int getACLevel(T t, int i);
+    public abstract double getACBeginning(T t, int i);
     public abstract boolean getACIsControl(T t, int i);
     public abstract boolean getACIsEntry(T t, int i);
     

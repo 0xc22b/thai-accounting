@@ -4,6 +4,7 @@ import gwt.client.TCF;
 import gwt.client.TConstants;
 import gwt.client.def.FisDef;
 import gwt.client.view.JournalTypeView;
+import gwt.shared.Utils;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.CssResource;
@@ -102,15 +103,21 @@ public class JournalTypeViewImpl<T> extends Composite implements JournalTypeView
     private boolean validateInputs(){
         boolean isValid = true;
         
-        if(nameTB.getValue().isEmpty()){
-            errNameLb.setText(constants.invalid());
+        if(nameTB.getValue().isEmpty() || Utils.hasSpace(nameTB.getValue())){
+            errNameLb.setText(constants.invalidMsg());
             isValid = false;
         }else{
-            errNameLb.setText("");
+            // Check duplicate name.
+            if (presenter.isJournalTypeNameDuplicate(keyString, nameTB.getValue())) {
+                errNameLb.setText(constants.duplicateNameMsg());
+                isValid = false;
+            } else {
+                errNameLb.setText("");
+            }
         }
         
         if(shortNameTB.getValue().isEmpty()){
-            errShortNameLb.setText(constants.invalid());
+            errShortNameLb.setText(constants.invalidMsg());
             isValid = false;
         }else{
             errShortNameLb.setText("");

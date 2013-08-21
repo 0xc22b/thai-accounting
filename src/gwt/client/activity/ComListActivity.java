@@ -63,8 +63,7 @@ public class ComListActivity extends AbstractActivity implements ListView.Presen
     
     private void getComList(){
         // 1. Waiting for getting data
-        clientFactory.getShell().reset();
-        clientFactory.getShell().setHLb(constants.loading());
+        clientFactory.getShell().setLoading();
         
         // 2. Get data
         clientFactory.getModel().getComList(new AsyncCallback<SComList>(){

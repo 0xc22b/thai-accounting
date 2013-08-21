@@ -46,6 +46,7 @@ public class JournalTypeListActivity extends AbstractActivity implements ListVie
 
     @Override
     public String mayStop() {
+        clientFactory.getJournalTypeListView().saveFirstVisibleIndex();
         return null;
     }
 

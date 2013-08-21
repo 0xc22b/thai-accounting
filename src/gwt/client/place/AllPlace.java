@@ -30,10 +30,25 @@ public class AllPlace extends Place {
     //public static final String JOUR = "jour";
     public static final String LEDGER = "ledger";
     public static final String TRIAL = "trial";
+    public static final String BALANCE = "balance";
+    public static final String PROFIT = "profit";
+    public static final String COST = "cost";
+    public static final String WORK_SHEET = "work_sheet";
     public static final String FIN = "fin";
-    
+
+    // Used by AccChartView
+    //     whether to create a new account chart as a child or a sibling.
+    public static final String CHILD = "child";
+    public static final String SIBLING = "sibling";
+
+    // Used by ReportView
+    //     whether to begin acc no. from first and end acc no. to last.
     public static final String FIRST = "first";
     public static final String LAST = "last";
+    
+    // Used by ReportView
+    //     whether to show all.
+    public static final String SHOW_ALL = "show_all";
     
     public static class Tokenizer implements PlaceTokenizer<AllPlace> {
 
@@ -74,6 +89,20 @@ public class AllPlace extends Place {
         this.token = place + "/" + action + "/" + comKeyString + "/" + fisKeyString + "/" + keyString + "/" + keyString2;
     }
     
+    public AllPlace(String place, String action, String comKeyString,
+            String fisKeyString, String keyString, String keyString2,
+            String keyString3){
+        this.token = place + "/" + action + "/" + comKeyString + "/"
+                + fisKeyString + "/" + keyString + "/" + keyString2 + "/"
+                + keyString3;
+    }
+    
+    public AllPlace(String place, String action, String comKeyString, String fisKeyString, String keyString, String keyString2, String keyString3,
+            String keyString4, String keyString5, String keyString6){
+        this.token = place + "/" + action + "/" + comKeyString + "/" + fisKeyString + "/" + keyString + "/" + keyString2 + "/" + keyString3 +
+                "/" + keyString4 + "/" + keyString5 + "/" + keyString6;
+    }
+    
     public AllPlace(String place, String action, String comKeyString, String fisKeyString, String keyString, String keyString2, String keyString3,
             String keyString4, String keyString5, String keyString6, String keyString7){
         this.token = place + "/" + action + "/" + comKeyString + "/" + fisKeyString + "/" + keyString + "/" + keyString2 + "/" + keyString3 +
@@ -84,6 +113,15 @@ public class AllPlace extends Place {
             String keyString4, String keyString5, String keyString6, String keyString7, String keyString8){
         this.token = place + "/" + action + "/" + comKeyString + "/" + fisKeyString + "/" + keyString + "/" + keyString2 + "/" + keyString3 +
                 "/" + keyString4 + "/" + keyString5 + "/" + keyString6 + "/" + keyString7 + "/" + keyString8;
+    }
+    
+    public AllPlace(String place, String action, String comKeyString,
+            String fisKeyString, String keyString, String keyString2,
+            String keyString3, String keyString4, String keyString5,
+            String keyString6, String keyString7, String keyString8,
+            String keyString9){
+        this.token = place + "/" + action + "/" + comKeyString + "/" + fisKeyString + "/" + keyString + "/" + keyString2 + "/" + keyString3 +
+                "/" + keyString4 + "/" + keyString5 + "/" + keyString6 + "/" + keyString7 + "/" + keyString8 + "/" + keyString9;
     }
 
     public String getToken() {
@@ -165,6 +203,14 @@ public class AllPlace extends Place {
     public String getKeyString8(){
         try{
             return token.split("/")[11];
+        }catch(ArrayIndexOutOfBoundsException e){
+            return null;
+        }
+    }
+    
+    public String getKeyString9(){
+        try{
+            return token.split("/")[12];
         }catch(ArrayIndexOutOfBoundsException e){
             return null;
         }

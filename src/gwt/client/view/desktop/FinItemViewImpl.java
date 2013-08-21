@@ -264,16 +264,16 @@ public class FinItemViewImpl<T> extends Composite implements FinItemView<T> {
         try{
             int n = getSeq();
             if (n == 0) {
-                errSeqLb.setText(constants.invalid());
+                errSeqLb.setText(constants.invalidMsg());
                 isValid = false;
             } else {
                 errSeqLb.setText("");
             }
         }catch(NumberFormatException e){
-            errSeqLb.setText(constants.invalid());
+            errSeqLb.setText(constants.invalidMsg());
             isValid = false;
         }catch(InvalidValueException e){
-            errSeqLb.setText(constants.invalid());
+            errSeqLb.setText(constants.invalidMsg());
             isValid = false;
         }
         
@@ -281,13 +281,13 @@ public class FinItemViewImpl<T> extends Composite implements FinItemView<T> {
             try{
                 String k = getArg();
                 if(k == null){
-                    errArgLb.setText(constants.invalid());
+                    errArgLb.setText(constants.invalidMsg());
                     isValid = false;
                 } else {
                     errArgLb.setText("");
                 }
             }catch(InvalidValueException e){
-                errArgLb.setText(constants.invalid());
+                errArgLb.setText(constants.invalidMsg());
                 isValid = false;
             }
         } else {

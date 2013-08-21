@@ -16,6 +16,7 @@ import gwt.server.user.UserVerifier;
 import gwt.server.user.model.Session;
 import gwt.server.user.model.User;
 import gwt.shared.NotLoggedInException;
+import gwt.shared.SConstants;
 import gwt.shared.model.SAccChart;
 import gwt.shared.model.SAccChart.AccType;
 import gwt.shared.model.SAccGrp;
@@ -255,7 +256,8 @@ public class RpcServiceImplTest {
             
             SFiscalYear sFis = new SFiscalYear(null, 2, 2012, 1, 2013);
             fisKeyString = rpcService.addFis(session.getKeyString(),
-                    session.getSessionID(), comKeyString, sFis, false);
+                    session.getSessionID(), comKeyString,
+                    SConstants.ADD_FIS_WITH_NO_SETUP, sFis);
         } catch (NotLoggedInException e) {
             fail();
         }
@@ -284,7 +286,8 @@ public class RpcServiceImplTest {
             
             SFiscalYear sFis = new SFiscalYear(null, 2, 2012, 1, 2013);
             fisKeyString = rpcService.addFis(session.getKeyString(),
-                    session.getSessionID(), comKeyString, sFis, false);
+                    session.getSessionID(), comKeyString,
+                    SConstants.ADD_FIS_WITH_NO_SETUP, sFis);
         } catch (NotLoggedInException e) {
             fail();
         }
@@ -321,7 +324,8 @@ public class RpcServiceImplTest {
             
             SFiscalYear sFis = new SFiscalYear(null, 2, 2012, 1, 2013);
             fisKeyString = rpcService.addFis(session.getKeyString(),
-                    session.getSessionID(), comKeyString, sFis, false);
+                    session.getSessionID(), comKeyString,
+                    SConstants.ADD_FIS_WITH_NO_SETUP, sFis);
         } catch (NotLoggedInException e) {
             fail();
         }
@@ -359,7 +363,8 @@ public class RpcServiceImplTest {
             
             SFiscalYear sFis = new SFiscalYear(null, 2, 2012, 1, 2013);
             fisKeyString = rpcService.addFis(session.getKeyString(),
-                    session.getSessionID(), comKeyString, sFis, false);
+                    session.getSessionID(), comKeyString,
+                    SConstants.ADD_FIS_WITH_NO_SETUP, sFis);
             
             SJournalType sJournalType = new SJournalType(null, "name", "shortName", new Date());
             journalTypeKeyString = rpcService.addJournalType(session.getKeyString(),
@@ -448,7 +453,8 @@ public class RpcServiceImplTest {
             
             SFiscalYear sFis = new SFiscalYear(null, 2, 2012, 1, 2013);
             String fisKeyString = rpcService.addFis(session.getKeyString(),
-                    session.getSessionID(), comKeyString, sFis, false);
+                    session.getSessionID(), comKeyString,
+                    SConstants.ADD_FIS_WITH_NO_SETUP, sFis);
             
             SJournalType sJournalType = new SJournalType(null, "name", "shortName", new Date());
             journalTypeKeyString = rpcService.addJournalType(session.getKeyString(),
@@ -479,7 +485,8 @@ public class RpcServiceImplTest {
             
             SFiscalYear sFis = new SFiscalYear(null, 2, 2012, 1, 2013);
             String fisKeyString = rpcService.addFis(session.getKeyString(),
-                    session.getSessionID(), comKeyString, sFis, false);
+                    session.getSessionID(), comKeyString,
+                    SConstants.ADD_FIS_WITH_NO_SETUP, sFis);
             
             SJournalType sJournalType = new SJournalType(null, "name", "shortName", new Date());
             journalTypeKeyString = rpcService.addJournalType(session.getKeyString(),
@@ -519,7 +526,8 @@ public class RpcServiceImplTest {
             
             SFiscalYear sFis = new SFiscalYear(null, 2, 2012, 1, 2013);
             String fisKeyString = rpcService.addFis(session.getKeyString(),
-                    session.getSessionID(), comKeyString, sFis, false);
+                    session.getSessionID(), comKeyString,
+                    SConstants.ADD_FIS_WITH_NO_SETUP, sFis);
             
             SJournalType sJournalType = new SJournalType(null, "name", "shortName", new Date());
             journalTypeKeyString = rpcService.addJournalType(session.getKeyString(),
@@ -560,7 +568,8 @@ public class RpcServiceImplTest {
             
             SFiscalYear sFis = new SFiscalYear(null, 2, 2012, 1, 2013);
             String fisKeyString = rpcService.addFis(session.getKeyString(),
-                    session.getSessionID(), comKeyString, sFis, false);
+                    session.getSessionID(), comKeyString,
+                    SConstants.ADD_FIS_WITH_NO_SETUP, sFis);
             
             SJournalType sJournalType = new SJournalType(null, "name", "shortName", new Date());
             journalTypeKeyString = rpcService.addJournalType(session.getKeyString(),
@@ -599,7 +608,8 @@ public class RpcServiceImplTest {
             
             SFiscalYear sFis = new SFiscalYear(null, 2, 2012, 1, 2013);
             String fisKeyString = rpcService.addFis(session.getKeyString(),
-                    session.getSessionID(), comKeyString, sFis, false);
+                    session.getSessionID(), comKeyString,
+                    SConstants.ADD_FIS_WITH_NO_SETUP, sFis);
             
             SJournalType sJournalType = new SJournalType(null, "name", "shortName", new Date());
             journalTypeKeyString = rpcService.addJournalType(session.getKeyString(),
@@ -647,7 +657,8 @@ public class RpcServiceImplTest {
             
             SFiscalYear sFis = new SFiscalYear(null, 2, 2012, 1, 2013);
             String fisKeyString = rpcService.addFis(session.getKeyString(),
-                    session.getSessionID(), comKeyString, sFis, false);
+                    session.getSessionID(), comKeyString,
+                    SConstants.ADD_FIS_WITH_NO_SETUP, sFis);
             
             SJournalType sJournalType = new SJournalType(null, "name", "shortName", new Date());
             journalTypeKeyString = rpcService.addJournalType(session.getKeyString(),
@@ -691,7 +702,8 @@ public class RpcServiceImplTest {
             
             SFiscalYear sFis = new SFiscalYear(null, 2, 2012, 1, 2013);
             String fisKeyString = rpcService.addFis(session.getKeyString(),
-                    session.getSessionID(), comKeyString, sFis, false);
+                    session.getSessionID(), comKeyString,
+                    SConstants.ADD_FIS_WITH_NO_SETUP, sFis);
             
             SAccGrp sAccGrp = new SAccGrp(null, "accgrpname", new Date());
             accGrpKeyString = rpcService.addAccGrp(session.getKeyString(),
@@ -721,7 +733,8 @@ public class RpcServiceImplTest {
             
             SFiscalYear sFis = new SFiscalYear(null, 2, 2012, 1, 2013);
             String fisKeyString = rpcService.addFis(session.getKeyString(),
-                    session.getSessionID(), comKeyString, sFis, false);
+                    session.getSessionID(), comKeyString,
+                    SConstants.ADD_FIS_WITH_NO_SETUP, sFis);
             
             SAccGrp sAccGrp = new SAccGrp(null, "accgrpname", new Date());
             accGrpKeyString = rpcService.addAccGrp(session.getKeyString(),
@@ -759,7 +772,8 @@ public class RpcServiceImplTest {
             
             SFiscalYear sFis = new SFiscalYear(null, 2, 2012, 1, 2013);
             String fisKeyString = rpcService.addFis(session.getKeyString(),
-                    session.getSessionID(), comKeyString, sFis, false);
+                    session.getSessionID(), comKeyString,
+                    SConstants.ADD_FIS_WITH_NO_SETUP, sFis);
             
             SAccGrp sAccGrp = new SAccGrp(null, "accgrpname", new Date());
             accGrpKeyString = rpcService.addAccGrp(session.getKeyString(),
@@ -800,7 +814,8 @@ public class RpcServiceImplTest {
             
             SFiscalYear sFis = new SFiscalYear(null, 2, 2012, 1, 2013);
             String fisKeyString = rpcService.addFis(session.getKeyString(),
-                    session.getSessionID(), comKeyString, sFis, false);
+                    session.getSessionID(), comKeyString,
+                    SConstants.ADD_FIS_WITH_NO_SETUP, sFis);
             
             SAccGrp sAccGrp = new SAccGrp(null, "accgrpname", new Date());
             accGrpKeyString = rpcService.addAccGrp(session.getKeyString(),
@@ -849,7 +864,8 @@ public class RpcServiceImplTest {
             
             SFiscalYear sFis = new SFiscalYear(null, 2, 2012, 1, 2013);
             fisKeyString = rpcService.addFis(session.getKeyString(),
-                    session.getSessionID(), comKeyString, sFis, false);
+                    session.getSessionID(), comKeyString,
+                    SConstants.ADD_FIS_WITH_NO_SETUP, sFis);
             
             SAccGrp sAccGrp = new SAccGrp(null, "accgrpname", new Date());
             accGrpKeyString = rpcService.addAccGrp(session.getKeyString(),
@@ -913,7 +929,8 @@ public class RpcServiceImplTest {
             
             SFiscalYear sFis = new SFiscalYear(null, 2, 2012, 1, 2013);
             String fisKeyString = rpcService.addFis(session.getKeyString(),
-                    session.getSessionID(), comKeyString, sFis, false);
+                    session.getSessionID(), comKeyString,
+                    SConstants.ADD_FIS_WITH_NO_SETUP, sFis);
             
             SAccGrp sAccGrp = new SAccGrp(null, "accgrpname", new Date());
             accGrpKeyString = rpcService.addAccGrp(session.getKeyString(),
@@ -962,7 +979,8 @@ public class RpcServiceImplTest {
             
             SFiscalYear sFis = new SFiscalYear(null, 2, 2012, 1, 2013);
             String fisKeyString = rpcService.addFis(session.getKeyString(),
-                    session.getSessionID(), comKeyString, sFis, false);
+                    session.getSessionID(), comKeyString,
+                    SConstants.ADD_FIS_WITH_NO_SETUP, sFis);
             
             SFinHeader sFinHeader = new SFinHeader(null, "finheadername", new Date());
             finHeaderKeyString = rpcService.addFinHeader(session.getKeyString(),
@@ -1001,7 +1019,8 @@ public class RpcServiceImplTest {
             
             SFiscalYear sFis = new SFiscalYear(null, 2, 2012, 1, 2013);
             String fisKeyString = rpcService.addFis(session.getKeyString(),
-                    session.getSessionID(), comKeyString, sFis, false);
+                    session.getSessionID(), comKeyString,
+                    SConstants.ADD_FIS_WITH_NO_SETUP, sFis);
             
             SFinHeader sFinHeader = new SFinHeader(null, "finheadername", new Date());
             String finHeaderKeyString = rpcService.addFinHeader(session.getKeyString(),
@@ -1050,7 +1069,8 @@ public class RpcServiceImplTest {
             
             SFiscalYear sFis = new SFiscalYear(null, 2, 2012, 1, 2013);
             fisKeyString = rpcService.addFis(session.getKeyString(),
-                    session.getSessionID(), comKeyString, sFis, false);
+                    session.getSessionID(), comKeyString,
+                    SConstants.ADD_FIS_WITH_NO_SETUP, sFis);
             
             SJournalType sJournalType = new SJournalType(null, "name", "shortName", new Date());
             String journalTypeKeyString = rpcService.addJournalType(session.getKeyString(),
@@ -1133,7 +1153,8 @@ public class RpcServiceImplTest {
             
             SFiscalYear sFis = new SFiscalYear(null, 2, 2012, 1, 2013);
             String fisKeyString = rpcService.addFis(session.getKeyString(),
-                    session.getSessionID(), comKeyString, sFis, false);
+                    session.getSessionID(), comKeyString,
+                    SConstants.ADD_FIS_WITH_NO_SETUP, sFis);
             
             SJournalType sJournalType = new SJournalType(null, "name", "shortName", new Date());
             String journalTypeKeyString = rpcService.addJournalType(session.getKeyString(),

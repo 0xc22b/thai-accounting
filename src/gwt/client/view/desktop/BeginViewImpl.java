@@ -114,7 +114,7 @@ public class BeginViewImpl<T> extends Composite implements BeginView<T> {
     }
 
     @Override
-    public void setBeginBtnClicked() {
+    public void addBeginBtnClicked() {
         if(!validateInputs()){
             return;
         }
@@ -123,7 +123,20 @@ public class BeginViewImpl<T> extends Composite implements BeginView<T> {
         double debit = debitDB.getCustomValue();
         double credit = creditDB.getCustomValue();
         double beginning = debit != 0 ? debit : credit * -1;
-        presenter.setBegin(ks, beginning);
+        presenter.addBegin(ks, beginning);
+    }
+    
+    @Override
+    public void editBeginBtnClicked() {
+        if(!validateInputs()){
+            return;
+        }
+        
+        String ks = keyString != null ? keyString : noSB.getKey();
+        double debit = debitDB.getCustomValue();
+        double credit = creditDB.getCustomValue();
+        double beginning = debit != 0 ? debit : credit * -1;
+        presenter.editBegin(ks, beginning);
     }
     
     private boolean validateInputs(){
@@ -132,13 +145,13 @@ public class BeginViewImpl<T> extends Composite implements BeginView<T> {
         try{
             String ks = noSB.getKey();
             if(ks == null){
-                errNoLb.setText(constants.invalid());
+                errNoLb.setText(constants.invalidMsg());
                 isValid = false;
             }else{
                 errNoLb.setText("");
             }
         }catch(InvalidValueException e){
-            errNoLb.setText(constants.invalid());
+            errNoLb.setText(constants.invalidMsg());
             isValid = false;
         }
         
@@ -147,19 +160,19 @@ public class BeginViewImpl<T> extends Composite implements BeginView<T> {
             double credit = creditDB.getCustomValue();
             
             if(debit != 0 && credit != 0){
-                errBeginLb.setText(constants.invalid());
+                errBeginLb.setText(constants.invalidMsg());
                 isValid = false;
             }else if(debit == 0 && credit == 0){
-                errBeginLb.setText(constants.invalid());
+                errBeginLb.setText(constants.invalidMsg());
                 isValid = false;
             }else{
                 errBeginLb.setText("");
             }
         }catch(NumberFormatException e){
-            errBeginLb.setText(constants.invalid());
+            errBeginLb.setText(constants.invalidNumberMsg());
             isValid = false;
         }catch(InvalidValueException e){
-            errBeginLb.setText(constants.invalid());
+            errBeginLb.setText(constants.invalidNumberMsg());
             isValid = false;
         }
         

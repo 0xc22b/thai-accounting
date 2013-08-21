@@ -201,6 +201,16 @@ public class FisDefImpl extends FisDef<SFiscalYear> {
     }
     
     @Override
+    public int getACLevel(SFiscalYear t, int i) {
+        return t.getSAccChartList().get(i).getLevel();
+    }
+
+    @Override
+    public double getACBeginning(SFiscalYear t, int i) {
+        return t.getSAccChartList().get(i).getBeginning();
+    }
+    
+    @Override
     public boolean getACIsControl(SFiscalYear t, int i) {
         return t.getSAccChartList().get(i).getType().equals(SAccChart.AccType.CONTROL);
     }

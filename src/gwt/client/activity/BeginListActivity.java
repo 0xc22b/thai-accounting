@@ -46,6 +46,7 @@ public class BeginListActivity extends AbstractActivity implements ListView.Pres
 
     @Override
     public String mayStop() {
+        clientFactory.getBeginListView().saveFirstVisibleIndex();
         return null;
     }
 

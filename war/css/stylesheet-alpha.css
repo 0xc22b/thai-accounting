@@ -76,9 +76,15 @@ input {
     position: absolute;
     top: 10px;
     right: 100px;
+    width: 270px;
 }
 
-#logInP label, #logInP a {
+#logInP span,
+#logInP label,
+#logInP input,
+#logInP button,
+#logInP img,
+#logInP a {
 	display: block;
 }
 
@@ -86,25 +92,35 @@ input {
 	margin: 0;
 }
 
+#logInP button {
+	margin: 10px 0 0 0;
+}
+
 #descP {
 	float: left;
-    width: 50%;
+    width: 40%;
 }
 
 #signUpP {
-    float: right;
+    float: left;
     width: 50%;
-    margin: 50px 0;
+    margin: 30px 0;
 }
 
-#signUpP h2, #signUpP label, #signUpP input, #signUpP button, #signUpP img {
+#signUpP span,
+#signUpP label,
+#signUpP input,
+#signUpP button,
+#signUpP img {
 	display: block;
-	margin: 0 auto;
-	text-align: center;
+}
+
+#signUpP h2 {
+    margin: 0;
 }
 
 #signUpP button {
-	margin: 10px 0 0 47%;
+	margin: 10px 0 0 0;
 }
 
 #signUpP img {

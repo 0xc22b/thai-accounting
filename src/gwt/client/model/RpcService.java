@@ -27,7 +27,7 @@ public interface RpcService extends RemoteService {
 	String editCom(String sSID, String sID, SCom sCom) throws NotLoggedInException;
 	String deleteCom(String sSID, String sID, String keyString) throws NotLoggedInException;
 	
-	String addFis(String sSID, String sID, String comKeyString, SFiscalYear sFis, boolean isSetup) throws NotLoggedInException;
+	String addFis(String sSID, String sID, String comKeyString, int setupType, SFiscalYear sFis) throws NotLoggedInException;
     String editFis(String sSID, String sID, SFiscalYear sFis) throws NotLoggedInException, IllegalArgumentException;
     String deleteFis(String sSID, String sID, String keyString) throws NotLoggedInException;
     

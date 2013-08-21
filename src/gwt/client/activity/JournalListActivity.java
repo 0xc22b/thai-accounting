@@ -42,6 +42,7 @@ public class JournalListActivity extends AbstractActivity implements ListView.Pr
 
     @Override
     public String mayStop() {
+        clientFactory.getJournalListView().saveFirstVisibleIndex();
         return null;
     }
 
@@ -67,8 +68,7 @@ public class JournalListActivity extends AbstractActivity implements ListView.Pr
     
     private void getJournalList(){
         // 1. Waiting for getting data
-        clientFactory.getShell().reset();
-        clientFactory.getShell().setHLb(constants.loading());
+        clientFactory.getShell().setLoading();
         
         // 2. Get data
         clientFactory.getModel().getJournal(place.getComKeyString(), place.getFisKeyString(), null,

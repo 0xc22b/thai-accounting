@@ -46,6 +46,7 @@ public class FisListActivity extends AbstractActivity implements ListView.Presen
 
     @Override
     public String mayStop() {
+        clientFactory.getFisListView().saveFirstVisibleIndex();
         return null;
     }
 

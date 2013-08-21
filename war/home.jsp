@@ -13,7 +13,7 @@
         </div>
     </noscript>
     
-    <a href="https://github.com/witnapatat/thai-accounting">
+    <a href="https://github.com/witterk/thai-accounting">
         <img style="position: absolute; top: 0; right: 0; border: 0;"
                 src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png" 
                 alt="Fork me on GitHub" />
@@ -21,9 +21,11 @@
     
     <div id="logInP">
         <h2>Log in</h2>
-        <label id='logInErrLb' class='errLb'>&nbsp;</label>
-        <input type='text' name='username' placeholder='username or email' id='logInUsernameTB' /> 
-        <input type='password' name='password'  placeholder='password' id='logInPasswordTB' />
+        <span id='logInErrLb' class='errLb'>&nbsp;</span>
+        <label for='logInUsernameTB'>Username or email</label>
+        <input type='text' name='username' id='logInUsernameTB' />
+        <label for='logInPasswordTB'>Password</label> 
+        <input type='password' name='password' id='logInPasswordTB' />
         <button id='logInBtn'>OK</button>
         <img src='/img/loading.gif' id='logInLoadingImg' style='display: none;' />
         <a href="/forgot">Forgot password?</a>
@@ -56,14 +58,18 @@
 
     <div id="signUpP">
         <h2>Create an account</h2>    
-        <label id='signUpUsernameErrLb' class='errLb'>&nbsp;</label>
-        <input type='text' name='username' placeholder='username' id='signUpUsernameTB' />
-        <label id='signUpPasswordErrLb' class='errLb'>&nbsp;</label> 
-        <input type='password' name='password'  placeholder='password' id='signUpPasswordTB' />
-        <label id='signUpRepeatPasswordErrLb' class='errLb'>&nbsp;</label> 
-        <input type='password' name='password'  placeholder='Repeat password' id='signUpRepeatPasswordTB' />
-        <label id='signUpEmailErrLb' class='errLb'>&nbsp;</label>
-        <input type='text' name='email'  placeholder='email' id='signUpEmailTB' />
+        <span id='signUpUsernameErrLb' class='errLb'>&nbsp;</span>
+        <label for='signUpUsernameTB'>Username</label>
+        <input type='text' name='username' id='signUpUsernameTB' />
+        <span id='signUpPasswordErrLb' class='errLb'>&nbsp;</span>
+        <label for='signUpPasswordTB'>Password</label>
+        <input type='password' name='password' id='signUpPasswordTB' />
+        <span id='signUpRepeatPasswordErrLb' class='errLb'>&nbsp;</span>
+        <label for='signUpRepeatPasswordTB'>Repeat Password</label>
+        <input type='password' name='password' id='signUpRepeatPasswordTB' />
+        <span id='signUpEmailErrLb' class='errLb'>&nbsp;</span>
+        <label for='signUpEmailTB'>Email</label>
+        <input type='text' name='email' id='signUpEmailTB' />
         <button id='signUpBtn'>OK</button>
         <img src='/img/loading.gif' id='signUpLoadingImg' style='display: none;' />
     </div>

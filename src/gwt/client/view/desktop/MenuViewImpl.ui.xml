@@ -3,12 +3,12 @@
              xmlns:c='urn:import:gwt.client.ui'>
 
     <ui:style type='gwt.client.view.desktop.MenuViewImpl.Style'>
-        
+
         .row {
             display: table;
             margin: 10px 0;
         }
-        
+
         .btn {
 	        border: 1px solid #FFF;
             margin: 0 10px 0 0;
@@ -17,10 +17,31 @@
         .btn:hover {
 	        border: 1px solid #FFF;
 	    }
+	    
+	    .clickedBtn {
+	        background-image: none;
+	        background-color: #AAA;
+	        border: 1px solid #AAA;
+	        border-bottom-right-radius: 0;
+	        border-bottom-left-radius: 0;
+	    }
+	    
+	    .clickedBtn:hover {
+            border: 1px solid #AAA;
+        }
+	    
+	    .reportPanel {
+	       margin: 0;
+	    }
+	    
+	    .subMenu {
+	        padding: 10px 15px 20px;
+	        border: 1px solid #AAA;
+	    }
         
         .label {
             display: table-cell;
-            width: 120px;
+            width: 170px;
         }
         
         .fLb {
@@ -48,7 +69,6 @@
         }
         
         .endAccNoLb {
-            display: table-cell;
             padding: 0 20px;
         }
         
@@ -69,22 +89,33 @@
         <g:FlowPanel ui:field="journalPanel" styleName='{style.row}'>
         
         </g:FlowPanel>
-        <g:FlowPanel ui:field="reportPanel" styleName='{style.row}'>
+        <g:FlowPanel ui:field="reportPanel" styleName='{style.row} {style.reportPanel}'>
             <g:Button ui:field="accChartRepBtn"></g:Button>
             <g:Button ui:field="journalRepBtn"></g:Button>
             <g:Button ui:field="ledgerRepBtn"></g:Button>
             <g:Button ui:field="trialRepBtn"></g:Button>
+            <g:Button ui:field="balanceRepBtn"></g:Button>
+            <g:Button ui:field="profitRepBtn"></g:Button>
+            <g:Button ui:field="costRepBtn"></g:Button>
+            <g:Button ui:field="workSheetBtn"></g:Button>
             <g:FlowPanel ui:field="finRepPanel" styleName='{style.finRepPanel}'></g:FlowPanel>
         </g:FlowPanel>
-        <g:FlowPanel ui:field="subMenuPanel">
-            <g:FlowPanel styleName='{style.row}'>
+        <g:FlowPanel ui:field="subMenuPanel" styleName='{style.subMenu}'>
+            <g:FlowPanel ui:field="journalTypePanel" styleName='{style.row}'>
                 <g:Label ui:field="journalTypeLb" styleName='{style.label}'></g:Label>
                 <c:CustomListBox ui:field="journalTypeLB"></c:CustomListBox>
-                <g:Label ui:field="beginAccNoLb" styleName='{style.label}'></g:Label>
-                <c:CustomSuggestBox ui:field="beginAccNoSB"></c:CustomSuggestBox>
-                <g:Label ui:field="endAccNoLb" styleName='{style.endAccNoLb}'></g:Label>
-                <c:CustomSuggestBox ui:field="endAccNoSB"></c:CustomSuggestBox>
-                <g:Label ui:field="errAccNoLb"></g:Label>
+            </g:FlowPanel>
+            <g:FlowPanel ui:field="accNoPanel" styleName='{style.row}'>
+                <g:FlowPanel styleName='{style.row}'>
+                    <g:Label ui:field="beginAccNoLb" styleName='{style.label}'></g:Label>
+                    <c:CustomSuggestBox ui:field="beginAccNoSB"></c:CustomSuggestBox>
+                    <g:Label ui:field="errBeginAccNoLb" styleName='{style.errMsg}'></g:Label>
+                </g:FlowPanel>
+                <g:FlowPanel styleName='{style.row}'>
+                    <g:Label ui:field="endAccNoLb" styleName='{style.label} {style.endAccNoLb}'></g:Label>
+                    <c:CustomSuggestBox ui:field="endAccNoSB"></c:CustomSuggestBox>
+                    <g:Label ui:field="errEndAccNoLb" styleName='{style.errMsg}'></g:Label>
+                </g:FlowPanel>
             </g:FlowPanel>
             <g:FlowPanel ui:field="datePanel">
                 <g:FlowPanel styleName='{style.row}'>
@@ -107,6 +138,46 @@
                     <c:CustomIntBox ui:field="endYearIB" styleName='{style.input}' visibleLength='4'></c:CustomIntBox>
                     <g:Label ui:field="errEndDateLb" styleName='{style.errMsg}'></g:Label>
                 </g:FlowPanel>
+            </g:FlowPanel>
+            <g:FlowPanel ui:field="assetPanel" styleName='{style.row}'>
+                <g:Label ui:field="assetAccNoLb" styleName='{style.label}'></g:Label>
+                <c:CustomSuggestBox ui:field="assetAccNoSB"></c:CustomSuggestBox>
+                <g:Label ui:field="errAssetLb" styleName='{style.errMsg}'></g:Label>
+            </g:FlowPanel>
+            <g:FlowPanel ui:field="debtPanel" styleName='{style.row}'>
+                <g:Label ui:field="debtAccNoLb" styleName='{style.label}'></g:Label>
+                <c:CustomSuggestBox ui:field="debtAccNoSB"></c:CustomSuggestBox>
+                <g:Label ui:field="errDebtLb" styleName='{style.errMsg}'></g:Label>
+            </g:FlowPanel>
+            <g:FlowPanel ui:field="shareholderPanel">
+                <g:FlowPanel styleName='{style.row}'>
+	                <g:Label ui:field="shareholderAccNoLb" styleName='{style.label}'></g:Label>
+	                <c:CustomSuggestBox ui:field="shareholderAccNoSB"></c:CustomSuggestBox>
+	                <g:Label ui:field="errShareholderLb" styleName='{style.errMsg}'></g:Label>
+                </g:FlowPanel>
+                <g:FlowPanel styleName='{style.row}'>
+                    <g:Label ui:field="accruedProfitAccNoLb" styleName='{style.label}'></g:Label>
+                    <c:CustomSuggestBox ui:field="accruedProfitAccNoSB"></c:CustomSuggestBox>
+                    <g:Label ui:field="errAccruedProfitLb" styleName='{style.errMsg}'></g:Label>
+                </g:FlowPanel>
+            </g:FlowPanel>
+            <g:FlowPanel ui:field="incomePanel" styleName='{style.row}'>
+                <g:Label ui:field="incomeAccNoLb" styleName='{style.label}'></g:Label>
+                <c:CustomSuggestBox ui:field="incomeAccNoSB"></c:CustomSuggestBox>
+                <g:Label ui:field="errIncomeLb" styleName='{style.errMsg}'></g:Label>
+            </g:FlowPanel>
+            <g:FlowPanel ui:field="expensePanel" styleName='{style.row}'>
+                <g:Label ui:field="expenseAccNoLb" styleName='{style.label}'></g:Label>
+                <c:CustomSuggestBox ui:field="expenseAccNoSB"></c:CustomSuggestBox>
+                <g:Label ui:field="errExpenseLb" styleName='{style.errMsg}'></g:Label>
+            </g:FlowPanel>
+            <g:FlowPanel ui:field="costPanel" styleName='{style.row}'>
+                <g:Label ui:field="costAccNoLb" styleName='{style.label}'></g:Label>
+                <c:CustomSuggestBox ui:field="costAccNoSB"></c:CustomSuggestBox>
+                <g:Label ui:field="errCostLb" styleName='{style.errMsg}'></g:Label>
+            </g:FlowPanel>
+            <g:FlowPanel ui:field="showAllPanel" styleName='{style.row}'>
+                <g:CheckBox ui:field="showAllCB"></g:CheckBox>
             </g:FlowPanel>
             <g:Button ui:field="okBtn"></g:Button>
         </g:FlowPanel>

@@ -6,6 +6,7 @@ import gwt.client.model.RpcService;
 import gwt.client.model.RpcServiceAsync;
 import gwt.shared.DataNotFoundException;
 import gwt.shared.NotLoggedInException;
+import gwt.shared.Utils;
 import gwt.shared.model.SAccChart;
 import gwt.shared.model.SAccGrp;
 import gwt.shared.model.SCom;
@@ -14,8 +15,10 @@ import gwt.shared.model.SDocType;
 import gwt.shared.model.SFinHeader;
 import gwt.shared.model.SFinItem;
 import gwt.shared.model.SJournalHeader;
+import gwt.shared.model.SJournalItem;
 import gwt.shared.model.SJournalType;
 import gwt.shared.model.SFiscalYear;
+import gwt.shared.model.SAccChart.AccType;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Cookies;
@@ -169,14 +172,14 @@ public class Model {
         callback.onFailure(new DataNotFoundException());
     }
 
-    public void addFis(final String comKeyString, final SFiscalYear sFis,
-            final boolean isSetup, final AsyncCallback<String> callback) {
+    public void addFis(final String comKeyString, final int setupType,
+            final SFiscalYear sFis, final AsyncCallback<String> callback) {
         // Check and get login sessionID
         getSID(callback, new GetSIDCallback() {
             @Override
             public void onGet(String sSID, String sID) {
                 // Send request to server 
-                rpcService.addFis(sSID, sID, comKeyString, sFis, isSetup,
+                rpcService.addFis(sSID, sID, comKeyString, setupType, sFis, 
                         new AsyncCallback<String>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -344,6 +347,20 @@ public class Model {
         }
         callback.onFailure(new DataNotFoundException("getJournalType: No data found!"));
     }
+
+    public boolean isJournalTypeNameDuplicate(final String comKeyString,
+            final String fisKeyString, final String keyString,
+            final String name) {
+        SFiscalYear sFis = sComList.getSCom(comKeyString).getSFis(fisKeyString);
+        for (int i = 0; i < sFis.getSJournalTypeList().size(); i++) {
+            SJournalType sExistingJournalType = sFis.getSJournalTypeList().get(i);
+            if (sExistingJournalType.getName().equals(name)
+                    && !sExistingJournalType.getKeyString().equals(keyString)) {
+                return true;
+            }
+        }
+        return false;
+    }
     
     public void addJournalType(final String comKeyString, final String fisKeyString,
             final SJournalType sJournalType, final AsyncCallback<String> callback) {
@@ -453,6 +470,20 @@ public class Model {
             }
         }
         callback.onFailure(new DataNotFoundException("getDocType: No data found!"));
+    }
+    
+    public boolean isDocTypeCodeDuplicate(final String comKeyString,
+            final String fisKeyString, final String keyString,
+            final String code) {
+        SFiscalYear sFis = sComList.getSCom(comKeyString).getSFis(fisKeyString);
+        for (int i = 0; i < sFis.getSDocTypeList().size(); i++) {
+            SDocType sExistingDocType = sFis.getSDocTypeList().get(i);
+            if (sExistingDocType.getCode().equals(code)
+                    && !sExistingDocType.getKeyString().equals(keyString)) {
+                return true;
+            }
+        }
+        return false;
     }
     
     public void addDocType(final String comKeyString, final String fisKeyString,
@@ -572,6 +603,20 @@ public class Model {
         callback.onFailure(new DataNotFoundException("getAccGrp: No data found!"));
     }
     
+    public boolean isAccGrpNameDuplicate(final String comKeyString,
+            final String fisKeyString, final String keyString,
+            final String name) {
+        SFiscalYear sFis = sComList.getSCom(comKeyString).getSFis(fisKeyString);
+        for (int i = 0; i < sFis.getSAccGrpList().size(); i++) {
+            SAccGrp sExistingAccGrp = sFis.getSAccGrpList().get(i);
+            if (sExistingAccGrp.getName().equals(name)
+                    && !sExistingAccGrp.getKeyString().equals(keyString)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
     public void addAccGrp(final String comKeyString, final String fisKeyString,
             final SAccGrp sAccGrp, final AsyncCallback<String> callback) {
         // Check and get login sessionID
@@ -676,7 +721,95 @@ public class Model {
         }
         callback.onFailure(new DataNotFoundException("getAccChart: No data found!"));
     }
+
+    public boolean isAccChartNoDuplicate(final String comKeyString,
+            final String fisKeyString, final String accChartKeyString,
+            final String accChartNo) {
+        SFiscalYear sFis = sComList.getSCom(comKeyString).getSFis(fisKeyString);
+        for (int i = 0; i < sFis.getSAccChartList().size(); i++) {
+            SAccChart sExistingAccChart = sFis.getSAccChartList().get(i);
+            if (sExistingAccChart.getNo().equals(accChartNo)
+                    && !sExistingAccChart.getKeyString().equals(accChartKeyString)) {
+                return true;
+            }
+        }
+        return false;
+    }
     
+    public boolean isAccChartNameDuplicate(final String comKeyString,
+            final String fisKeyString, final String keyString,
+            final String name) {
+        SFiscalYear sFis = sComList.getSCom(comKeyString).getSFis(fisKeyString);
+        for (int i = 0; i < sFis.getSAccChartList().size(); i++) {
+            SAccChart sExistingAccChart = sFis.getSAccChartList().get(i);
+            if (sExistingAccChart.getName().equals(name)
+                    && !sExistingAccChart.getKeyString().equals(keyString)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public boolean isAccChartTypeValid(String comKeyString,
+            final String fisKeyString, String keyString, AccType accType) {
+        if (keyString == null) {
+            throw new IllegalArgumentException();
+        }
+
+        SFiscalYear sFis = sComList.getSCom(comKeyString).getSFis(fisKeyString);
+        
+        if (accType == AccType.CONTROL) {
+            // Entry -> Control: not in use in beginning, finances, journals
+            SAccChart sAccChart = sFis.getSAccChart(keyString);
+            if (!Utils.isZero(sAccChart.getBeginning(), 2)) {
+                return false;
+            }
+
+            for (int i = 0; i < sFis.getSFinHeaderList().size(); i++) {
+                SFinHeader sFinHeader = sFis.getSFinHeaderList().get(i);
+                for (int j = 0; j < sFinHeader.getSFinItemList().size(); j++) {
+                    SFinItem sFinItem = sFinHeader.getSFinItemList().get(j);
+                    if (sAccChart.getKeyString().equals(sFinItem.getArg())) {
+                        return false;
+                    }
+                }
+            }
+            
+            for (int i = 0; i < sFis.getSJournalList().size(); i++) {
+                SJournalHeader sJournal = sFis.getSJournalList().get(i);
+                for (int j = 0; j < sJournal.getItemList().size(); j++) {
+                    SJournalItem sJournalItem = sJournal.getItemList().get(j);
+                    if (sJournalItem.getAccChartKeyString().equals(
+                            sAccChart.getKeyString())) {
+                        return false;
+                    }
+                }
+            }
+        } else if (accType == AccType.ENTRY) {
+            // Control -> Entry: No children
+            for (int i = 0; i < sFis.getSAccChartList().size(); i++) {
+                SAccChart sAccChart = sFis.getSAccChartList().get(i);
+                if (keyString.equals(sAccChart.getParentAccChartKeyString())) {
+                    return false;
+                }
+            }
+        } else {
+            throw new AssertionError();
+        }
+
+        return true;
+    }
+
+    public boolean isAccChartLevelValid(String comKeyString,
+            String fisKeyString, String parentKeyString, int level) {
+        SFiscalYear sFis = sComList.getSCom(comKeyString).getSFis(fisKeyString);
+        SAccChart sParentAccChart = sFis.getSAccChart(parentKeyString);
+        if (sParentAccChart != null && sParentAccChart.getLevel() >= level) {
+            return false;
+        }
+        return true;
+    }
+
     public void addAccChart(final String comKeyString, final String fisKeyString,
             final SAccChart sAccChart, final AsyncCallback<String> callback) {
         // Check and get login sessionID
@@ -1113,7 +1246,22 @@ public class Model {
             }
         });    
     }
-    
+
+    public boolean isJournalNoDuplicate(final String comKeyString,
+            final String fisKeyString, final String keyString,
+            final String docTypeKeyString, final String journalNo) {
+        SFiscalYear sFis = sComList.getSCom(comKeyString).getSFis(fisKeyString);
+        for (int i = 0; i < sFis.getSJournalList().size(); i++) {
+            SJournalHeader sExistingJournal = sFis.getSJournalList().get(i);
+            if (sExistingJournal.getNo().equals(journalNo)
+                    && sExistingJournal.getDocTypeKeyString().equals(docTypeKeyString)
+                    && !sExistingJournal.getKeyString().equals(keyString)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void addJournal(final String comKeyString, final String fisKeyString,
             final SJournalHeader sJournal, final AsyncCallback<String> callback) {
         // Check and get login sessionID

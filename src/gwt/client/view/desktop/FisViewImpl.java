@@ -6,6 +6,7 @@ import gwt.client.def.FisDef;
 import gwt.client.ui.CustomIntBox;
 import gwt.client.view.FisView;
 import gwt.shared.InvalidValueException;
+import gwt.shared.Utils;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.CssResource;
@@ -114,13 +115,14 @@ public class FisViewImpl<T> extends Composite implements FisView<T> {
     }
 
     @Override
-    public void addFisBtnClicked(boolean isSetup) {
+    public void addFisBtnClicked(int setupType) {
         if(!validateInputs()){
             return;
         }
         
-        presenter.addFis(beginMonthIB.getCustomValue(), beginYearIB.getCustomValue(), endMonthIB.getCustomValue(), endYearIB.getCustomValue(),
-                isSetup);
+        presenter.addFis(setupType, beginMonthIB.getCustomValue(),
+                beginYearIB.getCustomValue(), endMonthIB.getCustomValue(),
+                endYearIB.getCustomValue());
     }
 
     @Override
@@ -136,76 +138,91 @@ public class FisViewImpl<T> extends Composite implements FisView<T> {
     private boolean validateInputs(){
         
         boolean isValid = true;
+        int beginMonth = 0;
+        int beginYear = 0;
+        int endMonth = 0;
+        int endYear = 0;
         
         try{
-            int beginMonth = beginMonthIB.getCustomValue();
+            beginMonth = beginMonthIB.getCustomValue();
             // It's 0, if empty
             if(beginMonth == 0){
-                errBeginMonthLb.setText(constants.invalid());
+                errBeginMonthLb.setText(constants.invalidNumberMsg());
                 isValid = false;
             }else{
                 errBeginMonthLb.setText("");
             }
         }catch(NumberFormatException e){
-            errBeginMonthLb.setText(constants.invalid());
+            errBeginMonthLb.setText(constants.invalidNumberMsg());
             isValid = false;
         }catch(InvalidValueException e){
-            errBeginMonthLb.setText(constants.invalid());
+            errBeginMonthLb.setText(constants.invalidNumberMsg());
             isValid = false;
         }
         
         try{
-            int beginYear = beginYearIB.getCustomValue();
+            beginYear = beginYearIB.getCustomValue();
             // It's 0, if empty
             if(beginYear == 0){
-                errBeginYearLb.setText(constants.invalid());
+                errBeginYearLb.setText(constants.invalidNumberMsg());
                 isValid = false;
             }else{
                 errBeginYearLb.setText("");
             }
         }catch(NumberFormatException e){
-            errBeginYearLb.setText(constants.invalid());
+            errBeginYearLb.setText(constants.invalidNumberMsg());
             isValid = false;
         }catch(InvalidValueException e){
-            errBeginYearLb.setText(constants.invalid());
+            errBeginYearLb.setText(constants.invalidNumberMsg());
             isValid = false;
         }
         
         
         try{
-            int endMonth = endMonthIB.getCustomValue();
+            endMonth = endMonthIB.getCustomValue();
             // It's 0, if empty
             if(endMonth == 0){
-                errEndMonthLb.setText(constants.invalid());
+                errEndMonthLb.setText(constants.invalidNumberMsg());
                 isValid = false;
             }else{
                 errEndMonthLb.setText("");
             }
         }catch(NumberFormatException e){
-            errEndMonthLb.setText(constants.invalid());
+            errEndMonthLb.setText(constants.invalidNumberMsg());
             isValid = false;
         }catch(InvalidValueException e){
-            errEndMonthLb.setText(constants.invalid());
+            errEndMonthLb.setText(constants.invalidNumberMsg());
             isValid = false;
         }
         
         try{
-            int endYear = endYearIB.getCustomValue();
+            endYear = endYearIB.getCustomValue();
             // It's 0, if empty
             if(endYear == 0){
-                errEndYearLb.setText(constants.invalid());
+                errEndYearLb.setText(constants.invalidNumberMsg());
                 isValid = false;
             }else{
                 errEndYearLb.setText("");
             }
         }catch(NumberFormatException e){
-            errEndYearLb.setText(constants.invalid());
+            errEndYearLb.setText(constants.invalidNumberMsg());
             isValid = false;
         }catch(InvalidValueException e){
-            errEndYearLb.setText(constants.invalid());
+            errEndYearLb.setText(constants.invalidNumberMsg());
             isValid = false;
         }
-        
+
+        if (isValid) {
+	        if (Utils.compareDate(1, beginMonth, beginYear,
+	        		Utils.getLastDay(endMonth, endYear), endMonth, endYear) > 0) {
+	            errBeginMonthLb.setText(constants.invalidMsg());
+	            errBeginYearLb.setText(constants.invalidMsg());
+	            errEndMonthLb.setText(constants.invalidMsg());
+	            errEndYearLb.setText(constants.invalidMsg());
+	            isValid = false;
+	        }
+        }
+
         return isValid;
     }
 

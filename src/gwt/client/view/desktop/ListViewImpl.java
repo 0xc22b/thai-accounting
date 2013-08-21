@@ -15,6 +15,7 @@ import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -30,6 +31,7 @@ import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.SafeHtmlHeader;
 import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.cellview.client.SimplePager.TextLocation;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
@@ -73,7 +75,9 @@ public class ListViewImpl<L, E> extends Composite implements ListView<L, E> {
     private ListDef<L, E> listDef;
     private SingleSelectionModel<E> selectionModel;
     private ListDataProvider<E> dataProvider;
-    
+
+    private int firstVisibleIndex;
+
     public ListViewImpl(ListDef<L, E> listDef) {
         this.listDef = listDef;
         initialize(); 
@@ -107,11 +111,33 @@ public class ListViewImpl<L, E> extends Composite implements ListView<L, E> {
         dataGrid.getColumnSortList().clear();
         
         dataGrid.setVisible(true);
+
+        if (firstVisibleIndex > 0) {
+            new Timer() {
+                public void run() {
+                    Element el = dataGrid.getRowContainer();
+                    el = el.getParentElement().getParentElement().getParentElement();
+                    el.setScrollTop(firstVisibleIndex);
+                    // Prevent scrolling after delete.
+                    firstVisibleIndex = 0;
+                }
+            }.schedule(1000);
+        }
     }
     
     @Override
     public String getSelectedItemKeyString() {
         return selectionModel.getSelectedObject() == null ? null : listDef.getKeyString(selectionModel.getSelectedObject());
+    }
+
+    @Override
+    public void saveFirstVisibleIndex() {
+        Element el = dataGrid.getRowContainer();
+        for (int i = 0; i < 3; i++) {
+            el = el.getParentElement();
+            if (el == null) return;
+        }
+        firstVisibleIndex = el.getScrollTop();
     }
     
     private void initialize() {

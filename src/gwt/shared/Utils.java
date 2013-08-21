@@ -65,4 +65,12 @@ public class Utils {
             throw new AssertionError(month);
         }
     }
+    
+    public static boolean isZero(double d, int decimals) {
+        return ((int)(d * Math.pow(10, decimals))) == 0;
+    }
+    
+    public static boolean hasSpace(String s) {
+        return s.indexOf(" ") != -1;
+    }
 }

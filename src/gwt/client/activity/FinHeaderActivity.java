@@ -61,12 +61,13 @@ public class FinHeaderActivity extends AbstractActivity implements FinHeaderView
         
         SFinHeader sFinHeader = new SFinHeader(null, name, new Date());
         
+        clientFactory.getShell().setLoading();
         clientFactory.getModel().addFinHeader(allPlace.getComKeyString(),
                 allPlace.getFisKeyString(), sFinHeader, new AsyncCallback<String>() {
             @Override
             public void onFailure(Throwable caught) {
-                // TODO Auto-generated method stub
                 Window.alert(caught.getMessage());
+                setAddFinShell();
             }
             @Override
             public void onSuccess(String result) {
@@ -82,12 +83,13 @@ public class FinHeaderActivity extends AbstractActivity implements FinHeaderView
         
         SFinHeader sFinHeader = new SFinHeader(keyString, name, new Date());
         
+        clientFactory.getShell().setLoading();
         clientFactory.getModel().editFinHeader(allPlace.getComKeyString(),
                 allPlace.getFisKeyString(), sFinHeader, new AsyncCallback<String>() {
             @Override
             public void onFailure(Throwable caught) {
-                // TODO Auto-generated method stub
                 Window.alert(caught.getMessage());
+                setEditFinShell();
             }
             @Override
             public void onSuccess(String result) {
@@ -123,10 +125,7 @@ public class FinHeaderActivity extends AbstractActivity implements FinHeaderView
         assert(comKeyString != null && fisKeyString != null);
         
         // 1. set Shell
-        clientFactory.getShell().reset();
-        clientFactory.getShell().setHLb(constants.fin() + ": " + constants.createNew());
-        clientFactory.getShell().setActBtn(0, constants.save(), ActionNames.OK, true);
-        clientFactory.getShell().setActBtn(1, constants.cancel(), ActionNames.CANCEL, true);
+        setAddFinShell();
         
         // 2. add Shell handlers via EventBus
         ActionEvent.register(eventBus, ActionNames.OK, new ActionEvent.Handler(){
@@ -160,16 +159,20 @@ public class FinHeaderActivity extends AbstractActivity implements FinHeaderView
         });
     }
     
+    private void setAddFinShell() {
+        clientFactory.getShell().reset();
+        clientFactory.getShell().setHLb(constants.fin() + ": " + constants.createNew());
+        clientFactory.getShell().setActBtn(0, constants.save(), ActionNames.OK, true);
+        clientFactory.getShell().setActBtn(1, constants.cancel(), ActionNames.CANCEL, true);
+    }
+    
     private void setEditFin(final String comKeyString, final String fisKeyString,
             final String finHeaderKeyString){
         
         assert(comKeyString != null && fisKeyString != null && finHeaderKeyString != null);
         
         // 1. set Shell
-        clientFactory.getShell().reset();
-        clientFactory.getShell().setHLb(constants.fin() + ": " + constants.edit());
-        clientFactory.getShell().setActBtn(0, constants.save(), ActionNames.OK, true);
-        clientFactory.getShell().setActBtn(1, constants.cancel(), ActionNames.CANCEL, true);
+        setEditFinShell();
         
         // 2. add Shell handlers via EventBus
         ActionEvent.register(eventBus, ActionNames.OK, new ActionEvent.Handler(){
@@ -203,6 +206,13 @@ public class FinHeaderActivity extends AbstractActivity implements FinHeaderView
                         finHeaderKeyString, true);
             }
         });
+    }
+    
+    private void setEditFinShell() {
+        clientFactory.getShell().reset();
+        clientFactory.getShell().setHLb(constants.fin() + ": " + constants.edit());
+        clientFactory.getShell().setActBtn(0, constants.save(), ActionNames.OK, true);
+        clientFactory.getShell().setActBtn(1, constants.cancel(), ActionNames.CANCEL, true);
     }
     
     private void setViewFin(final String comKeyString, final String fisKeyString,

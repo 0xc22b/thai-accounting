@@ -61,7 +61,7 @@ public class ShellImpl extends Composite implements Shell {
         logOutBtn.setText(constants.logOut());
         userBtn.setText(constants.user());
         
-        initializeActBtns(6);
+        initializeActBtns(7);
     }
 
     @Override
@@ -79,6 +79,14 @@ public class ShellImpl extends Composite implements Shell {
     @Override
     public void reset(){
         hLb.setText("Thai SME Accounting");
+        for(int i=0; i<actBar.getWidgetCount(); i++){
+            actBar.getWidget(i).setVisible(false);
+        }
+    }
+    
+    @Override
+    public void setLoading(){
+        hLb.setText(constants.loading());
         for(int i=0; i<actBar.getWidgetCount(); i++){
             actBar.getWidget(i).setVisible(false);
         }

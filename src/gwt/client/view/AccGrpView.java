@@ -5,7 +5,8 @@ import com.google.gwt.user.client.ui.Widget;
 
 public interface AccGrpView<T> extends IsWidget {
 
-    public interface Presenter {      
+    public interface Presenter {    
+        boolean isAccGrpNameDuplicate(String keyString, String name);
         void addAccGrp(String name);
         void editAccGrp(String keyString, String name);
     }
