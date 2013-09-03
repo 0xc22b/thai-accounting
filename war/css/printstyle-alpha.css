@@ -1,195 +1,275 @@
-body, table, table th, table td {
-    font-family: Arial Unicode MS, Arial, sans-serif;
-    font-size: 7pt;
+/*********************************************
+ * Caveats: Need to modify a bit!!!
+ *
+ * 1. Copy all from ReportViewImpl.css
+ * 2. Modify nth-child\(n\) to nth-child(n)
+ *    Tip: Find \ and replace with ''
+ ********************************************* */
+
+/* ===========================================
+   Print styles
+   =========================================== */
+@media print {
+
+    body, table, table th, table td {
+        font-family: BrowalliaUPC, "Arial Unicode MS", Arial, sans-serif;
+        font-size: 12pt;
+    }
+    
+    body {
+        background: none repeat scroll 0 0 #FFFFFF;
+        border: 0 none;
+        color: black;
+        direction: ltr;
+        margin: 0;
+        padding: 0;
+    }
+
+    @page {
+
+    }
 }
 
-body {
-    background: none repeat scroll 0 0 #FFFFFF;
-    border: 0 none;
-    color: black;
-    direction: ltr;
-    margin: 0px;
-    padding: 0;
-}
-
-/*=============================================================================
- * ReportViewImpl.css
- *=============================================================================
- */
+@external .flexTable, .chart, .journal, .ledger, .trial, .finance;
 
 .flexTable {
     width: 100%;
-}
-
-.flexTable thead {
-    display: table-header-group;
 }
 
 .flexTable tr {
     page-break-inside: avoid;
 }
 
+.flexTable thead {
+    display: table-header-group;
+}
+
+.flexTable thead tr th {
+    font-weight: normal;
+}
+
 .flexTable thead tr:last-child th {
     border-bottom: 1px solid #000;
-    font-weight: bold;
     text-align: left;
 }
 
-.chart thead tr:nth-child\(1\) th:nth-child\(1\) {
+
+
+/**************************************************
+ * Account chart
+ *************************************************/
+.chart thead tr:nth-child(1) th:nth-child(1) {
     text-align: left;
 }
 
-.chart thead tr:nth-child\(1\) th:nth-child\(2\) {
+.chart thead tr:nth-child(1) th:nth-child(2) {
     text-align: right;
 }
 
-.chart thead tr:nth-child\(2\) th:nth-child\(1\) {
+.chart thead tr:nth-child(2) th:nth-child(1) {
     text-align: left;
 }
 
-.chart thead tr:last-child th:nth-child\(1\){
-    width: 7%;
-}
-
-.chart thead tr:last-child th:nth-child\(3\){
-    width: 5%;
-}
-
-.chart thead tr:last-child th:nth-child\(4\){
-    width: 5%;
-}
-
-.chart thead tr:last-child th:nth-child\(5\){
-    width: 5%;
-}
-
-.chart thead tr:last-child th:nth-child\(6\){
-    width: 7%;
-}
-
-.journal thead tr:nth-child\(1\) th:nth-child\(1\) {
-    text-align: left;
-}
-
-.journal thead tr:nth-child\(1\) th:nth-child\(2\) {
-    text-align: right;
-}
-
-.journal thead tr:nth-child\(2\) th:nth-child\(1\) {
-    text-align: left;
-}
-
-.journal thead tr:nth-child\(3\) th:nth-child\(1\) {
-    text-align: left;
-}
-
-.journal thead tr:last-child th:nth-child\(1\){
-    width: 7%;
-}
-
-.journal thead tr:last-child th:nth-child\(4\){
+.chart thead tr:last-child th:nth-child(1){
     width: 10%;
+}
+
+.chart thead tr:last-child th:nth-child(3){
+    width: 5%;
+}
+
+.chart thead tr:last-child th:nth-child(4){
+    width: 5%;
+}
+
+.chart thead tr:last-child th:nth-child(5){
+    width: 5%;
+}
+
+.chart thead tr:last-child th:nth-child(6){
+    width: 10%;
+}
+
+
+
+/**************************************************
+ * Journal
+ *************************************************/
+.journal thead tr:nth-child(1) th:nth-child(1) {
+    text-align: left;
+}
+
+.journal thead tr:nth-child(1) th:nth-child(2) {
+    text-align: right;
+}
+
+.journal thead tr:nth-child(2) th:nth-child(1) {
+    text-align: left;
+}
+
+.journal thead tr:nth-child(3) th:nth-child(1) {
+    text-align: left;
+}
+
+.journal thead tr:last-child th:nth-child(1){
+    width: 10%;
+}
+
+.journal thead tr:last-child th:nth-child(4){
+    width: 12%;
     text-align: center !important;
 }
 
-.journal thead tr:last-child th:nth-child\(5\){
-    width: 10%;
+.journal thead tr:last-child th:nth-child(5){
+    width: 12%;
     text-align: center !important;
 }
 
-.journal tbody tr td:nth-child\(4\){
+.journal tbody tr td:nth-child(4){
     text-align: right !important;
 }
 
-.journal tbody tr td:nth-child\(5\){
+.journal tbody tr td:nth-child(5){
     text-align: right !important;
 }
 
-.ledger thead tr:nth-child\(1\) th:nth-child\(1\) {
+
+
+/**************************************************
+ * Ledger
+ *************************************************/
+.ledger thead tr:nth-child(1) th:nth-child(1) {
     text-align: left;
 }
 
-.ledger thead tr:nth-child\(1\) th:nth-child\(2\) {
+.ledger thead tr:nth-child(1) th:nth-child(2) {
     text-align: right;
 }
 
-.ledger thead tr:nth-child\(2\) th:nth-child\(1\) {
+.ledger thead tr:nth-child(2) th:nth-child(1) {
     text-align: left;
 }
 
-.ledger thead tr:nth-child\(3\) th:nth-child\(1\) {
+.ledger thead tr:nth-child(3) th:nth-child(1) {
     text-align: left;
 }
 
-.ledger thead tr:last-child th:nth-child\(1\){
+.ledger thead tr:last-child th:nth-child(1){
     width: 7%;
 }
 
-.ledger thead tr:last-child th:nth-child\(2\){
+.ledger thead tr:last-child th:nth-child(2){
     width: 4%;
 }
 
-.ledger thead tr:last-child th:nth-child\(5\){
+.ledger thead tr:last-child th:nth-child(3){
     width: 10%;
 }
 
-.ledger thead tr:last-child th:nth-child\(6\){
-    width: 10%;
+.ledger thead tr:last-child th:nth-child(5){
+    width: 12%;
+    text-align: center !important;
 }
 
-.ledger thead tr:last-child th:nth-child\(7\){
-    width: 10%;
+.ledger thead tr:last-child th:nth-child(6){
+    width: 12%;
+    text-align: center !important;
 }
 
-.trial thead tr:nth-child\(1\) th:nth-child\(1\) {
+.ledger thead tr:last-child th:nth-child(7){
+    width: 12%;
+    text-align: center !important;
+}
+
+.ledger tbody tr td:nth-child(5){
+    text-align: right !important;
+}
+
+.ledger tbody tr td:nth-child(6){
+    text-align: right !important;
+}
+
+.ledger tbody tr td:nth-child(7){
+    text-align: right !important;
+}
+
+
+
+/**************************************************
+ * Trial
+ *************************************************/
+.trial thead tr:nth-child(1) th:nth-child(1) {
     text-align: left;
 }
 
-.trial thead tr:nth-child\(1\) th:nth-child\(2\) {
+.trial thead tr:nth-child(1) th:nth-child(2) {
     text-align: right;
 }
 
-.trial thead tr:nth-child\(2\) th:nth-child\(1\) {
+.trial thead tr:nth-child(2) th:nth-child(1) {
     text-align: left;
 }
 
-.trial thead tr:nth-child\(3\) th:nth-child\(1\) {
+.trial thead tr:nth-child(3) th:nth-child(1) {
     text-align: left;
 }
 
-.trial thead tr:last-child th:nth-child\(1\){
-    width: 7%;
-}
-
-.trial thead tr:last-child th:nth-child\(3\){
+.trial thead tr:last-child th:nth-child(1){
     width: 10%;
 }
 
-.trial thead tr:last-child th:nth-child\(4\){
+.trial thead tr:last-child th:nth-child(3){
+    width: 12%;
+    text-align: center !important;
+}
+
+.trial thead tr:last-child th:nth-child(4){
+    width: 12%;
+    text-align: center !important;
+}
+.trial tbody tr td:nth-child(3){
+    text-align: right !important;
+}
+
+.trial tbody tr td:nth-child(4){
+    text-align: right !important;
+}
+
+
+
+/**************************************************
+ * Finance
+ *************************************************/
+.finance thead tr:nth-child(1) th:nth-child(1) {
+    text-align: center;
+}
+
+.finance thead tr:nth-child(2) th:nth-child(1) {
+    text-align: center;
+}
+
+.finance thead tr:nth-child(3) th:nth-child(1) {
+    text-align: center;
+}
+
+.finance tbody tr td:nth-child(2){
     width: 10%;
+    text-align: right !important;
 }
 
-.finance thead tr:nth-child\(1\) th:nth-child\(1\) {
-    text-align: center;
-}
 
-.finance thead tr:nth-child\(2\) th:nth-child\(1\) {
-    text-align: center;
-}
 
-.finance thead tr:nth-child\(3\) th:nth-child\(1\) {
-    text-align: center;
+/**************************************************
+ * Helper
+ *************************************************/
+
+@external .right, .center;
+
+.right {
+    text-align: right;
 }
 
 .center {
     text-align: center;
-    border-bottom: 1px double #000;
-}
-
-.uline {
-    border-bottom: 1px solid #000;
-}
-
-.twoulines {
-    border-bottom: 1px double #000;
+    /*border-bottom: 1px double #000;*/
 }

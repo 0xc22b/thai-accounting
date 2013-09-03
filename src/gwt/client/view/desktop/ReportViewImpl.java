@@ -82,7 +82,6 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
     @Override
     public void onPrintBtnClicked() {
         Print.it(DOC_TAG, STYLE_TAG, flexTable);
-        Print.printFrame();
     }
 
     @Override
@@ -451,7 +450,8 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
         flexTable.setHeaderHTML(1, 0, 4, constants.balanceSheet());
         int month = fisDef.getFEndMonth(t);
         int year = fisDef.getFEndYear(t);
-        flexTable.setHeaderHTML(2, 0, 4, constants.end() + genFormalDate(Utils.getLastDay(month, year), month, year));
+        flexTable.setHeaderHTML(2, 0, 4, constants.end() + " "
+                + genFormalDate(Utils.getLastDay(month, year), month, year));
 
         List<CumulativeAC<T>> assetCACs = getCumulativeACList(t,
                 assetACKeyString, null, 0.0);
@@ -513,7 +513,7 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
         flexTable.setHeaderHTML(1, 0, 4, constants.profitReport());
         int month = fisDef.getFEndMonth(t);
         int year = fisDef.getFEndYear(t);
-        flexTable.setHeaderHTML(2, 0, 4, constants.end() + genFormalDate(
+        flexTable.setHeaderHTML(2, 0, 4, constants.end() + " " + genFormalDate(
                 Utils.getLastDay(month, year), month, year));
 
         List<CumulativeAC<T>> incomeCACs = getCumulativeACList(t,
@@ -554,7 +554,7 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
         flexTable.setHeaderHTML(1, 0, 4, constants.costReport());
         int month = fisDef.getFEndMonth(t);
         int year = fisDef.getFEndYear(t);
-        flexTable.setHeaderHTML(2, 0, 4, constants.end() + genFormalDate(
+        flexTable.setHeaderHTML(2, 0, 4, constants.end() + " " + genFormalDate(
                 Utils.getLastDay(month, year), month, year));
 
         List<CumulativeAC<T>> costCACs = getCumulativeACList(t,
@@ -838,7 +838,7 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
         flexTable.setHeaderHTML(1, 0, 4, fisDef.getFinHeaderName(t, finHeaderKeyString));
         int month = fisDef.getFEndMonth(t);
         int year = fisDef.getFEndYear(t);
-        flexTable.setHeaderHTML(2, 0, 4, constants.end() + genFormalDate(Utils.getLastDay(month, year), month, year));
+        flexTable.setHeaderHTML(2, 0, 4, constants.end() + " " + genFormalDate(Utils.getLastDay(month, year), month, year));
         
         int row = 0;
         double var1 = 0;
