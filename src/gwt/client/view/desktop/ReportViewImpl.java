@@ -96,7 +96,7 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
     @Override
     public void setChartData(T t, String comName) {
         flexTable.setStyleName("flexTable chart");
-        
+
         // Set header
         flexTable.setHeaderHTML(0, 0, 3, comName);
         flexTable.setHeaderHTML(0, 1, 3, constants.date() + ": " + genTodayDate());
@@ -132,17 +132,17 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
     }
 
     @Override
-    public void setJourData(T t, String comName, String journalTypeKeyString, int beginDay, int beginMonth, int beginYear, int endDay, int endMonth,
-            int endYear) {
+    public void setJourData(T t, String comName, String journalTypeKeyString, int beginDay,
+            int beginMonth, int beginYear, int endDay, int endMonth, int endYear) {
         flexTable.setStyleName("flexTable journal");
-        
+
         // Set header
         flexTable.setHeaderHTML(0, 0, 3, comName);
         flexTable.setHeaderHTML(0, 1, 2, genTodayDate());
         flexTable.setHeaderHTML(1, 0, 5, fisDef.getJTName(t, journalTypeKeyString));
 
         int[] dates = getBeginDateEndDate(t, beginDay, beginMonth, beginYear, endDay, endMonth, endYear);
-        flexTable.setHeaderHTML(2, 0, 5, constants.begin() + " " + genFormalDate(dates[0], dates[1], dates[2]) + " " + constants.end() + 
+        flexTable.setHeaderHTML(2, 0, 5, constants.begin() + " " + genFormalDate(dates[0], dates[1], dates[2]) + " " + constants.end() +
                 " " + genFormalDate(dates[3], dates[4], dates[5]));
         flexTable.setHeaderHTML(3, 0, 1, constants.accNo());
         flexTable.setHeaderHTML(3, 1, 1, constants.accName());
@@ -231,7 +231,7 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
             int beginYear, int endDay, int endMonth, int endYear,
             boolean doShowAll) {
         flexTable.setStyleName("flexTable ledger");
-        
+
         // Set header
         flexTable.setHeaderHTML(0, 0, 4, comName);
         flexTable.setHeaderHTML(0, 1, 3, genTodayDate());
@@ -241,7 +241,7 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
         String[] accNos = getBeginAccNoEndAccNo(t, beginAccChartKeyString, endAccChartKeyString);
         flexTable.setHeaderHTML(2, 0, 7, constants.accNo() + " " + accNos[0] + " - " + accNos[1] + " (" + genFormalDate(dates[0], dates[1], dates[2])
                 + " - " + genFormalDate(dates[3], dates[4], dates[5]) + ")");
-        
+
         flexTable.setHeaderHTML(3, 0, 1, constants.date());
         flexTable.setHeaderHTML(3, 1, 1, constants.journalType());
         flexTable.setHeaderHTML(3, 2, 1, constants.journalNo());
@@ -301,13 +301,13 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
                     }
                     if (doesHaveData) break;
                 }
-                
+
                 beginning = fisDef.getACBeginning(t, accChartKeyString);
 
                 if (!doShowAll && Utils.isZero(beginning, 2) && !doesHaveData) {
                     continue;
                 }
-                
+
                 formattedBeginning = NumberFormat.getFormat(
                         "#,##0.00;(#,##0.00)").format(Math.abs(beginning));
 
@@ -325,13 +325,13 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
                     String journalKeyString = fisDef.getJKeyString(t, j);
 
                     if ((beginDay > 0 && beginMonth > 0 && beginYear > 0)
-                            && (fisDef.getJCompareDate(t, journalKeyString, 
+                            && (fisDef.getJCompareDate(t, journalKeyString,
                                     beginDay, beginMonth, beginYear) < 0)) {
                         continue;
                     }
 
-                    if ((endDay > 0 && endMonth > 0 && endYear > 0) 
-                            && (fisDef.getJCompareDate(t, journalKeyString, 
+                    if ((endDay > 0 && endMonth > 0 && endYear > 0)
+                            && (fisDef.getJCompareDate(t, journalKeyString,
                                     endDay, endMonth, endYear) > 0)) {
                         continue;
                     }
@@ -379,7 +379,7 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
                 flexTable.setHTML(row, 4, NumberFormat.getFormat("#,##0.00").format(debit));
                 flexTable.setHTML(row, 5, NumberFormat.getFormat("#,##0.00").format(Math.abs(credit)));
                 flexTable.setHTML(row, 6, "&nbsp;");
-                
+
                 flexCellFormatter.addStyleName(row, 4, STYLE_NAME_AULINE);
                 flexCellFormatter.addStyleName(row, 5, STYLE_NAME_AULINE);
                 row += 1;
@@ -413,7 +413,7 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
     @Override
     public void setTrialData(T t, String comName, boolean doShowAll) {
         flexTable.setStyleName("flexTable trial");
-        
+
         // Set header
         flexTable.setHeaderHTML(0, 0, 2, comName);
         flexTable.setHeaderHTML(0, 1, 2, genTodayDate());
@@ -431,7 +431,7 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
         double creditTotal = 0.0;
 
         String formatedAmt;
-        
+
         for (int i = 0; i < fisDef.getACListSize(t); i++) {
             if (fisDef.getACIsEntry(t, i)) {
                 String accChartKeyString = fisDef.getACKeyString(t, i);
@@ -449,7 +449,7 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
                 if (!doShowAll && Utils.isZero(amt, 2)) {
                     continue;
                 }
-                
+
                 formatedAmt = NumberFormat.getFormat("#,##0.00").format(
                         Math.abs(amt));
 
@@ -475,7 +475,7 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
         flexCellFormatter.addStyleName(row, 2, STYLE_NAME_ADULINE);
         flexCellFormatter.addStyleName(row, 3, STYLE_NAME_ADULINE);
     }
-    
+
     @Override
     public void setBalanceData(final T t, final String comName,
             String assetACKeyString, String debtACKeyString,
@@ -483,7 +483,7 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
             String incomeACKeyString, String expenseACKeyString,
             boolean doShowAll, boolean doesSplit) {
         flexTable.setStyleName("flexTable finance");
-        
+
         // Set header
         flexTable.setHeaderHTML(0, 0, 4, comName);
         flexTable.setHeaderHTML(1, 0, 4, constants.balanceSheet());
@@ -496,12 +496,12 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
                 assetACKeyString, null, 0.0);
         List<CumulativeAC<T>> debtCACs = getCumulativeACList(t,
                 debtACKeyString, null, 0.0);
-        
+
         List<CumulativeAC<T>> incomeCACs = getCumulativeACList(t,
                 incomeACKeyString, null, 0.0);
         List<CumulativeAC<T>> expenseCACs = getCumulativeACList(t,
                 expenseACKeyString, null, 0.0);
-        
+
         // Total profit (loss)
         double profit = 0.0;
         if (!incomeCACs.isEmpty()) {
@@ -510,33 +510,33 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
         if (!expenseCACs.isEmpty()) {
             profit += expenseCACs.get(0).amt;
         }
-        
+
         List<CumulativeAC<T>> shareholderCACs = getCumulativeACList(
                 t, shareholderACKeyString, accruedProfitACKeyString, profit);
 
         int row = 0;
         row = printCACs(row, assetCACs, doShowAll, true, true,
-                PrintStyle.DULINE, PrintStyle.AULINE);
+                PrintStyle.DULINE, true, PrintStyle.AULINE);
 
         row = printLine(row, constants.debtAndShareholder(), 0, false,
                 PrintStyle.CENTER, false);
-        
+
         if (doesSplit) {
             flexRowFormatter.addStyleName(row - 1, STYLE_NAME_PAGE_ALWAYS_BREAK_BEFORE);
         }
-        
+
         // Blank line
         row = printLine(row, "&nbsp;", 0.0, false, PrintStyle.BLANK,
                 false);
-        
+
         row = printCACs(row, debtCACs, doShowAll, false, false,
-                PrintStyle.ULINE, PrintStyle.AULINE);
+                PrintStyle.ULINE, true, PrintStyle.AULINE);
         row = printSecondLevelCACs(row, shareholderCACs.get(0),
-                shareholderCACs, doShowAll, false, false, PrintStyle.AULINE);
+                shareholderCACs, doShowAll, false, false, true, PrintStyle.AULINE);
 
         CumulativeAC<T> debtCAC = debtCACs.get(0);
         CumulativeAC<T> shareholderCAC = shareholderCACs.get(0);
-        
+
         // Print total debts and shareholders
         row = printLine(row, constants.total() + constants.debtAndShareholder(),
                 debtCAC.amt + shareholderCAC.amt, true, PrintStyle.DULINE,
@@ -552,7 +552,7 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
             String expenseACKeyString, boolean doShowAll, boolean doesSplit) {
 
         flexTable.setStyleName("flexTable finance");
-        
+
         // Set header
         flexTable.setHeaderHTML(0, 0, 4, comName);
         flexTable.setHeaderHTML(1, 0, 4, constants.profitReport());
@@ -565,7 +565,7 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
                 incomeACKeyString, null, 0.0);
         List<CumulativeAC<T>> expenseCACs = getCumulativeACList(t,
                 expenseACKeyString, null, 0.0);
-        
+
         // Total profit (loss)
         double profit = 0.0;
         if (!incomeCACs.isEmpty()) {
@@ -574,14 +574,14 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
         if (!expenseCACs.isEmpty()) {
             profit += expenseCACs.get(0).amt;
         }
-        
+
         int row = 0;
         row = printCACs(row, incomeCACs, doShowAll, true, false,
-                PrintStyle.AULINE, PrintStyle.BLANK);
+                PrintStyle.AULINE, false, PrintStyle.BLANK);
         int brokenRow = row;
         row = printCACs(row, expenseCACs, doShowAll, true, true,
-                PrintStyle.AULINE, PrintStyle.BLANK);
-        
+                PrintStyle.AULINE, false, PrintStyle.BLANK);
+
         if (doesSplit) {
             flexRowFormatter.addStyleName(brokenRow,
                     STYLE_NAME_PAGE_ALWAYS_BREAK_BEFORE);
@@ -601,7 +601,7 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
             boolean doShowAll) {
 
         flexTable.setStyleName("flexTable finance");
-        
+
         // Set header
         flexTable.setHeaderHTML(0, 0, 4, comName);
         flexTable.setHeaderHTML(1, 0, 4, constants.costReport());
@@ -615,9 +615,9 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
 
         int row = 0;
         row = printSecondLevelCACs(row, costCACs.get(0), costCACs, doShowAll,
-                true, true, PrintStyle.ADULINE);
+                true, true, true, PrintStyle.ADULINE);
     }
-    
+
     private static class CumulativeAC<T> {
         String keyString;
         //String no;
@@ -626,7 +626,7 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
         int level;
         double beginning;
         double amt;
-        
+
         public CumulativeAC(FisDef<T> fisDef, T t, int i) {
             this.keyString = fisDef.getACKeyString(t, i);
             //this.no = fisDef.getACNo(t, i);
@@ -667,9 +667,9 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
             if (fisDef.getACLevel(t, i) <= rootCAC.level) {
                 break;
             }
-            
+
             CumulativeAC<T> cAC = new CumulativeAC<T>(fisDef, t, i);
-            
+
             // Populate values
             if (cAC.type == AccType.ENTRY) {
                 cAC.amt = cAC.beginning;
@@ -683,13 +683,13 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
                     }
                 }
             }
-            
+
             // Adjust values
             if (adjustedACKeyString != null
                     && adjustedACKeyString.equals(cAC.keyString)) {
                 cAC.amt += adjustedValue;
             }
-            
+
             cACList.add(cAC);
         }
 
@@ -698,7 +698,7 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
 
         return cACList;
     }
-    
+
     private double cumulateAmount(CumulativeAC<T> cAC,
             List<CumulativeAC<T>> cACList) {
         if (cAC.type == AccType.ENTRY) {
@@ -711,20 +711,20 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
         }
         return cAC.amt;
     }
-    
+
     private List<CumulativeAC<T>> getDirectCACChildren(CumulativeAC<T> parentCAC,
             List<CumulativeAC<T>> cACList) {
-        
+
         int parentIndex = cACList.indexOf(parentCAC);
         if (parentIndex < 0) return null;
-        
+
         List<CumulativeAC<T>> children = new ArrayList<CumulativeAC<T>>();
         for (int i = parentIndex + 1; i < cACList.size(); i++) {
             CumulativeAC<T> cAC = cACList.get(i);
             if (cAC.level <= parentCAC.level) {
                 break;
             }
-            
+
             if (cAC.level == parentCAC.level + 1) {
                 children.add(cAC);
             }
@@ -734,18 +734,19 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
 
     private int printCACs(int row, List<CumulativeAC<T>> cACs,
             boolean doShowAll, boolean doesPrintRoot, boolean doesShowPlus,
-            PrintStyle totalPrintStyle, PrintStyle secondLevelTotalPrintStyle) {
+            PrintStyle totalPrintStyle, boolean doesPrintSecondLevelTotal,
+            PrintStyle secondLevelTotalPrintStyle) {
         // Shareholder account chart groups is not working with this format of report
         //     as it needs to have some values from other account chart groups.
         //     Use printSecondLevelCACS instead.
 
         // Print total for level 1 and level 2
-        
+
         CumulativeAC<T> rootCAC = cACs.get(0);
         if (doesPrintRoot) {
             row = printLine(row, rootCAC.name, 0, false, PrintStyle.CENTER,
                     doesShowPlus);
-            
+
             // Blank line
             row = printLine(row, "&nbsp;", 0.0, false, PrintStyle.BLANK,
                     doesShowPlus);
@@ -755,7 +756,7 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
                 rootCAC, cACs);
         for (CumulativeAC<T> directCACChild : directCACChildren) {
             row = printSecondLevelCACs(row, directCACChild, cACs, doShowAll,
-                    doesShowPlus, true, secondLevelTotalPrintStyle);
+                    doesShowPlus, true, doesPrintSecondLevelTotal, secondLevelTotalPrintStyle);
         }
 
         // Total for level 1
@@ -765,13 +766,13 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
         // Blank line
         row = printLine(row, "&nbsp;", 0.0, false, PrintStyle.BLANK,
                 doesShowPlus);
-        
+
         return row;
     }
 
     private int printSecondLevelCACs(int row, CumulativeAC<T> secondLevelCAC,
             List<CumulativeAC<T>> cACs, boolean doShowAll, boolean doesShowPlus,
-            boolean doesAdjustLevel, PrintStyle totalPrintStyle) {
+            boolean doesAdjustLevel, boolean doesPrintTotal, PrintStyle totalPrintStyle) {
         int startIndex = cACs.indexOf(secondLevelCAC);
         if (startIndex < 0) {
             return row;
@@ -828,11 +829,11 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
             }
         }
 
-        if (row > startRow) {
+        if (row > startRow && doesPrintTotal) {
             // Always at the first level
             row = printLine(row, constants.total() + secondLevelCAC.name,
                     secondLevelCAC.amt, true, totalPrintStyle, doesShowPlus);
-            
+
             // Blank line
             row = printLine(row, "&nbsp;", 0.0, false, PrintStyle.BLANK,
                     doesShowPlus);
@@ -840,7 +841,7 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
 
         return row;
     }
-    
+
     private boolean isDeepestControlAC(List<CumulativeAC<T>> cACs, int i) {
         CumulativeAC<T> cAC = cACs.get(i);
         for (int j = i + 1; j < cACs.size(); j++) {
@@ -854,7 +855,7 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
         }
         return true;
     }
-    
+
     private boolean isThereSameLevelControlAC(List<CumulativeAC<T>> cACs, int i) {
         CumulativeAC<T> cAC = cACs.get(i);
         // Look down
@@ -868,7 +869,7 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
                 return true;
             }
         }
-        
+
         // Look up
         for (int j = i - 1; j >= 0; j--) {
             CumulativeAC<T> tCAC = cACs.get(j);
@@ -880,35 +881,35 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
                 return true;
             }
         }
-        
+
         return false;
     }
-    
+
     @Override
     public void setFinData(final T t, final String comName, final String finHeaderKeyString) {
         flexTable.setStyleName("flexTable finance");
-        
+
         // Set header
         flexTable.setHeaderHTML(0, 0, 4, comName);
         flexTable.setHeaderHTML(1, 0, 4, fisDef.getFinHeaderName(t, finHeaderKeyString));
         int month = fisDef.getFEndMonth(t);
         int year = fisDef.getFEndYear(t);
         flexTable.setHeaderHTML(2, 0, 4, constants.end() + " " + genFormalDate(Utils.getLastDay(month, year), month, year));
-        
+
         int row = 0;
         double var1 = 0;
         double var2 = 0;
         double var3 = 0;
         double var4 = 0;
         for(int i=0; i<fisDef.getFinItemListSize(t, finHeaderKeyString); i++){
-            
+
             String finItemKeyString = fisDef.getFinItemKeyString(t, finHeaderKeyString, i);
-            
+
             Comm comm = fisDef.getFinItemComm(t, finHeaderKeyString, finItemKeyString);
             PrintCon printCon = fisDef.getFinItemPrintCon(t, finHeaderKeyString, finItemKeyString);
             PrintStyle printStyle = fisDef.getFinItemPrintStyle(t, finHeaderKeyString, finItemKeyString);
             CalCon calCon = fisDef.getFinItemCalCon(t, finHeaderKeyString, finItemKeyString);
-            
+
             if(comm.equals(Comm.TXT)){
                 row = calPrint(printCon, row, fisDef.getFinItemArg(t, finHeaderKeyString,
                         finItemKeyString), 0, false, printStyle);
@@ -938,7 +939,7 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
                 }
 
                 row = calPrint(printCon, row, accChartName, total, true, printStyle);
-                
+
                 var1 = calOperateVar(calCon, fisDef.getFinItemVar1(t, finHeaderKeyString,
                         finItemKeyString), var1, total);
                 var2 = calOperateVar(calCon, fisDef.getFinItemVar2(t, finHeaderKeyString,
@@ -950,7 +951,7 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
             }else if(comm.equals(Comm.PVAR1)){
                 row = calPrint(printCon, row, fisDef.getFinItemArg(t, finHeaderKeyString,
                         finItemKeyString), var1, true, printStyle);
-                
+
                 var1 = calOperateVar(calCon, fisDef.getFinItemVar1(t, finHeaderKeyString,
                         finItemKeyString), var1, var1);
                 var2 = calOperateVar(calCon, fisDef.getFinItemVar2(t, finHeaderKeyString,
@@ -959,11 +960,11 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
                         finItemKeyString), var3, var1);
                 var4 = calOperateVar(calCon, fisDef.getFinItemVar4(t, finHeaderKeyString,
                         finItemKeyString), var4, var1);
-                
+
             }else if(comm.equals(Comm.PVAR2)){
                 row = calPrint(printCon, row, fisDef.getFinItemArg(t, finHeaderKeyString,
                         finItemKeyString), var2, true, printStyle);
-                
+
                 var1 = calOperateVar(calCon, fisDef.getFinItemVar1(t, finHeaderKeyString,
                         finItemKeyString), var1, var2);
                 var2 = calOperateVar(calCon, fisDef.getFinItemVar2(t, finHeaderKeyString,
@@ -975,7 +976,7 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
             }else if(comm.equals(Comm.PVAR3)){
                 row = calPrint(printCon, row, fisDef.getFinItemArg(t, finHeaderKeyString,
                         finItemKeyString), var3, true, printStyle);
-                
+
                 var1 = calOperateVar(calCon, fisDef.getFinItemVar1(t, finHeaderKeyString,
                         finItemKeyString), var1, var3);
                 var2 = calOperateVar(calCon, fisDef.getFinItemVar2(t, finHeaderKeyString,
@@ -987,7 +988,7 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
             }else if(comm.equals(Comm.PVAR4)){
                 row = calPrint(printCon, row, fisDef.getFinItemArg(t, finHeaderKeyString,
                         finItemKeyString), var4, true, printStyle);
-                
+
                 var1 = calOperateVar(calCon, fisDef.getFinItemVar1(t, finHeaderKeyString,
                         finItemKeyString), var1, var4);
                 var2 = calOperateVar(calCon, fisDef.getFinItemVar2(t, finHeaderKeyString,
@@ -1000,9 +1001,9 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
                 throw new AssertionError(comm);
             }
         }
-        
+
     }
-    
+
     private int calPrint(PrintCon printCon, int row, String text, double value,
             boolean isValue, PrintStyle printStyle){
         if(printCon.equals(PrintCon.PRINT)){
@@ -1018,7 +1019,7 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
         }
         return row;
     }
-    
+
     private int printLine(int row, String text, double value, boolean isValue,
             PrintStyle printStyle, boolean doesShowPlus){
         if (printStyle == PrintStyle.CENTER) {
@@ -1027,12 +1028,12 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
             flexCellFormatter.addStyleName(row, 0, STYLE_NAME_CENTER);
         } else {
             flexTable.setHTML(row, 0, text);
-    
+
             if(isValue){
                 value = doesShowPlus ? value : value * -1;
                 String formattedValue = NumberFormat.getFormat(
                         "#,##0.00;(#,##0.00)").format(value);
-                
+
                 flexTable.setHTML(row, 1, formattedValue);
 
                 if (printStyle.equals(PrintStyle.ULINE)) {
@@ -1054,7 +1055,7 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
 
         return row + 1;
     }
-    
+
     private double calOperateVar(CalCon calCon, Operand operand, double var, double operator){
         if(calCon.equals(CalCon.CAL)){
             return operateVar(operand, var, operator);
@@ -1074,7 +1075,7 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
             throw new AssertionError(calCon);
         }
     }
-    
+
     private double operateVar(Operand operand, double var, double operator){
         if(operand.equals(Operand.PLUS)){
             return var + operator;
@@ -1096,7 +1097,7 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
         }
         return s + name;
     }
-    
+
     private String genTodayDate(){
         String dateS = DateTimeFormat.getFormat("dd/MM/yyyy").format(new Date());
         //TODO: Convert to Thai year using company/user settings.
@@ -1104,11 +1105,11 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
         int year = Integer.parseInt(yearS) + 543;
         return dateS.substring(0, 6) + year;
     }
-    
+
     private String genFormalDate(int day, int month, int year){
         String s = "";
         s += day + " ";
-        
+
         switch(month){
         case 1:
             s += constants.jan() + " ";
@@ -1149,12 +1150,12 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
         default:
             throw new AssertionError(month);
         }
-        
+
         s += year;
-        
+
         return s;
     }
-    
+
     private int[] getBeginDateEndDate(T t, int beginDay, int beginMonth, int beginYear, int endDay, int endMonth, int endYear) {
         int[] dates = new int[6];
         dates[0] = beginDay != 0 ? beginDay : 1;
