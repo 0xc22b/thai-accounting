@@ -211,6 +211,9 @@ public interface TConstants extends Constants{
     
     @DefaultStringValue("Show all")
     String showAll();
+    
+    @DefaultStringValue("Does split")
+    String doesSplit();
 
     @DefaultStringValue("Jan")
     String jan();

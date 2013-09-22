@@ -137,14 +137,16 @@ public class ReportActivity extends AbstractActivity implements ReportView.Prese
                     doShowAll);
         } else if (action.equals(AllPlace.BALANCE)) {
             boolean doShowAll = place.getKeyString7().equals(AllPlace.SHOW_ALL);
+            boolean doesSplit = place.getKeyString8().equals(AllPlace.SPLIT);
             clientFactory.getReportView().setBalanceData(sFis, comName,
                     place.getKeyString(), place.getKeyString2(),
                     place.getKeyString3(), place.getKeyString4(),
-                    place.getKeyString5(), place.getKeyString6(), doShowAll);
+                    place.getKeyString5(), place.getKeyString6(), doShowAll, doesSplit);
         } else if (action.equals(AllPlace.PROFIT)) {
             boolean doShowAll = place.getKeyString3().equals(AllPlace.SHOW_ALL);
+            boolean doesSplit = place.getKeyString4().equals(AllPlace.SPLIT);
             clientFactory.getReportView().setProfitData(sFis, comName,
-                    place.getKeyString(), place.getKeyString2(), doShowAll);
+                    place.getKeyString(), place.getKeyString2(), doShowAll, doesSplit);
         } else if (action.equals(AllPlace.COST)) {
             boolean doShowAll = place.getKeyString2().equals(AllPlace.SHOW_ALL);
             clientFactory.getReportView().setCostData(sFis, comName,

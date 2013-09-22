@@ -212,6 +212,10 @@ public class MenuViewImpl<T> extends Composite implements MenuView<T> {
     @UiField
     CheckBox showAllCB;
     @UiField
+    FlowPanel doesSplitPanel;
+    @UiField
+    CheckBox doesSplitCB;
+    @UiField
     Button okBtn;
 
     private static final TConstants constants = TCF.get();
@@ -291,6 +295,7 @@ public class MenuViewImpl<T> extends Composite implements MenuView<T> {
         costAccNoSB.addTextBoxStyleName(style.suggestBox());
         
         showAllCB.setText(constants.showAll());
+        doesSplitCB.setText(constants.doesSplit());
 
         okBtn.setText(constants.ok());
     }
@@ -530,6 +535,7 @@ public class MenuViewImpl<T> extends Composite implements MenuView<T> {
             costPanel.setVisible(false);
             
             showAllPanel.setVisible(false);
+            doesSplitPanel.setVisible(false);
         } else if (reportSubMenuState == ReportSubMenuState.LEDGER) {
             ledgerRepBtn.addStyleName(style.clickedBtn());
             
@@ -545,6 +551,7 @@ public class MenuViewImpl<T> extends Composite implements MenuView<T> {
             costPanel.setVisible(false);
             
             showAllPanel.setVisible(true);
+            doesSplitPanel.setVisible(false);
         } else if (reportSubMenuState == ReportSubMenuState.TRIAL) {
             trialRepBtn.addStyleName(style.clickedBtn());
             
@@ -560,6 +567,7 @@ public class MenuViewImpl<T> extends Composite implements MenuView<T> {
             costPanel.setVisible(false);
             
             showAllPanel.setVisible(true);
+            doesSplitPanel.setVisible(false);
         } else if (reportSubMenuState == ReportSubMenuState.BALANCE) {
             balanceRepBtn.addStyleName(style.clickedBtn());
             
@@ -575,6 +583,7 @@ public class MenuViewImpl<T> extends Composite implements MenuView<T> {
             costPanel.setVisible(false);
             
             showAllPanel.setVisible(true);
+            doesSplitPanel.setVisible(true);
         } else if (reportSubMenuState == ReportSubMenuState.PROFIT) {
             profitRepBtn.addStyleName(style.clickedBtn());
             
@@ -590,6 +599,7 @@ public class MenuViewImpl<T> extends Composite implements MenuView<T> {
             costPanel.setVisible(false);
             
             showAllPanel.setVisible(true);
+            doesSplitPanel.setVisible(true);
         } else if (reportSubMenuState == ReportSubMenuState.COST) {
             costRepBtn.addStyleName(style.clickedBtn());
             
@@ -605,6 +615,7 @@ public class MenuViewImpl<T> extends Composite implements MenuView<T> {
             costPanel.setVisible(true);
             
             showAllPanel.setVisible(true);
+            doesSplitPanel.setVisible(false);
         } else if (reportSubMenuState == ReportSubMenuState.WORK_SHEET) {
             workSheetBtn.addStyleName(style.clickedBtn());
             
@@ -620,6 +631,7 @@ public class MenuViewImpl<T> extends Composite implements MenuView<T> {
             costPanel.setVisible(true);
 
             showAllPanel.setVisible(true);
+            doesSplitPanel.setVisible(false);
         } else {
             throw new AssertionError(reportSubMenuState);
         }
@@ -694,10 +706,11 @@ public class MenuViewImpl<T> extends Composite implements MenuView<T> {
             }
             
             boolean doShowAll = showAllCB.getValue();
+            boolean doesSplit = doesSplitCB.getValue();
 
             presenter.goToBalanceRep(assetACKeyString, debtACKeyString,
                     shareholderACKeyString, accruedProfitACKeyString,
-                    incomeACKeyString, expenseACKeyString, doShowAll);
+                    incomeACKeyString, expenseACKeyString, doShowAll, doesSplit);
         } else if (reportSubMenuState == ReportSubMenuState.PROFIT) {
             String incomeACKeyString = getACKeyString(incomeAccNoSB, incomeAccNoLb);
             String expenseACKeyString = getACKeyString(expenseAccNoSB, expenseAccNoLb);
@@ -708,9 +721,10 @@ public class MenuViewImpl<T> extends Composite implements MenuView<T> {
             }
             
             boolean doShowAll = showAllCB.getValue();
+            boolean doesSplit = doesSplitCB.getValue();
 
             presenter.goToProfitRep(incomeACKeyString,
-                    expenseACKeyString, doShowAll);
+                    expenseACKeyString, doShowAll, doesSplit);
         } else if (reportSubMenuState == ReportSubMenuState.COST) {
             String costACKeyString = getACKeyString(costAccNoSB, costAccNoLb);
             if (costACKeyString == null) {

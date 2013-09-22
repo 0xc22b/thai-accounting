@@ -27,9 +27,9 @@ public interface MenuView<T> extends IsWidget {
         void goToBalanceRep(String assetACKeyString, String debtACKeyString,
                 String shareholderACKeyString, String accruedProfitACKeyString,
                 String incomeACKeyString, String expenseACKeyString,
-                boolean doShowAll);
+                boolean doShowAll, boolean doesSplit);
         void goToProfitRep(String incomeACKeyString,
-                String expenseACKeyString, boolean doShowAll);
+                String expenseACKeyString, boolean doShowAll, boolean doesSplit);
         void goToCostRep(String costACKeyString, boolean doShowAll);
         void goToWorkSheet(String assetACKeyString, String debtACKeyString,
                 String shareholderACKeyString, String accruedProfitACKeyString,

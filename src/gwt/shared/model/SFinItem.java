@@ -29,7 +29,8 @@ public class SFinItem implements Serializable{
         BLANK,
         CENTER,
         ULINE,
-        TWOULINES
+        DULINE,
+        ADULINE
     }
     
     public enum Operand {

@@ -49,6 +49,7 @@ public class AllPlace extends Place {
     // Used by ReportView
     //     whether to show all.
     public static final String SHOW_ALL = "show_all";
+    public static final String SPLIT = "split";
     
     public static class Tokenizer implements PlaceTokenizer<AllPlace> {
 
@@ -95,6 +96,14 @@ public class AllPlace extends Place {
         this.token = place + "/" + action + "/" + comKeyString + "/"
                 + fisKeyString + "/" + keyString + "/" + keyString2 + "/"
                 + keyString3;
+    }
+    
+    public AllPlace(String place, String action, String comKeyString,
+            String fisKeyString, String keyString, String keyString2,
+            String keyString3, String keyString4){
+        this.token = place + "/" + action + "/" + comKeyString + "/"
+                + fisKeyString + "/" + keyString + "/" + keyString2 + "/"
+                + keyString3 + "/" + keyString4;
     }
     
     public AllPlace(String place, String action, String comKeyString, String fisKeyString, String keyString, String keyString2, String keyString3,

@@ -179,6 +179,9 @@
             <g:FlowPanel ui:field="showAllPanel" styleName='{style.row}'>
                 <g:CheckBox ui:field="showAllCB"></g:CheckBox>
             </g:FlowPanel>
+            <g:FlowPanel ui:field="doesSplitPanel" styleName='{style.row}'>
+                <g:CheckBox ui:field="doesSplitCB"></g:CheckBox>
+            </g:FlowPanel>
             <g:Button ui:field="okBtn"></g:Button>
         </g:FlowPanel>
     </g:HTMLPanel>

@@ -159,22 +159,25 @@ public class MenuActivity extends AbstractActivity implements MenuView.Presenter
     @Override
     public void goToBalanceRep(String assetACKeyString, String debtACKeyString,
             String shareholderACKeyString, String accruedProfitACKeyString,
-            String incomeACKeyString, String expenseACKeyString, boolean doShowAll) {
+            String incomeACKeyString, String expenseACKeyString, boolean doShowAll,
+            boolean doesSplit) {
         String doShowAllString = doShowAll ? AllPlace.SHOW_ALL : null;
+        String doesSplitString = doesSplit ? AllPlace.SPLIT : null;
         clientFactory.getPlaceController().goTo(new AllPlace(AllPlace.REPORT,
                 AllPlace.BALANCE, place.getComKeyString(), place.getFisKeyString(),
                 assetACKeyString, debtACKeyString, shareholderACKeyString,
                 accruedProfitACKeyString, incomeACKeyString, expenseACKeyString,
-                doShowAllString));
+                doShowAllString, doesSplitString));
     }
 
     @Override
     public void goToProfitRep(String incomeACKeyString,
-            String expenseACKeyString, boolean doShowAll) {
+            String expenseACKeyString, boolean doShowAll, boolean doesSplit) {
         String doShowAllString = doShowAll ? AllPlace.SHOW_ALL : null;
+        String doesSplitString = doesSplit ? AllPlace.SPLIT : null;
         clientFactory.getPlaceController().goTo(new AllPlace(AllPlace.REPORT,
                 AllPlace.PROFIT, place.getComKeyString(), place.getFisKeyString(),
-                incomeACKeyString, expenseACKeyString, doShowAllString));
+                incomeACKeyString, expenseACKeyString, doShowAllString, doesSplitString));
     }
 
     @Override

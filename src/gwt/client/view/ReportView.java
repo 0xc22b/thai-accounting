@@ -24,9 +24,9 @@ public interface ReportView<T> extends IsWidget {
     void setBalanceData(T t, String comName, String assetACKeyString,
             String debtACKeyString, String shareholderACKeyString,
             String accruedProfitACKeyString, String incomeACKeyString,
-            String expenseACKeyString, boolean doShowAll);
+            String expenseACKeyString, boolean doShowAll, boolean doesSplit);
     void setProfitData(T t, String comName, String incomeACKeyString,
-            String expenseACKeyString, boolean doShowAll);
+            String expenseACKeyString, boolean doShowAll, boolean doesSplit);
     void setCostData(T t, String comName, String costACKeyString,
             boolean doShowAll);
     void setFinData(T t, String comName, String finKeyString);

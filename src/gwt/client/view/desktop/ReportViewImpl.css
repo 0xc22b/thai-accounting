@@ -255,7 +255,7 @@
  * Helper
  *************************************************/
 
-@external .right, .center;
+@external .right, .center, uline, duline, auline, aduline, page-always-break-before;
 
 .right {
 	text-align: right;
@@ -263,5 +263,26 @@
 
 .center {
     text-align: center;
-    /*border-bottom: 1px double #000;*/
+}
+
+.uline {
+    border-bottom: 1px solid #000;
+}
+
+.duline {
+    border-bottom: 3px double #000;
+}
+
+.auline {
+	border-top: 1px solid #000;
+	border-bottom: 1px solid #000;
+}
+
+.aduline {
+    border-top: 1px solid #000;
+    border-bottom: 3px double #000;
+}
+
+.page-always-break-before {
+	page-break-before: always;
 }

@@ -65,11 +65,6 @@ public class CustomFlexTable extends FlexTable {
         getTHeadElement().addClassName(className);
     }
     
-    public void addTRClassName(int row, String className){
-        Element tr = DOM.getChild(getTHeadElement(), row);
-        tr.addClassName(className);
-    }
-    
     public void addTHClassName(int row, int column, String className){
         Element tr = DOM.getChild(getTHeadElement(), row);
         Element th = DOM.getChild(tr, column);

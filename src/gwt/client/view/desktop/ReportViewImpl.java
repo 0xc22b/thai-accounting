@@ -1,9 +1,5 @@
 package gwt.client.view.desktop;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
 import gwt.client.Print;
 import gwt.client.TCF;
 import gwt.client.TConstants;
@@ -19,6 +15,10 @@ import gwt.shared.model.SFinItem.Operand;
 import gwt.shared.model.SFinItem.PrintCon;
 import gwt.shared.model.SFinItem.PrintStyle;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
@@ -27,6 +27,7 @@ import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable.FlexCellFormatter;
+import com.google.gwt.user.client.ui.HTMLTable.RowFormatter;
 import com.google.gwt.user.client.ui.Widget;
 
 public class ReportViewImpl<T> extends Composite implements ReportView<T> {
@@ -45,14 +46,21 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
     private static final String DOC_TAG = "<!doctype html>";
     private static final String STYLE_TAG = "<link rel=stylesheet type=text/css media=all href=/css/printstyle-alpha.css>";
 
+    private static final String STYLE_NAME_RIGHT = "right";
     private static final String STYLE_NAME_CENTER = "center";
-    
+    private static final String STYLE_NAME_ULINE = "uline";
+    private static final String STYLE_NAME_DULINE = "duline";
+    private static final String STYLE_NAME_AULINE = "auline";
+    private static final String STYLE_NAME_ADULINE = "aduline";
+    private static final String STYLE_NAME_PAGE_ALWAYS_BREAK_BEFORE = "page-always-break-before";
+
     private static final TConstants constants = TCF.get();
 
     private FisDef<T> fisDef;
 
     private CustomFlexTable flexTable;
     private FlexCellFormatter flexCellFormatter;
+    private RowFormatter flexRowFormatter;
 
     public ReportViewImpl(FisDef<T> fisDef) {
 
@@ -65,6 +73,7 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
         initWidget(flexTable);
 
         flexCellFormatter = flexTable.getFlexCellFormatter();
+        flexRowFormatter = flexTable.getRowFormatter();
     }
 
     @Override
@@ -188,6 +197,10 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
                 flexTable.setHTML(row, 2, constants.total());
                 flexTable.setHTML(row, 3, NumberFormat.getFormat("#,##0.00").format(debit));
                 flexTable.setHTML(row, 4, NumberFormat.getFormat("#,##0.00").format(Math.abs(credit)));
+
+                flexCellFormatter.addStyleName(row, 3, STYLE_NAME_AULINE);
+                flexCellFormatter.addStyleName(row, 4, STYLE_NAME_AULINE);
+
                 row += 1;
 
                 debitTotal += debit;
@@ -197,10 +210,19 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
 
         flexTable.setHTML(row, 0, "&nbsp;");
         flexTable.setHTML(row, 1, "&nbsp;");
+        flexTable.setHTML(row, 2, "&nbsp;");
+        flexTable.setHTML(row, 3, "&nbsp;");
+        flexTable.setHTML(row, 4, "&nbsp;");
+        row += 1;
+
+        flexTable.setHTML(row, 0, "&nbsp;");
+        flexTable.setHTML(row, 1, "&nbsp;");
         flexTable.setHTML(row, 2, constants.wholeTotal());
         flexTable.setHTML(row, 3, NumberFormat.getFormat("#,##0.00").format(debitTotal));
         flexTable.setHTML(row, 4, NumberFormat.getFormat("#,##0.00").format(Math.abs(creditTotal)));
 
+        flexCellFormatter.addStyleName(row, 3, STYLE_NAME_DULINE);
+        flexCellFormatter.addStyleName(row, 4, STYLE_NAME_DULINE);
     }
 
     @Override
@@ -293,7 +315,7 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
                         + fisDef.getACName(t, accChartKeyString));
                 flexCellFormatter.setColSpan(row, 0, 6);
                 flexTable.setHTML(row, 1, formattedBeginning);
-                flexCellFormatter.addStyleName(row, 1, "right");
+                flexCellFormatter.addStyleName(row, 1, STYLE_NAME_RIGHT);
 
                 row += 1;
 
@@ -357,11 +379,22 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
                 flexTable.setHTML(row, 4, NumberFormat.getFormat("#,##0.00").format(debit));
                 flexTable.setHTML(row, 5, NumberFormat.getFormat("#,##0.00").format(Math.abs(credit)));
                 flexTable.setHTML(row, 6, "&nbsp;");
+                
+                flexCellFormatter.addStyleName(row, 4, STYLE_NAME_AULINE);
+                flexCellFormatter.addStyleName(row, 5, STYLE_NAME_AULINE);
+                row += 1;
+
+                flexTable.setHTML(row, 0, "&nbsp;");
+                flexTable.setHTML(row, 1, "&nbsp;");
+                flexTable.setHTML(row, 2, "&nbsp;");
+                flexTable.setHTML(row, 3, "&nbsp;");
+                flexTable.setHTML(row, 4, "&nbsp;");
+                flexTable.setHTML(row, 5, "&nbsp;");
+                flexTable.setHTML(row, 6, "&nbsp;");
                 row += 1;
 
                 debitTotal += debit;
                 creditTotal += credit;
-
             }
         }
 
@@ -372,6 +405,9 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
         flexTable.setHTML(row, 4, NumberFormat.getFormat("#,##0.00").format(debitTotal));
         flexTable.setHTML(row, 5, NumberFormat.getFormat("#,##0.00").format(Math.abs(creditTotal)));
         flexTable.setHTML(row, 6, "&nbsp;");
+
+        flexCellFormatter.addStyleName(row, 4, STYLE_NAME_DULINE);
+        flexCellFormatter.addStyleName(row, 5, STYLE_NAME_DULINE);
     }
 
     @Override
@@ -435,6 +471,9 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
         flexTable.setHTML(row, 1, constants.wholeTotal());
         flexTable.setHTML(row, 2, NumberFormat.getFormat("#,##0.00").format(debitTotal));
         flexTable.setHTML(row, 3, NumberFormat.getFormat("#,##0.00").format(Math.abs(creditTotal)));
+
+        flexCellFormatter.addStyleName(row, 2, STYLE_NAME_ADULINE);
+        flexCellFormatter.addStyleName(row, 3, STYLE_NAME_ADULINE);
     }
     
     @Override
@@ -442,7 +481,7 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
             String assetACKeyString, String debtACKeyString,
             String shareholderACKeyString, String accruedProfitACKeyString,
             String incomeACKeyString, String expenseACKeyString,
-            boolean doShowAll) {
+            boolean doShowAll, boolean doesSplit) {
         flexTable.setStyleName("flexTable finance");
         
         // Set header
@@ -476,27 +515,31 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
                 t, shareholderACKeyString, accruedProfitACKeyString, profit);
 
         int row = 0;
-        row = printCACs(row, assetCACs, doShowAll, true, true);
+        row = printCACs(row, assetCACs, doShowAll, true, true, PrintStyle.DULINE);
 
         row = printLine(row, constants.debtAndShareholder(), 0, false,
                 PrintStyle.CENTER, false);
+        
+        if (doesSplit) {
+            flexRowFormatter.addStyleName(row - 1, STYLE_NAME_PAGE_ALWAYS_BREAK_BEFORE);
+        }
+        
         // Blank line
         row = printLine(row, "&nbsp;", 0.0, false, PrintStyle.BLANK,
                 false);
         
-        row = printCACs(row, debtCACs, doShowAll, false, false);        
+        row = printCACs(row, debtCACs, doShowAll, false, false, PrintStyle.ULINE);
         row = printSecondLevelCACs(row, shareholderCACs.get(0),
-                shareholderCACs, doShowAll, false, false);
+                shareholderCACs, doShowAll, false, false, PrintStyle.ULINE);
 
         CumulativeAC<T> debtCAC = debtCACs.get(0);
         CumulativeAC<T> shareholderCAC = shareholderCACs.get(0);
         
         // Print total debts and shareholders
         row = printLine(row, constants.total() + constants.debtAndShareholder(),
-                debtCAC.amt + shareholderCAC.amt, true, PrintStyle.BLANK,
+                debtCAC.amt + shareholderCAC.amt, true, PrintStyle.DULINE,
                 false);
-        
-        
+
         // Blank line
         row = printLine(row, "&nbsp;", 0.0, false, PrintStyle.BLANK,
                 false);
@@ -504,7 +547,7 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
 
     @Override
     public void setProfitData(T t, String comName, String incomeACKeyString,
-            String expenseACKeyString, boolean doShowAll) {
+            String expenseACKeyString, boolean doShowAll, boolean doesSplit) {
 
         flexTable.setStyleName("flexTable finance");
         
@@ -531,12 +574,17 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
         }
         
         int row = 0;
-        row = printCACs(row, incomeCACs, doShowAll, true, false);
-        row = printCACs(row, expenseCACs, doShowAll, true, true);
+        row = printCACs(row, incomeCACs, doShowAll, true, false, PrintStyle.ULINE);
+        int brokenRow = row;
+        row = printCACs(row, expenseCACs, doShowAll, true, true, PrintStyle.ULINE);
+        
+        if (doesSplit) {
+            flexRowFormatter.addStyleName(brokenRow, STYLE_NAME_PAGE_ALWAYS_BREAK_BEFORE);
+        }
 
         // Print total profit
         row = printLine(row, constants.profit(), profit, true,
-                PrintStyle.BLANK, false);
+                PrintStyle.DULINE, false);
 
         // Blank line
         row = printLine(row, "&nbsp;", 0.0, false, PrintStyle.BLANK,
@@ -559,9 +607,10 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
 
         List<CumulativeAC<T>> costCACs = getCumulativeACList(t,
                 costACKeyString, null, 0.0);
+
         int row = 0;
         row = printSecondLevelCACs(row, costCACs.get(0), costCACs, doShowAll,
-                true, false);
+                true, true, PrintStyle.ADULINE);
     }
     
     private static class CumulativeAC<T> {
@@ -679,7 +728,8 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
     }
 
     private int printCACs(int row, List<CumulativeAC<T>> cACs,
-            boolean doShowAll, boolean doesPrintRoot, boolean doesShowPlus) {
+            boolean doShowAll, boolean doesPrintRoot, boolean doesShowPlus,
+            PrintStyle totalPrintStyle) {
         // Shareholder account chart groups is not working with this format of report
         //     as it needs to have some values from other account chart groups.
         //     Use printSecondLevelCACS instead.
@@ -700,13 +750,13 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
                 rootCAC, cACs);
         for (CumulativeAC<T> directCACChild : directCACChildren) {
             row = printSecondLevelCACs(row, directCACChild, cACs, doShowAll,
-                    doesShowPlus, true);
+                    doesShowPlus, true, PrintStyle.ULINE);
         }
 
         // Total for level 1
         row = printLine(row, constants.total() + rootCAC.name, rootCAC.amt, true,
-                PrintStyle.BLANK, doesShowPlus);
-        
+                totalPrintStyle, doesShowPlus);
+
         // Blank line
         row = printLine(row, "&nbsp;", 0.0, false, PrintStyle.BLANK,
                 doesShowPlus);
@@ -716,7 +766,7 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
 
     private int printSecondLevelCACs(int row, CumulativeAC<T> secondLevelCAC,
             List<CumulativeAC<T>> cACs, boolean doShowAll, boolean doesShowPlus,
-            boolean doesAdjustLevel) {
+            boolean doesAdjustLevel, PrintStyle totalPrintStyle) {
         int startIndex = cACs.indexOf(secondLevelCAC);
         if (startIndex < 0) {
             return row;
@@ -776,7 +826,7 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
         if (row > startRow) {
             // Always at the first level
             row = printLine(row, constants.total() + secondLevelCAC.name,
-                    secondLevelCAC.amt, true, PrintStyle.BLANK, doesShowPlus);
+                    secondLevelCAC.amt, true, totalPrintStyle, doesShowPlus);
             
             // Blank line
             row = printLine(row, "&nbsp;", 0.0, false, PrintStyle.BLANK,
@@ -966,20 +1016,10 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
     
     private int printLine(int row, String text, double value, boolean isValue,
             PrintStyle printStyle, boolean doesShowPlus){
-        //String uLine = "";
         if (printStyle == PrintStyle.CENTER) {
             flexTable.setHTML(row, 0, text);
             flexTable.setHTML(row, 1, "&nbsp;");
             flexCellFormatter.addStyleName(row, 0, STYLE_NAME_CENTER);
-            /*row += 1;
-
-            for (int i = 0; i < text.length(); i++) {
-                uLine += "-";
-            }
-            
-            flexTable.setHTML(row, 0, uLine);
-            flexTable.setHTML(row, 1, "&nbsp;");
-            flexCellFormatter.addStyleName(row, 0, STYLE_NAME_CENTER);*/
         } else {
             flexTable.setHTML(row, 0, text);
     
@@ -989,20 +1029,14 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
                         "#,##0.00;(#,##0.00)").format(value);
                 
                 flexTable.setHTML(row, 1, formattedValue);
-    
-                /*if (printStyle.equals(PrintStyle.ULINE)
-                        || printStyle.equals(PrintStyle.TWOULINES)) {
-                    row += 1;
 
-                    if (printStyle.equals(PrintStyle.ULINE)) {
-                        uLine = "--------------";
-                    } else if (printStyle.equals(PrintStyle.TWOULINES)) {
-                        uLine = "==============";
-                    }
-
-                    flexTable.setHTML(row, 0, "&nbsp;");
-                    flexTable.setHTML(row, 1, uLine);
-                }*/
+                if (printStyle.equals(PrintStyle.ULINE)) {
+                    flexCellFormatter.addStyleName(row, 1, STYLE_NAME_ULINE);
+                } else if (printStyle.equals(PrintStyle.DULINE)) {
+                    flexCellFormatter.addStyleName(row, 1, STYLE_NAME_DULINE);
+                } else if (printStyle.equals(PrintStyle.ADULINE)) {
+                    flexCellFormatter.addStyleName(row, 1, STYLE_NAME_ADULINE);
+                }
             }else{
                 flexTable.setHTML(row, 1, "&nbsp;");
             }
