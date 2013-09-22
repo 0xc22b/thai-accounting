@@ -515,7 +515,8 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
                 t, shareholderACKeyString, accruedProfitACKeyString, profit);
 
         int row = 0;
-        row = printCACs(row, assetCACs, doShowAll, true, true, PrintStyle.DULINE);
+        row = printCACs(row, assetCACs, doShowAll, true, true,
+                PrintStyle.DULINE, PrintStyle.AULINE);
 
         row = printLine(row, constants.debtAndShareholder(), 0, false,
                 PrintStyle.CENTER, false);
@@ -528,9 +529,10 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
         row = printLine(row, "&nbsp;", 0.0, false, PrintStyle.BLANK,
                 false);
         
-        row = printCACs(row, debtCACs, doShowAll, false, false, PrintStyle.ULINE);
+        row = printCACs(row, debtCACs, doShowAll, false, false,
+                PrintStyle.ULINE, PrintStyle.AULINE);
         row = printSecondLevelCACs(row, shareholderCACs.get(0),
-                shareholderCACs, doShowAll, false, false, PrintStyle.ULINE);
+                shareholderCACs, doShowAll, false, false, PrintStyle.AULINE);
 
         CumulativeAC<T> debtCAC = debtCACs.get(0);
         CumulativeAC<T> shareholderCAC = shareholderCACs.get(0);
@@ -574,12 +576,15 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
         }
         
         int row = 0;
-        row = printCACs(row, incomeCACs, doShowAll, true, false, PrintStyle.ULINE);
+        row = printCACs(row, incomeCACs, doShowAll, true, false,
+                PrintStyle.AULINE, PrintStyle.BLANK);
         int brokenRow = row;
-        row = printCACs(row, expenseCACs, doShowAll, true, true, PrintStyle.ULINE);
+        row = printCACs(row, expenseCACs, doShowAll, true, true,
+                PrintStyle.AULINE, PrintStyle.BLANK);
         
         if (doesSplit) {
-            flexRowFormatter.addStyleName(brokenRow, STYLE_NAME_PAGE_ALWAYS_BREAK_BEFORE);
+            flexRowFormatter.addStyleName(brokenRow,
+                    STYLE_NAME_PAGE_ALWAYS_BREAK_BEFORE);
         }
 
         // Print total profit
@@ -729,7 +734,7 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
 
     private int printCACs(int row, List<CumulativeAC<T>> cACs,
             boolean doShowAll, boolean doesPrintRoot, boolean doesShowPlus,
-            PrintStyle totalPrintStyle) {
+            PrintStyle totalPrintStyle, PrintStyle secondLevelTotalPrintStyle) {
         // Shareholder account chart groups is not working with this format of report
         //     as it needs to have some values from other account chart groups.
         //     Use printSecondLevelCACS instead.
@@ -750,7 +755,7 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
                 rootCAC, cACs);
         for (CumulativeAC<T> directCACChild : directCACChildren) {
             row = printSecondLevelCACs(row, directCACChild, cACs, doShowAll,
-                    doesShowPlus, true, PrintStyle.ULINE);
+                    doesShowPlus, true, secondLevelTotalPrintStyle);
         }
 
         // Total for level 1
@@ -1034,6 +1039,8 @@ public class ReportViewImpl<T> extends Composite implements ReportView<T> {
                     flexCellFormatter.addStyleName(row, 1, STYLE_NAME_ULINE);
                 } else if (printStyle.equals(PrintStyle.DULINE)) {
                     flexCellFormatter.addStyleName(row, 1, STYLE_NAME_DULINE);
+                } else if (printStyle.equals(PrintStyle.AULINE)) {
+                    flexCellFormatter.addStyleName(row, 1, STYLE_NAME_AULINE);
                 } else if (printStyle.equals(PrintStyle.ADULINE)) {
                     flexCellFormatter.addStyleName(row, 1, STYLE_NAME_ADULINE);
                 }

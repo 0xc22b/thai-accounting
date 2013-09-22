@@ -30,6 +30,7 @@ public class SFinItem implements Serializable{
         CENTER,
         ULINE,
         DULINE,
+        AULINE,
         ADULINE
     }
     
