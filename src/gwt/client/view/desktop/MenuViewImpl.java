@@ -654,6 +654,7 @@ public class MenuViewImpl<T> extends Composite implements MenuView<T> {
             }
 
             String beginAccChartKeyString = null;
+            errBeginAccNoLb.setText("");
             try {
                 beginAccChartKeyString = beginAccNoSB.getKey();
             } catch (InvalidValueException e) {
@@ -662,6 +663,7 @@ public class MenuViewImpl<T> extends Composite implements MenuView<T> {
             }
 
             String endAccChartKeyString = null;
+            errEndAccNoLb.setText("");
             try {
                 endAccChartKeyString = endAccNoSB.getKey();
             } catch (InvalidValueException e) {
