@@ -7,8 +7,17 @@ import gwt.client.event.ActionEvent;
 import gwt.client.event.ActionNames;
 import gwt.client.place.AllPlace;
 import gwt.client.view.ReportView;
+import gwt.shared.Utils;
+import gwt.shared.model.SAccAmt;
+import gwt.shared.model.SAccChart;
+import gwt.shared.model.SAccChart.AccType;
 import gwt.shared.model.SCom;
 import gwt.shared.model.SFiscalYear;
+import gwt.shared.model.SJournalHeader;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
@@ -20,11 +29,11 @@ import com.google.web.bindery.event.shared.ResettableEventBus;
 public class ReportActivity extends AbstractActivity implements ReportView.Presenter {
 
     private static final TConstants constants = TCF.get();
-    
+
     private AllPlace place;
     private ClientFactory clientFactory;
     private ResettableEventBus eventBus;
-    
+
     public ReportActivity(AllPlace place, ClientFactory clientFactory) {
         this.place = place;
         this.clientFactory = clientFactory;
@@ -35,6 +44,7 @@ public class ReportActivity extends AbstractActivity implements ReportView.Prese
     public void start(AcceptsOneWidget panel, EventBus _eventBus) {
         clientFactory.getReportView().init(this);
         panel.setWidget(clientFactory.getReportView().asWidget());
+
         getData();
     }
 
@@ -45,18 +55,18 @@ public class ReportActivity extends AbstractActivity implements ReportView.Prese
 
     @Override
     public void onCancel() {
-        
+
     }
-    
+
     @Override
     public void onStop() {
         eventBus.removeHandlers();
     }
-    
+
     private void getData(){
         // 1. Waiting for getting data
         clientFactory.getShell().setLoading();
-        
+
         // 2. Get data
         clientFactory.getModel().getCom(place.getComKeyString(),
                 new AsyncCallback<SCom>() {
@@ -67,7 +77,7 @@ public class ReportActivity extends AbstractActivity implements ReportView.Prese
 
             @Override
             public void onSuccess(final SCom sCom) {
-                clientFactory.getModel().getJournal(place.getComKeyString(),
+                clientFactory.getModel().getAccChart(place.getComKeyString(),
                         place.getFisKeyString(), null, new AsyncCallback<SFiscalYear>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -79,7 +89,7 @@ public class ReportActivity extends AbstractActivity implements ReportView.Prese
                         // 3. set Shell and actBtns
                         // 4. add Shell handlers via EventBus
                         initShell();
-                        
+
                         // 5. Update view
                         initView(sFis, sCom.getName());
                     }
@@ -87,15 +97,15 @@ public class ReportActivity extends AbstractActivity implements ReportView.Prese
             }
         });
     }
-    
+
     private void initShell(){
-        
+
         clientFactory.getShell().reset();
         clientFactory.getShell().setHLb(constants.reports());
         clientFactory.getShell().setActBtn(0, constants.print(), ActionNames.PRINT, true);
         clientFactory.getShell().setActBtn(1, constants.back(), ActionNames.BACK, true);
-        
-        
+
+
         ActionEvent.register(eventBus, ActionNames.PRINT, new ActionEvent.Handler(){
             @Override
             public void onAction(ActionEvent event) {
@@ -110,57 +120,211 @@ public class ReportActivity extends AbstractActivity implements ReportView.Prese
                         place.getFisKeyString()));
             }
         });
-        
+
     }
-    
-    private void initView(SFiscalYear sFis, String comName){
-        // case action
-        // some cases ask period!
+
+    private void initView(final SFiscalYear sFis, final String comName){
+
         String action = place.getAction();
-        
+
         if (action.equals(AllPlace.CHART)) {
+
             clientFactory.getReportView().setChartData(sFis, comName);
+
         } else if (action.equals(AllPlace.JOUR)) {
-            int[] date = extractJournalDate();
-            clientFactory.getReportView().setJourData(sFis, comName,
-                    place.getKeyString(), date[0], date[1], date[2], date[3],
-                    date[4], date[5]);
+
+            final String comKeyString = place.getComKeyString();
+            final String fisKeyString = place.getFisKeyString();
+            final String journalTypeKeyString = place.getKeyString();
+
+            final String journalTypeName = sFis.getSJournalType(journalTypeKeyString).getName();
+
+            int[] dates = extractJournalDate();
+            if (dates[0] == 0) {
+                dates[0] = 1;
+                dates[1] = sFis.getBeginMonth();
+                dates[2] = sFis.getBeginYear();
+                dates[3] = Utils.getLastDay(sFis.getEndMonth(), sFis.getEndYear());
+                dates[4] = sFis.getEndMonth();
+                dates[5] = sFis.getEndYear();
+            }
+
+            int[] beginDate = {dates[0], dates[1], dates[2]};
+            int[] endDate = {dates[3], dates[4], dates[5]};
+
+            final ArrayList<int[]> months = Utils.findAllMonths(beginDate, endDate);
+
+            final ArrayList<ArrayList<SJournalHeader>> monthSJournalList =
+                    new ArrayList<ArrayList<SJournalHeader>>();
+
+            for (int[] month : months) {
+                clientFactory.getModel().getJournalListWithJT(comKeyString, fisKeyString,
+                        journalTypeKeyString, month[1], month[2],
+                        new AsyncCallback<ArrayList<SJournalHeader>>() {
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        Window.alert(caught.getMessage());
+                    }
+
+                    @Override
+                    public void onSuccess(ArrayList<SJournalHeader> result) {
+
+                        monthSJournalList.add(result);
+
+                        if (monthSJournalList.size() == months.size()) {
+                            clientFactory.getReportView().setJourData(sFis, monthSJournalList,
+                                    months, comName, journalTypeName);
+                        }
+                    }
+                });
+            }
         } else if (action.equals(AllPlace.LEDGER)) {
-            int[] date = extractLedgerDate();
-            boolean doShowAll = place.getKeyString9().equals(AllPlace.SHOW_ALL);
-            clientFactory.getReportView().setLedgerData(sFis, comName,
-                    place.getKeyString(), place.getKeyString2(), date[0],
-                    date[1], date[2], date[3], date[4], date[5], doShowAll);
+
+            String comKeyString = place.getComKeyString();
+            String fisKeyString = place.getFisKeyString();
+
+            String beginACKeyString = place.getKeyString();
+            String endACKeyString = place.getKeyString2();
+
+            // Assume that Acc chart is sorted
+            List<SAccChart> sAccChartList = sFis.getSAccChartList();
+
+            if (beginACKeyString.equals(AllPlace.FIRST)) {
+                for (SAccChart sAccChart : sAccChartList) {
+                    if (sAccChart.getType() == AccType.ENTRY) {
+                        beginACKeyString = sAccChart.getKeyString();
+                        break;
+                    }
+                }
+            }
+
+            if (endACKeyString.equals(AllPlace.LAST)) {
+                for (int i = sAccChartList.size() - 1; i >= 0; i--) {
+                    SAccChart sAccChart = sAccChartList.get(i);
+                    if (sAccChart.getType() == AccType.ENTRY) {
+                        endACKeyString = sAccChart.getKeyString();
+                        break;
+                    }
+                }
+            }
+
+            final String beginACNo = sFis.getSAccChart(beginACKeyString).getNo();
+            final String endACNo = sFis.getSAccChart(endACKeyString).getNo();
+
+            // Begin and end dates
+            final int[] dates = extractLedgerDate();
+            if (dates[0] == 0) {
+                dates[0] = 1;
+                dates[1] = sFis.getBeginMonth();
+                dates[2] = sFis.getBeginYear();
+                dates[3] = Utils.getLastDay(sFis.getEndMonth(), sFis.getEndYear());
+                dates[4] = sFis.getEndMonth();
+                dates[5] = sFis.getEndYear();
+            }
+
+            final boolean doShowAll = place.getKeyString9().equals(AllPlace.SHOW_ALL);
+
+            clientFactory.getModel().getJournalListWithAC(comKeyString, fisKeyString, beginACNo,
+                    endACNo, dates, new AsyncCallback<HashMap<String, SJournalHeader>>() {
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    Window.alert(caught.getMessage());
+                }
+
+                @Override
+                public void onSuccess(HashMap<String, SJournalHeader> result) {
+
+                    clientFactory.getReportView().setLedgerData(sFis, result, dates, comName,
+                            beginACNo, endACNo, doShowAll);
+                }
+            });
+
         } else if (action.equals(AllPlace.TRIAL)){
-            boolean doShowAll = place.getKeyString().equals(AllPlace.SHOW_ALL);
-            clientFactory.getReportView().setTrialData(sFis, comName,
-                    doShowAll);
+
+            clientFactory.getModel().getAccAmtMap(place.getComKeyString(),
+                    place.getFisKeyString(), new AsyncCallback<HashMap<String, SAccAmt>>() {
+
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            Window.alert(caught.getMessage());
+                        }
+
+                        @Override
+                        public void onSuccess(HashMap<String, SAccAmt> result) {
+
+                            boolean doShowAll = place.getKeyString().equals(AllPlace.SHOW_ALL);
+
+                            clientFactory.getReportView().setTrialData(sFis, result, comName,
+                                    doShowAll);
+                        }
+                    });
         } else if (action.equals(AllPlace.BALANCE)) {
-            boolean doShowAll = place.getKeyString7().equals(AllPlace.SHOW_ALL);
-            boolean doesSplit = place.getKeyString8().equals(AllPlace.SPLIT);
-            clientFactory.getReportView().setBalanceData(sFis, comName,
-                    place.getKeyString(), place.getKeyString2(),
-                    place.getKeyString3(), place.getKeyString4(),
-                    place.getKeyString5(), place.getKeyString6(), doShowAll, doesSplit);
+
+            clientFactory.getModel().getAccAmtMap(place.getComKeyString(),
+                    place.getFisKeyString(), new AsyncCallback<HashMap<String, SAccAmt>>() {
+
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            Window.alert(caught.getMessage());
+                        }
+
+                        @Override
+                        public void onSuccess(HashMap<String, SAccAmt> result) {
+
+                            boolean doShowAll = place.getKeyString7().equals(AllPlace.SHOW_ALL);
+                            boolean doesSplit = place.getKeyString8().equals(AllPlace.SPLIT);
+                            clientFactory.getReportView().setBalanceData(sFis, result, comName,
+                                    place.getKeyString(), place.getKeyString2(),
+                                    place.getKeyString3(), place.getKeyString4(),
+                                    place.getKeyString5(), place.getKeyString6(), doShowAll,
+                                    doesSplit);
+                        }
+                    });
         } else if (action.equals(AllPlace.PROFIT)) {
-            boolean doShowAll = place.getKeyString3().equals(AllPlace.SHOW_ALL);
-            boolean doesSplit = place.getKeyString4().equals(AllPlace.SPLIT);
-            clientFactory.getReportView().setProfitData(sFis, comName,
-                    place.getKeyString(), place.getKeyString2(), doShowAll, doesSplit);
+
+            clientFactory.getModel().getAccAmtMap(place.getComKeyString(),
+                    place.getFisKeyString(), new AsyncCallback<HashMap<String, SAccAmt>>() {
+
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            Window.alert(caught.getMessage());
+                        }
+
+                        @Override
+                        public void onSuccess(HashMap<String, SAccAmt> result) {
+
+                            boolean doShowAll = place.getKeyString3().equals(AllPlace.SHOW_ALL);
+                            boolean doesSplit = place.getKeyString4().equals(AllPlace.SPLIT);
+                            clientFactory.getReportView().setProfitData(sFis, result, comName,
+                                    place.getKeyString(), place.getKeyString2(), doShowAll,
+                                    doesSplit);
+                        }
+                    });
         } else if (action.equals(AllPlace.COST)) {
-            boolean doShowAll = place.getKeyString2().equals(AllPlace.SHOW_ALL);
-            clientFactory.getReportView().setCostData(sFis, comName,
-                    place.getKeyString(), doShowAll);
-        } else if (action.equals(AllPlace.WORK_SHEET)) {
-            
-        } else if (action.equals(AllPlace.FIN)) {
-            clientFactory.getReportView().setFinData(sFis, comName,
-                    place.getKeyString());
+
+            clientFactory.getModel().getAccAmtMap(place.getComKeyString(),
+                    place.getFisKeyString(), new AsyncCallback<HashMap<String, SAccAmt>>() {
+
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            Window.alert(caught.getMessage());
+                        }
+
+                        @Override
+                        public void onSuccess(HashMap<String, SAccAmt> result) {
+
+                            boolean doShowAll = place.getKeyString2().equals(AllPlace.SHOW_ALL);
+                            clientFactory.getReportView().setCostData(sFis, result, comName,
+                                    place.getKeyString(), doShowAll);
+                        }
+                    });
         } else {
             throw new AssertionError(action);
         }
     }
-    
+
     private int[] extractJournalDate(){
         int[] date = new int[6];
         if(place.getKeyString2() != null){
@@ -173,7 +337,7 @@ public class ReportActivity extends AbstractActivity implements ReportView.Prese
         }
         return date;
     }
-    
+
     private int[] extractLedgerDate(){
         int[] date = new int[6];
         date[0] = Integer.parseInt(place.getKeyString3());

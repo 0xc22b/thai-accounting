@@ -9,6 +9,7 @@ import gwt.client.ui.CustomListBox;
 import gwt.client.ui.CustomSuggestBox;
 import gwt.client.view.MenuView;
 import gwt.shared.InvalidValueException;
+import gwt.shared.Utils;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -34,8 +35,7 @@ public class MenuViewImpl<T> extends Composite implements MenuView<T> {
         TRIAL,
         BALANCE,
         PROFIT,
-        COST,
-        WORK_SHEET
+        COST
     }
 
     @SuppressWarnings("rawtypes")
@@ -48,12 +48,13 @@ public class MenuViewImpl<T> extends Composite implements MenuView<T> {
     interface Style extends CssResource {
         String btn();
         String clickedBtn();
+        String recalAccAmtBtn();
         String suggestBox();
     }
 
     @UiField
     Style style;
-    
+
     // Setups
     @UiField
     FlowPanel setupPanel;
@@ -67,8 +68,6 @@ public class MenuViewImpl<T> extends Composite implements MenuView<T> {
     Button accChartBtn;
     @UiField
     Button beginningBtn;
-    @UiField
-    Button finBtn;
 
     // Journals
     @UiField
@@ -92,10 +91,8 @@ public class MenuViewImpl<T> extends Composite implements MenuView<T> {
     @UiField
     Button costRepBtn;
     @UiField
-    Button workSheetBtn;
-    @UiField
-    FlowPanel finRepPanel;
-    
+    Button recalAccAmtBtn;
+
     // Sub menu
     @UiField
     FlowPanel subMenuPanel;
@@ -119,6 +116,18 @@ public class MenuViewImpl<T> extends Composite implements MenuView<T> {
     CustomSuggestBox endAccNoSB;
     @UiField
     Label errEndAccNoLb;
+    @UiField
+    FlowPanel monthYearPanel;
+    @UiField
+    Label monthLb;
+    @UiField
+    CustomIntBox monthIB;
+    @UiField
+    Label yearLb;
+    @UiField
+    CustomIntBox yearIB;
+    @UiField
+    Label errMonthYearLb;
     @UiField
     FlowPanel datePanel;
     @UiField
@@ -219,13 +228,22 @@ public class MenuViewImpl<T> extends Composite implements MenuView<T> {
     Button okBtn;
 
     private static final TConstants constants = TCF.get();
+
     private Presenter presenter;
     private FisDef<T> fisDef;
-    private ReportSubMenuState reportSubMenuState;
+
+    private String journalTypeKeyString = null;
+    private ReportSubMenuState reportSubMenuState = ReportSubMenuState.NONE;
+
+    private boolean doKeepState = false;
+
+    private int beginMonth;
+    private int beginYear;
+    private int endMonth;
+    private int endYear;
 
     public MenuViewImpl(FisDef<T> fisDef) {
         this.fisDef = fisDef;
-        this.reportSubMenuState = ReportSubMenuState.NONE;
         initWidget(uiBinder.createAndBindUi(this));
 
         // Setups
@@ -239,8 +257,6 @@ public class MenuViewImpl<T> extends Composite implements MenuView<T> {
         accChartBtn.addStyleName(style.btn());
         beginningBtn.setText(constants.setup() + constants.beginning());
         beginningBtn.addStyleName(style.btn());
-        finBtn.setText(constants.setup() + constants.fin());
-        finBtn.addStyleName(style.btn());
 
         // Reports
         accChartRepBtn.setText(constants.accChart());
@@ -257,11 +273,9 @@ public class MenuViewImpl<T> extends Composite implements MenuView<T> {
         profitRepBtn.addStyleName(style.btn());
         costRepBtn.setText(constants.costReport());
         costRepBtn.addStyleName(style.btn());
+        recalAccAmtBtn.setText(constants.recalAccAmt());
+        recalAccAmtBtn.addStyleName(style.recalAccAmtBtn());
 
-        workSheetBtn.setVisible(false);
-        //workSheetBtn.setText(constants.workSheet());
-        //workSheetBtn.addStyleName(style.btn());
-        
         // Sub menu
         journalTypeLb.setText(constants.journalType());
 
@@ -269,7 +283,12 @@ public class MenuViewImpl<T> extends Composite implements MenuView<T> {
         beginAccNoSB.addTextBoxStyleName(style.suggestBox());
         endAccNoLb.setText(constants.end());
         endAccNoSB.addTextBoxStyleName(style.suggestBox());
-        
+
+        monthLb.setText(constants.month());
+        yearLb.setText(constants.year());
+
+        monthIB.setRange(1, 12);
+
         beginDateLb.setText(constants.begin());
         beginDayLb.setText(constants.day());
         beginMonthLb.setText(constants.month());
@@ -293,7 +312,7 @@ public class MenuViewImpl<T> extends Composite implements MenuView<T> {
         expenseAccNoSB.addTextBoxStyleName(style.suggestBox());
         costAccNoLb.setText(constants.costAccNo());
         costAccNoSB.addTextBoxStyleName(style.suggestBox());
-        
+
         showAllCB.setText(constants.showAll());
         doesSplitCB.setText(constants.doesSplit());
 
@@ -309,6 +328,11 @@ public class MenuViewImpl<T> extends Composite implements MenuView<T> {
     public void init(Presenter presenter) {
         this.presenter = presenter;
 
+        beginMonth = 0;
+        beginYear = 0;
+        endMonth = 0;
+        endYear = 0;
+
         setupPanel.setVisible(false);
         journalPanel.setVisible(false);
         reportPanel.setVisible(false);
@@ -318,117 +342,179 @@ public class MenuViewImpl<T> extends Composite implements MenuView<T> {
     @Override
     public void setMenu(T t, String action) {
 
+        beginMonth = fisDef.getFBeginMonth(t);
+        beginYear = fisDef.getFBeginYear(t);
+        endMonth = fisDef.getFEndMonth(t);
+        endYear = fisDef.getFEndYear(t);
+
         if (action.equals(AllPlace.SETUP)) {
+
             setupPanel.setVisible(true);
+
         } else if (action.equals(AllPlace.JOUR)) {
-            journalPanel.clear();
-            for (int i = 0; i < fisDef.getJTListSize(t); i++) {
-                final String keyString = fisDef.getJTKeyString(t, i);
-                Button btn = new Button(fisDef.getJTShortName(t, i));
-                btn.addStyleName(style.btn());
-                btn.addClickHandler(new ClickHandler() {
-                    @Override
-                    public void onClick(ClickEvent event) {
-                        presenter.goToJournal(keyString);
+
+            if (!doKeepState) {
+                journalPanel.clear();
+                for (int i = 0; i < fisDef.getJTListSize(t); i++) {
+                    final String journalTypeKeyString = fisDef.getJTKeyString(t, i);
+                    final Button btn = new Button(fisDef.getJTShortName(t, i));
+                    btn.addStyleName(style.btn());
+                    btn.addClickHandler(new ClickHandler() {
+
+                        @Override
+                        public void onClick(ClickEvent event) {
+
+                            MenuViewImpl.this.journalTypeKeyString = journalTypeKeyString;
+
+                            for (int i = 0; i < journalPanel.getWidgetCount(); i++) {
+                                Widget w = journalPanel.getWidget(i);
+                                w.removeStyleName(style.clickedBtn());
+                            }
+
+                            btn.addStyleName(style.clickedBtn());
+                        }
+                    });
+
+                    journalPanel.add(btn);
+
+                    // Default
+                    if (i == 0) {
+                        this.journalTypeKeyString = journalTypeKeyString;
+                        btn.addStyleName(style.clickedBtn());
                     }
-                });
-                journalPanel.add(btn);
+                }
+
+                monthIB.clear();
+                monthIB.setCustomValue(beginMonth);
+
+                yearIB.clear();
+                yearIB.setRange(beginYear, endYear);
+                yearIB.setCustomValue(beginYear);
+
+                // Show monthYearPanel and hide others
+                journalTypePanel.setVisible(false);
+                accNoPanel.setVisible(false);
+
+                monthYearPanel.setVisible(true);
+                datePanel.setVisible(false);
+
+                assetPanel.setVisible(false);
+                debtPanel.setVisible(false);
+                shareholderPanel.setVisible(false);
+                incomePanel.setVisible(false);
+                expensePanel.setVisible(false);
+                costPanel.setVisible(false);
+
+                showAllPanel.setVisible(false);
+                doesSplitPanel.setVisible(false);
             }
 
             journalPanel.setVisible(true);
+            subMenuPanel.setVisible(true);
         } else if (action.equals(AllPlace.REPORT)) {
-            finRepPanel.clear();
-            for (int i = 0; i < fisDef.getFinHeaderListSize(t); i++) {
-                final String keyString = fisDef.getFinHeaderKeyString(t, i);
-                Button btn = new Button(fisDef.getFinHeaderName(t, keyString));
-                btn.addStyleName(style.btn());
-                btn.addClickHandler(new ClickHandler() {
-                    @Override
-                    public void onClick(ClickEvent event) {
-                        reportSubMenuState = ReportSubMenuState.NONE;
-                        presenter.goToFinRep(keyString);
-                    }
-                });
-                finRepPanel.add(btn);
-            }
 
-            journalTypeLB.clear();
-            for (int i = 0; i < fisDef.getJTListSize(t); i++) {
-                journalTypeLB.addItem(fisDef.getJTShortName(t, i),
-                        fisDef.getJTKeyString(t, i));
-            }
+            if (!doKeepState) {
+                // Since share submenu and its okBtn, need to reset this value
+                journalTypeKeyString = null;
+                reportSubMenuState = ReportSubMenuState.NONE;
 
-            // Try to suggest acc no. for asset, debt, shareholder, income,
-            //     expense, and cost
-            String assetDefaultValue = null;
-            String debtDefaultValue = null;
-            String shareholderDefaultValue = null;
-            String accruedProfitDefaultValue = null;
-            String incomeDefaultValue = null;
-            String expenseDefaultValue = null;
-            String costDefaultValue = null;
+                beginDayIB.clear();
+                beginMonthIB.clear();
+                beginYearIB.clear();
+                endDayIB.clear();
+                endMonthIB.clear();
+                endYearIB.clear();
 
-            beginAccNoSB.clear();
-            endAccNoSB.clear();
-            assetAccNoSB.clear();
-            debtAccNoSB.clear();
-            shareholderAccNoSB.clear();
-            accruedProfitAccNoSB.clear();
-            incomeAccNoSB.clear();
-            expenseAccNoSB.clear();
-            costAccNoSB.clear();
-            for (int i = 0; i < fisDef.getACListSize(t); i++) {
-                String aCKeyString = fisDef.getACKeyString(t, i);
-                String aCNo = fisDef.getACNo(t, i);
-                String aCNoAndName = aCNo + " - " + fisDef.getACName(t, i);
-                if (fisDef.getACIsControl(t, i)) {
-                    assetAccNoSB.add(aCKeyString, aCNoAndName);
-                    debtAccNoSB.add(aCKeyString, aCNoAndName);
-                    shareholderAccNoSB.add(aCKeyString, aCNoAndName);
-                    incomeAccNoSB.add(aCKeyString, aCNoAndName);
-                    expenseAccNoSB.add(aCKeyString, aCNoAndName);
-                    costAccNoSB.add(aCKeyString, aCNoAndName);
-                    
-                    if (aCNo.equals("10-00-00-00")) {
-                        assetDefaultValue = aCNoAndName;
-                    } else if (aCNo.equals("20-00-00-00")) {
-                        debtDefaultValue = aCNoAndName;
-                    } else if (aCNo.equals("30-00-00-00")) {
-                        shareholderDefaultValue = aCNoAndName;
-                    } else if (aCNo.equals("40-00-00-00")) {
-                        incomeDefaultValue = aCNoAndName;
-                    } else if (aCNo.equals("50-00-00-00")) {
-                        expenseDefaultValue = aCNoAndName;
-                    } else if (aCNo.equals("51-00-00-00")) {
-                        costDefaultValue = aCNoAndName;
-                    }
-                } else if (fisDef.getACIsEntry(t, i)) {
-                    beginAccNoSB.add(aCKeyString, aCNoAndName);
-                    endAccNoSB.add(aCKeyString, aCNoAndName);
-                    
-                    accruedProfitAccNoSB.add(aCKeyString, aCNoAndName);
-                    
-                    if (aCNo.equals("32-00-00-00")) {
-                        accruedProfitDefaultValue = aCNoAndName;
-                    }
-                } else {
-                    throw new AssertionError();
+                showAllCB.setValue(false);
+                doesSplitCB.setValue(false);
+
+                journalTypeLB.clear();
+                for (int i = 0; i < fisDef.getJTListSize(t); i++) {
+                    journalTypeLB.addItem(fisDef.getJTShortName(t, i),
+                            fisDef.getJTKeyString(t, i));
                 }
-            }
 
-            assetAccNoSB.setValue(assetDefaultValue);
-            debtAccNoSB.setValue(debtDefaultValue);
-            shareholderAccNoSB.setValue(shareholderDefaultValue);
-            accruedProfitAccNoSB.setValue(accruedProfitDefaultValue);
-            incomeAccNoSB.setValue(incomeDefaultValue);
-            expenseAccNoSB.setValue(expenseDefaultValue);
-            costAccNoSB.setValue(costDefaultValue);
+                // Try to suggest acc no. for asset, debt, shareholder, income,
+                //     expense, and cost
+                String assetDefaultValue = null;
+                String debtDefaultValue = null;
+                String shareholderDefaultValue = null;
+                String accruedProfitDefaultValue = null;
+                String incomeDefaultValue = null;
+                String expenseDefaultValue = null;
+                String costDefaultValue = null;
+
+                beginAccNoSB.clear();
+                endAccNoSB.clear();
+                assetAccNoSB.clear();
+                debtAccNoSB.clear();
+                shareholderAccNoSB.clear();
+                accruedProfitAccNoSB.clear();
+                incomeAccNoSB.clear();
+                expenseAccNoSB.clear();
+                costAccNoSB.clear();
+                for (int i = 0; i < fisDef.getACListSize(t); i++) {
+                    String aCKeyString = fisDef.getACKeyString(t, i);
+                    String aCNo = fisDef.getACNo(t, i);
+                    String aCNoAndName = aCNo + " - " + fisDef.getACName(t, i);
+                    if (fisDef.getACIsControl(t, i)) {
+                        assetAccNoSB.add(aCKeyString, aCNoAndName);
+                        debtAccNoSB.add(aCKeyString, aCNoAndName);
+                        shareholderAccNoSB.add(aCKeyString, aCNoAndName);
+                        incomeAccNoSB.add(aCKeyString, aCNoAndName);
+                        expenseAccNoSB.add(aCKeyString, aCNoAndName);
+                        costAccNoSB.add(aCKeyString, aCNoAndName);
+
+                        if (aCNo.equals("10-00-00-00")) {
+                            assetDefaultValue = aCNoAndName;
+                        } else if (aCNo.equals("20-00-00-00")) {
+                            debtDefaultValue = aCNoAndName;
+                        } else if (aCNo.equals("30-00-00-00")) {
+                            shareholderDefaultValue = aCNoAndName;
+                        } else if (aCNo.equals("40-00-00-00")) {
+                            incomeDefaultValue = aCNoAndName;
+                        } else if (aCNo.equals("50-00-00-00")) {
+                            expenseDefaultValue = aCNoAndName;
+                        } else if (aCNo.equals("51-00-00-00")) {
+                            costDefaultValue = aCNoAndName;
+                        }
+                    } else if (fisDef.getACIsEntry(t, i)) {
+                        beginAccNoSB.add(aCKeyString, aCNoAndName);
+                        endAccNoSB.add(aCKeyString, aCNoAndName);
+
+                        accruedProfitAccNoSB.add(aCKeyString, aCNoAndName);
+
+                        if (aCNo.equals("32-00-00-00")) {
+                            accruedProfitDefaultValue = aCNoAndName;
+                        }
+                    } else {
+                        throw new AssertionError();
+                    }
+                }
+
+                assetAccNoSB.setValue(assetDefaultValue);
+                debtAccNoSB.setValue(debtDefaultValue);
+                shareholderAccNoSB.setValue(shareholderDefaultValue);
+                accruedProfitAccNoSB.setValue(accruedProfitDefaultValue);
+                incomeAccNoSB.setValue(incomeDefaultValue);
+                expenseAccNoSB.setValue(expenseDefaultValue);
+                costAccNoSB.setValue(costDefaultValue);
+
+                updateReportSubMenu();
+            }
 
             reportPanel.setVisible(true);
-            updateReportSubMenu();
+            subMenuPanel.setVisible(reportSubMenuState != ReportSubMenuState.NONE);
         } else {
             throw new AssertionError(action);
         }
+
+        doKeepState = false;
+    }
+
+    @Override
+    public void setRecalAccAmtBtnText(String text) {
+        recalAccAmtBtn.setText(text);
     }
 
     @UiHandler("journalTypeBtn")
@@ -456,11 +542,6 @@ public class MenuViewImpl<T> extends Composite implements MenuView<T> {
         presenter.goToBeginning();
     }
 
-    @UiHandler("finBtn")
-    void onFinanceBtnClicked(ClickEvent event) {
-        presenter.goToFin();
-    }
-
     @UiHandler("accChartRepBtn")
     void onAccChartRepBtnClicked(ClickEvent event) {
         reportSubMenuState = ReportSubMenuState.NONE;
@@ -484,47 +565,48 @@ public class MenuViewImpl<T> extends Composite implements MenuView<T> {
         reportSubMenuState = ReportSubMenuState.TRIAL;
         updateReportSubMenu();
     }
-    
+
     @UiHandler("balanceRepBtn")
     void onBalanceRepBtnClicked(ClickEvent event) {
         reportSubMenuState = ReportSubMenuState.BALANCE;
         updateReportSubMenu();
     }
-    
+
     @UiHandler("profitRepBtn")
     void onProfitRepBtnClicked(ClickEvent event) {
         reportSubMenuState = ReportSubMenuState.PROFIT;
         updateReportSubMenu();
     }
-    
+
     @UiHandler("costRepBtn")
     void onCostRepBtnClicked(ClickEvent event) {
         reportSubMenuState = ReportSubMenuState.COST;
         updateReportSubMenu();
     }
-    
-    @UiHandler("workSheetBtn")
-    void onWorkSheetBtnClicked(ClickEvent event) {
-        reportSubMenuState = ReportSubMenuState.WORK_SHEET;
-        updateReportSubMenu();
+
+    @UiHandler("recalAccAmtBtn")
+    void onRecalAccAmtBtnClicked(ClickEvent event) {
+        recalAccAmtBtn.setEnabled(false);
+        presenter.recalAccAmt();
     }
-    
+
     private void updateReportSubMenu() {
-        
+
         journalRepBtn.removeStyleName(style.clickedBtn());
         ledgerRepBtn.removeStyleName(style.clickedBtn());
         trialRepBtn.removeStyleName(style.clickedBtn());
         balanceRepBtn.removeStyleName(style.clickedBtn());
         profitRepBtn.removeStyleName(style.clickedBtn());
         costRepBtn.removeStyleName(style.clickedBtn());
-        workSheetBtn.removeStyleName(style.clickedBtn());
-        
+
         if (reportSubMenuState == ReportSubMenuState.NONE) {
         } else if (reportSubMenuState == ReportSubMenuState.JOURNAL) {
             journalRepBtn.addStyleName(style.clickedBtn());
 
             journalTypePanel.setVisible(true);
             accNoPanel.setVisible(false);
+
+            monthYearPanel.setVisible(false);
             datePanel.setVisible(true);
 
             assetPanel.setVisible(false);
@@ -533,14 +615,16 @@ public class MenuViewImpl<T> extends Composite implements MenuView<T> {
             incomePanel.setVisible(false);
             expensePanel.setVisible(false);
             costPanel.setVisible(false);
-            
+
             showAllPanel.setVisible(false);
             doesSplitPanel.setVisible(false);
         } else if (reportSubMenuState == ReportSubMenuState.LEDGER) {
             ledgerRepBtn.addStyleName(style.clickedBtn());
-            
+
             journalTypePanel.setVisible(false);
             accNoPanel.setVisible(true);
+
+            monthYearPanel.setVisible(false);
             datePanel.setVisible(true);
 
             assetPanel.setVisible(false);
@@ -549,14 +633,16 @@ public class MenuViewImpl<T> extends Composite implements MenuView<T> {
             incomePanel.setVisible(false);
             expensePanel.setVisible(false);
             costPanel.setVisible(false);
-            
+
             showAllPanel.setVisible(true);
             doesSplitPanel.setVisible(false);
         } else if (reportSubMenuState == ReportSubMenuState.TRIAL) {
             trialRepBtn.addStyleName(style.clickedBtn());
-            
+
             journalTypePanel.setVisible(false);
             accNoPanel.setVisible(false);
+
+            monthYearPanel.setVisible(false);
             datePanel.setVisible(false);
 
             assetPanel.setVisible(false);
@@ -565,14 +651,16 @@ public class MenuViewImpl<T> extends Composite implements MenuView<T> {
             incomePanel.setVisible(false);
             expensePanel.setVisible(false);
             costPanel.setVisible(false);
-            
+
             showAllPanel.setVisible(true);
             doesSplitPanel.setVisible(false);
         } else if (reportSubMenuState == ReportSubMenuState.BALANCE) {
             balanceRepBtn.addStyleName(style.clickedBtn());
-            
+
             journalTypePanel.setVisible(false);
             accNoPanel.setVisible(false);
+
+            monthYearPanel.setVisible(false);
             datePanel.setVisible(false);
 
             assetPanel.setVisible(true);
@@ -581,14 +669,16 @@ public class MenuViewImpl<T> extends Composite implements MenuView<T> {
             incomePanel.setVisible(true);
             expensePanel.setVisible(true);
             costPanel.setVisible(false);
-            
+
             showAllPanel.setVisible(true);
             doesSplitPanel.setVisible(true);
         } else if (reportSubMenuState == ReportSubMenuState.PROFIT) {
             profitRepBtn.addStyleName(style.clickedBtn());
-            
+
             journalTypePanel.setVisible(false);
             accNoPanel.setVisible(false);
+
+            monthYearPanel.setVisible(false);
             datePanel.setVisible(false);
 
             assetPanel.setVisible(false);
@@ -597,14 +687,16 @@ public class MenuViewImpl<T> extends Composite implements MenuView<T> {
             incomePanel.setVisible(true);
             expensePanel.setVisible(true);
             costPanel.setVisible(false);
-            
+
             showAllPanel.setVisible(true);
             doesSplitPanel.setVisible(true);
         } else if (reportSubMenuState == ReportSubMenuState.COST) {
             costRepBtn.addStyleName(style.clickedBtn());
-            
+
             journalTypePanel.setVisible(false);
             accNoPanel.setVisible(false);
+
+            monthYearPanel.setVisible(false);
             datePanel.setVisible(false);
 
             assetPanel.setVisible(false);
@@ -612,22 +704,6 @@ public class MenuViewImpl<T> extends Composite implements MenuView<T> {
             shareholderPanel.setVisible(false);
             incomePanel.setVisible(false);
             expensePanel.setVisible(false);
-            costPanel.setVisible(true);
-            
-            showAllPanel.setVisible(true);
-            doesSplitPanel.setVisible(false);
-        } else if (reportSubMenuState == ReportSubMenuState.WORK_SHEET) {
-            workSheetBtn.addStyleName(style.clickedBtn());
-            
-            journalTypePanel.setVisible(false);
-            accNoPanel.setVisible(false);
-            datePanel.setVisible(false);
-
-            assetPanel.setVisible(true);
-            debtPanel.setVisible(true);
-            shareholderPanel.setVisible(true);
-            incomePanel.setVisible(true);
-            expensePanel.setVisible(true);
             costPanel.setVisible(true);
 
             showAllPanel.setVisible(true);
@@ -636,19 +712,36 @@ public class MenuViewImpl<T> extends Composite implements MenuView<T> {
             throw new AssertionError(reportSubMenuState);
         }
 
-        subMenuPanel.setVisible(
-                reportSubMenuState != ReportSubMenuState.NONE);
+        subMenuPanel.setVisible(reportSubMenuState != ReportSubMenuState.NONE);
     }
 
     @UiHandler("okBtn")
     void onOkBtnClicked(ClickEvent event) {
-        if (reportSubMenuState == ReportSubMenuState.JOURNAL) {
+
+        // If go from here, can keep state, no need to regen buttons and submenu when come back
+        //     as no setup changed
+        doKeepState = true;
+
+        if (journalTypeKeyString != null) {
+
+            if (!isMonthYearValid()) {
+                return;
+            }
+            presenter.goToJournal(journalTypeKeyString, monthIB.getCustomValue(),
+                    yearIB.getCustomValue());
+
+        } else if (reportSubMenuState == ReportSubMenuState.JOURNAL) {
+
             if (!isBeginDateAndEndDateValid()) {
                 return;
             }
-            presenter.goToJournalRep(journalTypeLB.getValue(), beginDayIB.getCustomValue(), beginMonthIB.getCustomValue(),
-                    beginYearIB.getCustomValue(), endDayIB.getCustomValue(), endMonthIB.getCustomValue(), endYearIB.getCustomValue());
+            presenter.goToJournalRep(journalTypeLB.getValue(), beginDayIB.getCustomValue(),
+                    beginMonthIB.getCustomValue(), beginYearIB.getCustomValue(),
+                    endDayIB.getCustomValue(), endMonthIB.getCustomValue(),
+                    endYearIB.getCustomValue());
+
         } else if (reportSubMenuState == ReportSubMenuState.LEDGER) {
+
             if (!isBeginDateAndEndDateValid()) {
                 return;
             }
@@ -687,10 +780,14 @@ public class MenuViewImpl<T> extends Composite implements MenuView<T> {
                     beginYearIB.getCustomValue(), endDayIB.getCustomValue(),
                     endMonthIB.getCustomValue(), endYearIB.getCustomValue(),
                     doShowAll);
+
         } else if (reportSubMenuState == ReportSubMenuState.TRIAL) {
+
             boolean doShowAll = showAllCB.getValue();
             presenter.goToTrialRep(doShowAll);
+
         } else if (reportSubMenuState == ReportSubMenuState.BALANCE) {
+
             String assetACKeyString = getACKeyString(assetAccNoSB, assetAccNoLb);
             String debtACKeyString = getACKeyString(debtAccNoSB, debtAccNoLb);
             String shareholderACKeyString = getACKeyString(shareholderAccNoSB,
@@ -699,73 +796,87 @@ public class MenuViewImpl<T> extends Composite implements MenuView<T> {
                     accruedProfitAccNoLb);
             String incomeACKeyString = getACKeyString(incomeAccNoSB, incomeAccNoLb);
             String expenseACKeyString = getACKeyString(expenseAccNoSB, expenseAccNoLb);
-            
+
             if (assetACKeyString == null || debtACKeyString == null
                     || shareholderACKeyString == null
                     || accruedProfitACKeyString == null || incomeACKeyString == null
                     || expenseACKeyString == null) {
                 return;
             }
-            
+
             boolean doShowAll = showAllCB.getValue();
             boolean doesSplit = doesSplitCB.getValue();
 
             presenter.goToBalanceRep(assetACKeyString, debtACKeyString,
                     shareholderACKeyString, accruedProfitACKeyString,
                     incomeACKeyString, expenseACKeyString, doShowAll, doesSplit);
+
         } else if (reportSubMenuState == ReportSubMenuState.PROFIT) {
+
             String incomeACKeyString = getACKeyString(incomeAccNoSB, incomeAccNoLb);
             String expenseACKeyString = getACKeyString(expenseAccNoSB, expenseAccNoLb);
-            
+
             if (incomeACKeyString == null
                     || expenseACKeyString == null) {
                 return;
             }
-            
+
             boolean doShowAll = showAllCB.getValue();
             boolean doesSplit = doesSplitCB.getValue();
 
             presenter.goToProfitRep(incomeACKeyString,
                     expenseACKeyString, doShowAll, doesSplit);
+
         } else if (reportSubMenuState == ReportSubMenuState.COST) {
+
             String costACKeyString = getACKeyString(costAccNoSB, costAccNoLb);
             if (costACKeyString == null) {
                 return;
             }
-            
+
             boolean doShowAll = showAllCB.getValue();
 
             presenter.goToCostRep(costACKeyString, doShowAll);
-        } else if (reportSubMenuState == ReportSubMenuState.WORK_SHEET) {
-            String assetACKeyString = getACKeyString(assetAccNoSB, assetAccNoLb);
-            String debtACKeyString = getACKeyString(debtAccNoSB, debtAccNoLb);
-            String shareholderACKeyString = getACKeyString(shareholderAccNoSB,
-                    shareholderAccNoLb);
-            String accruedProfitACKeyString = getACKeyString(accruedProfitAccNoSB,
-                    accruedProfitAccNoLb);
-            String incomeACKeyString = getACKeyString(incomeAccNoSB, incomeAccNoLb);
-            String expenseACKeyString = getACKeyString(expenseAccNoSB, expenseAccNoLb);
-            String costACKeyString = getACKeyString(costAccNoSB, costAccNoLb);
 
-            if (assetACKeyString == null || debtACKeyString == null
-                    || shareholderACKeyString == null
-                    || accruedProfitACKeyString == null
-                    || incomeACKeyString == null
-                    || expenseACKeyString == null || costACKeyString == null) {
-                return;
-            }
-            
-            boolean doShowAll = showAllCB.getValue();
-
-            presenter.goToWorkSheet(assetACKeyString, debtACKeyString,
-                    shareholderACKeyString, accruedProfitACKeyString,
-                    incomeACKeyString, expenseACKeyString, costACKeyString,
-                    doShowAll);
         } else {
             throw new AssertionError(reportSubMenuState);
         }
     }
-    
+
+    private boolean isMonthYearValid() {
+        int month;
+        int year;
+
+        errMonthYearLb.setText("");
+
+        try {
+            month = monthIB.getCustomValue();
+            year = yearIB.getCustomValue();
+        } catch (NumberFormatException e) {
+            errMonthYearLb.setText(constants.invalidNumberMsg());
+            return false;
+        } catch (InvalidValueException e) {
+            errMonthYearLb.setText(constants.invalidNumberMsg());
+            return false;
+        }
+
+        // all required
+        if (month <= 0 || year <= 0) {
+            errMonthYearLb.setText(constants.invalidMsg());
+            return false;
+        }
+
+        // Check against fiscal year
+        if (Utils.compareDate(1, month, year, 1, beginMonth, beginYear) < 0
+                || Utils.compareDate(Utils.getLastDay(month, year), month, year,
+                Utils.getLastDay(endMonth, endYear), endMonth, endYear) > 0) {
+            errMonthYearLb.setText(constants.invalidMsg());
+            return false;
+        }
+
+        return true;
+    }
+
     private boolean isBeginDateAndEndDateValid() {
         int beginDay;
         int beginMonth;
@@ -788,7 +899,7 @@ public class MenuViewImpl<T> extends Composite implements MenuView<T> {
             errBeginDateLb.setText(constants.invalidNumberMsg());
             return false;
         }
-        
+
         try {
             endDay = endDayIB.getCustomValue();
             endMonth = endMonthIB.getCustomValue();
@@ -801,17 +912,35 @@ public class MenuViewImpl<T> extends Composite implements MenuView<T> {
             return false;
         }
 
+        // some empty some not not allowed
         if (!(beginDay == 0 && beginMonth == 0 && beginYear == 0 && endDay == 0 && endMonth == 0 && endYear == 0)
                 && !(beginDay != 0 && beginMonth != 0 && beginYear != 0 && endDay != 0 && endMonth != 0 && endYear != 0)) {
-            // some empty some not not allowed
             errBeginDateLb.setText(constants.invalidMsg());
             errEndDateLb.setText(constants.invalidMsg());
             return false;
         }
-        
+
+        if (beginDay != 0) {
+            // Begin date must less than end date
+            if (Utils.compareDate(beginDay, beginMonth, beginYear, endDay, endMonth, endYear) > 0) {
+                errBeginDateLb.setText(constants.invalidMsg());
+                errEndDateLb.setText(constants.invalidMsg());
+                return false;
+            }
+
+            // Check against fiscal year
+            if (Utils.compareDate(beginDay, beginMonth, beginYear, 1, this.beginMonth, this.beginYear) < 0
+                    || Utils.compareDate(endDay, endMonth, endYear,
+                    Utils.getLastDay(this.endMonth, this.endYear), this.endMonth, this.endYear) > 0) {
+                errBeginDateLb.setText(constants.invalidMsg());
+                errEndDateLb.setText(constants.invalidMsg());
+                return false;
+            }
+        }
+
         return true;
     }
-    
+
     private String getACKeyString(CustomSuggestBox sb, Label errLb) {
         errLb.setText("");
         try {

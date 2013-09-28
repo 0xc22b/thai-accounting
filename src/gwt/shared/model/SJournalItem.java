@@ -11,8 +11,14 @@ public class SJournalItem implements Serializable{
     private String accChartKeyString;
     private double amt;
     private Date createDate;
-    
-    private String accChartNo;
+
+    // These are extra fields used by a ledger populated by getJournalListWithAC in RpcServiceImpl.java
+    public int day;
+    public int month;
+    public int year;
+    public String journalTypeShortName;
+    public String journalNo;
+    public String journalDesc;
     
 	public SJournalItem(){
 		
@@ -41,21 +47,11 @@ public class SJournalItem implements Serializable{
         return createDate;
     }
 
-    public String getAccChartNo() {
-        return accChartNo;
-    }
-
     public void setKeyString(String keyString) {
         this.keyString = keyString;
     }
 
     public void setAmt(double amt) {
         this.amt = amt;
-    }
-
-    public void setAccChartNo(String accChartNo) {
-        this.accChartNo = accChartNo;
-    }
-
-    
+    }    
 }

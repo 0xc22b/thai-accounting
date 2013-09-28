@@ -1,18 +1,18 @@
 package gwt.client;
 
 import gwt.client.activity.AppActivityMapper;
+import gwt.client.def.AccAmtDefImpl;
 import gwt.client.def.AccChartListDefImpl;
 import gwt.client.def.AccGrpListDefImpl;
 import gwt.client.def.BeginListDefImpl;
 import gwt.client.def.ComDefImpl;
 import gwt.client.def.ComListDefImpl;
 import gwt.client.def.DocTypeListDefImpl;
-import gwt.client.def.FinHeaderListDefImpl;
-import gwt.client.def.FinItemListDefImpl;
-import gwt.client.def.JournalTypeListDefImpl;
 import gwt.client.def.FisDefImpl;
 import gwt.client.def.FisListDefImpl;
+import gwt.client.def.JournalDefImpl;
 import gwt.client.def.JournalListDefImpl;
+import gwt.client.def.JournalTypeListDefImpl;
 import gwt.client.model.Model;
 import gwt.client.place.AppPlaceHistoryMapper;
 import gwt.client.view.AccChartView;
@@ -20,10 +20,8 @@ import gwt.client.view.AccGrpView;
 import gwt.client.view.BeginView;
 import gwt.client.view.ComView;
 import gwt.client.view.DocTypeView;
-import gwt.client.view.FinHeaderView;
-import gwt.client.view.FinItemView;
-import gwt.client.view.JournalTypeView;
 import gwt.client.view.FisView;
+import gwt.client.view.JournalTypeView;
 import gwt.client.view.JournalView;
 import gwt.client.view.ListView;
 import gwt.client.view.MenuView;
@@ -34,25 +32,24 @@ import gwt.client.view.desktop.AccGrpViewImpl;
 import gwt.client.view.desktop.BeginViewImpl;
 import gwt.client.view.desktop.ComViewImpl;
 import gwt.client.view.desktop.DocTypeViewImpl;
-import gwt.client.view.desktop.FinHeaderViewImpl;
-import gwt.client.view.desktop.FinItemViewImpl;
-import gwt.client.view.desktop.JournalTypeViewImpl;
 import gwt.client.view.desktop.FisViewImpl;
+import gwt.client.view.desktop.JournalTypeViewImpl;
 import gwt.client.view.desktop.JournalViewImpl;
 import gwt.client.view.desktop.ListViewImpl;
 import gwt.client.view.desktop.MenuViewImpl;
 import gwt.client.view.desktop.ReportViewImpl;
 import gwt.client.view.desktop.ShellImpl;
+import gwt.shared.model.SAccAmt;
 import gwt.shared.model.SAccChart;
 import gwt.shared.model.SAccGrp;
 import gwt.shared.model.SCom;
 import gwt.shared.model.SComList;
 import gwt.shared.model.SDocType;
-import gwt.shared.model.SFinHeader;
-import gwt.shared.model.SFinItem;
-import gwt.shared.model.SJournalType;
 import gwt.shared.model.SFiscalYear;
 import gwt.shared.model.SJournalHeader;
+import gwt.shared.model.SJournalType;
+
+import java.util.List;
 
 import com.google.gwt.activity.shared.ActivityManager;
 import com.google.gwt.activity.shared.ActivityMapper;
@@ -76,29 +73,34 @@ public class ClientFactoryImpl implements ClientFactory {
     private Model model;
     
     private Shell shell;
+
     private ListView<SComList, SCom> comListView;
     private ComView<SCom> comView;
+
     private ListView<SCom, SFiscalYear> fisListView;
     private FisView<SFiscalYear> fisView;
+
     private MenuView<SFiscalYear> menuView;
+
     private ListView<SFiscalYear, SJournalType> journalTypeListView;
     private JournalTypeView<SFiscalYear> journalTypeView;
+
     private ListView<SFiscalYear, SDocType> docTypeListView;
     private DocTypeView<SFiscalYear> docTypeView;
+
     private ListView<SFiscalYear, SAccGrp> accGrpListView;
     private AccGrpView<SFiscalYear> accGrpView;
+
     private ListView<SFiscalYear, SAccChart> accChartListView;
     private AccChartView<SFiscalYear> accChartView;
+
     private ListView<SFiscalYear, SAccChart> beginListView;
     private BeginView<SFiscalYear> beginView;
-    private ListView<SFiscalYear, SFinHeader> finHeaderListView;
-    private FinHeaderView<SFiscalYear> finHeaderView;
-    private ListView<SFinHeader, SFinItem> finItemListView;
-    private FinItemView<SFiscalYear> finItemView;
-    private ListView<SFiscalYear, SJournalHeader> journalListView;
-    private JournalView<SFiscalYear> journalView;
+
+    private ListView<List<SJournalHeader>, SJournalHeader> journalListView;
+    private JournalView<SFiscalYear, SJournalHeader> journalView;
     
-    private ReportView<SFiscalYear> reportView;
+    private ReportView<SFiscalYear, SJournalHeader, SAccAmt> reportView;
     
     @Override
     public App getApp() {
@@ -256,59 +258,30 @@ public class ClientFactoryImpl implements ClientFactory {
         }
         return beginView;
     }
-    
-    @Override
-    public ListView<SFiscalYear, SFinHeader> getFinHeaderListView() {
-        if (finHeaderListView == null) {
-            finHeaderListView = new ListViewImpl<SFiscalYear, SFinHeader>(FinHeaderListDefImpl.getInstance());
-        }
-        return finHeaderListView;
-    }
 
     @Override
-    public FinHeaderView<SFiscalYear> getFinHeaderView() {
-        if (finHeaderView == null) {
-            finHeaderView = new FinHeaderViewImpl<SFiscalYear>(FisDefImpl.getInstance());
-        }
-        return finHeaderView;
-    }
-    
-    @Override
-    public ListView<SFinHeader, SFinItem> getFinItemListView() {
-        if (finItemListView == null) {
-            finItemListView = new ListViewImpl<SFinHeader, SFinItem>(FinItemListDefImpl.getInstance());
-        }
-        return finItemListView;
-    }
-
-    @Override
-    public FinItemView<SFiscalYear> getFinItemView() {
-        if (finItemView == null) {
-            finItemView = new FinItemViewImpl<SFiscalYear>(FisDefImpl.getInstance());
-        }
-        return finItemView;
-    }
-
-    @Override
-    public ListView<SFiscalYear, SJournalHeader> getJournalListView() {
+    public ListView<List<SJournalHeader>, SJournalHeader> getJournalListView() {
         if (journalListView == null) {
-            journalListView = new ListViewImpl<SFiscalYear, SJournalHeader>(JournalListDefImpl.getInstance());
+            journalListView = new ListViewImpl<List<SJournalHeader>, SJournalHeader>(
+                    JournalListDefImpl.getInstance());
         }
         return journalListView;
     }
 
     @Override
-    public JournalView<SFiscalYear> getJournalView() {
+    public JournalView<SFiscalYear, SJournalHeader> getJournalView() {
         if (journalView == null) {
-            journalView = new JournalViewImpl<SFiscalYear>(FisDefImpl.getInstance());
+            journalView = new JournalViewImpl<SFiscalYear, SJournalHeader>(
+                    FisDefImpl.getInstance(), JournalDefImpl.getInstance());
         }
         return journalView;
     }
 
     @Override
-    public ReportView<SFiscalYear> getReportView() {
+    public ReportView<SFiscalYear, SJournalHeader, SAccAmt> getReportView() {
         if (reportView == null) {
-            reportView = new ReportViewImpl<SFiscalYear>(FisDefImpl.getInstance());
+            reportView = new ReportViewImpl<SFiscalYear, SJournalHeader, SAccAmt>(
+                    FisDefImpl.getInstance(), JournalDefImpl.getInstance(), AccAmtDefImpl.getInstance());
         }
         return reportView;
     }

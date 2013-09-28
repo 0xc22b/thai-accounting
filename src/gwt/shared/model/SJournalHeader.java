@@ -21,9 +21,6 @@ public class SJournalHeader implements Serializable {
     
     private ArrayList<SJournalItem> itemList = new ArrayList<SJournalItem>();
     
-    private String journalTypeShortName;
-    private String docTypeCode;
-    
 	public SJournalHeader(){
 		
 	}
@@ -83,14 +80,6 @@ public class SJournalHeader implements Serializable {
         return desc;
     }
 
-    public String getJournalTypeShortName() {
-        return journalTypeShortName;
-    }
-
-    public String getDocTypeCode() {
-        return docTypeCode;
-    }
-
     public List<SJournalItem> getItemList() {
         return Collections.unmodifiableList(itemList);
     }
@@ -121,14 +110,6 @@ public class SJournalHeader implements Serializable {
     
     public void setYear(int year) {
         this.year = year;
-    }
-
-    public void setJournalTypeShortName(String journalTypeShortName) {
-        this.journalTypeShortName = journalTypeShortName;
-    }
-
-    public void setDocTypeCode(String docTypeCode) {
-        this.docTypeCode = docTypeCode;
     }
 
     public int compareDate(int day, int month, int year){

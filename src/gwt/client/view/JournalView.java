@@ -6,7 +6,7 @@ import java.util.Date;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 
-public interface JournalView<T> extends IsWidget {
+public interface JournalView<T, J> extends IsWidget {
 
     public class ItemData {
         public String accChartKeyString;
@@ -23,15 +23,16 @@ public interface JournalView<T> extends IsWidget {
     public interface Presenter {
         boolean isJournalNoDuplicate(String keyString, String docTypeKeyString,
                 String no);
-        void addJournal(String docTypeKeyString, String no, int day, int month, int year, String desc, ArrayList<ItemData> itemDataList);
-        void editJournal(String keyString, String docTypeKeyString, String no, int day, int month, int year, 
+        void addJournal(String docTypeKeyString, String no, int day, int month, int year,
                 String desc, ArrayList<ItemData> itemDataList);
+        void editJournal(String keyString, String docTypeKeyString, String no, int day, int month,
+                int year, String desc, ArrayList<ItemData> itemDataList);
         void onDocTypeChanged();
     }
 
     Widget asWidget();
     void init(Presenter presenter);
-    void setJournal(T t, String journalTypeKeyString, String keyString, boolean editable);
+    void setJournal(T t, String journalTypeKeyString, int month, int year, J j, boolean editable);
     void addJournalBtnClicked();
     void editJournalBtnClicked();
     void addItemBtnClicked(T t);

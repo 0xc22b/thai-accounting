@@ -103,4 +103,9 @@ public class ComListDefImpl extends ListDef<SComList, SCom> {
     public Unit getWidthUnit(int i) {
         return null;
     }
+    
+    @Override
+    public int getPageSize() {
+        return 100;
+    }
 }

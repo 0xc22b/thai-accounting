@@ -116,6 +116,10 @@ public class CustomSuggestBox extends Composite{
         suggestBox.getValueBox().setEnabled(enabled);
     }
     
+    public void setFocus(boolean focused) {
+        suggestBox.setFocus(focused);
+    }
+    
     public void addTextBoxStyleName(String style){
         suggestBox.addStyleName(style);
     }

@@ -6,8 +6,6 @@ import gwt.client.view.AccGrpView;
 import gwt.client.view.BeginView;
 import gwt.client.view.ComView;
 import gwt.client.view.DocTypeView;
-import gwt.client.view.FinHeaderView;
-import gwt.client.view.FinItemView;
 import gwt.client.view.FisView;
 import gwt.client.view.JournalTypeView;
 import gwt.client.view.JournalView;
@@ -15,16 +13,17 @@ import gwt.client.view.ListView;
 import gwt.client.view.MenuView;
 import gwt.client.view.ReportView;
 import gwt.client.view.Shell;
+import gwt.shared.model.SAccAmt;
 import gwt.shared.model.SAccChart;
 import gwt.shared.model.SAccGrp;
 import gwt.shared.model.SCom;
 import gwt.shared.model.SComList;
 import gwt.shared.model.SDocType;
-import gwt.shared.model.SFinHeader;
-import gwt.shared.model.SFinItem;
 import gwt.shared.model.SFiscalYear;
 import gwt.shared.model.SJournalHeader;
 import gwt.shared.model.SJournalType;
+
+import java.util.List;
 
 import com.google.gwt.place.shared.PlaceController;
 import com.google.web.bindery.event.shared.EventBus;
@@ -53,11 +52,9 @@ public interface ClientFactory {
     AccChartView<SFiscalYear> getAccChartView();
     ListView<SFiscalYear, SAccChart> getBeginListView();
     BeginView<SFiscalYear> getBeginView();
-    ListView<SFiscalYear, SFinHeader> getFinHeaderListView();
-    FinHeaderView<SFiscalYear> getFinHeaderView();
-    ListView<SFinHeader, SFinItem> getFinItemListView();
-    FinItemView<SFiscalYear> getFinItemView();
-    ListView<SFiscalYear, SJournalHeader> getJournalListView();
-    JournalView<SFiscalYear> getJournalView();
-    ReportView<SFiscalYear> getReportView();
+
+    ListView<List<SJournalHeader>, SJournalHeader> getJournalListView();
+    JournalView<SFiscalYear, SJournalHeader> getJournalView();
+
+    ReportView<SFiscalYear, SJournalHeader, SAccAmt> getReportView();
 }

@@ -1,390 +1,279 @@
 package gwt.server.account;
 
-import gwt.server.account.model.AccChart;
-import gwt.server.account.model.AccGroup;
-import gwt.server.account.model.DocType;
-import gwt.server.account.model.FinHeader;
-import gwt.server.account.model.FinItem;
-import gwt.server.account.model.FiscalYear;
-import gwt.server.account.model.JournalHeader;
-import gwt.server.account.model.JournalItem;
-import gwt.server.account.model.JournalType;
 import gwt.shared.model.SAccChart;
+import gwt.shared.model.SAccChart.AccType;
 import gwt.shared.model.SAccGrp;
 import gwt.shared.model.SDocType;
-import gwt.shared.model.SFinHeader;
-import gwt.shared.model.SFinItem;
 import gwt.shared.model.SFiscalYear;
-import gwt.shared.model.SJournalHeader;
-import gwt.shared.model.SJournalItem;
 import gwt.shared.model.SJournalType;
 
-import java.util.List;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
+import java.util.Date;
 
-import javax.jdo.PersistenceManager;
-import javax.jdo.Query;
+import com.google.appengine.api.utils.SystemProperty;
 
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
+public class Db {
 
-public class Db<T> {
-    
-    public interface DbGetCallback {
-        void setQuery(Query query);
-    }
-    
-    @SuppressWarnings("unchecked")
-    public List<T> get(PersistenceManager pm, Class<T> cl, String keyString,
-            DbGetCallback callback){
-        Key key = KeyFactory.stringToKey(keyString);
-        List<T> list = null;
-        Query query = pm.newQuery(cl);
-        callback.setQuery(query);
-        try {
-            list = (List<T>) query.execute(key);
-        } finally {
-            query.closeAll();
+    // Table names
+    public static final String COM = "com";
+    public static final String FISCAL_YEAR = "fiscal_year";
+    public static final String ACC_GRP = "acc_grp";
+    public static final String DOC_TYPE = "doc_type";
+    public static final String JOURNAL_TYPE = "journal_type";
+    public static final String ACC_CHART = "acc_chart";
+    public static final String JOURNAL_HEADER = "journal_header";
+    public static final String JOURNAL_ITEM = "journal_item";
+    public static final String ACC_AMT = "acc_amt";
+
+    // Table fields
+    public static final String ID = "id";
+    public static final String USER_KEY_STRING = "user_key_string";
+    public static final String NAME = "name";
+    public static final String CREATE_DATE = "create_date";
+    public static final String BEGIN_MONTH = "begin_month";
+    public static final String BEGIN_YEAR = "begin_year";
+    public static final String END_MONTH = "end_month";
+    public static final String END_YEAR = "end_year";
+    public static final String SHORT_NAME = "short_name";
+    public static final String JOURNAL_TYPE_ID = "journal_type_id";
+    public static final String CODE = "code";
+    public static final String JOURNAL_DESC = "journal_desc";
+    public static final String ACC_GRP_ID = "acc_grp_id";
+    public static final String PARENT_ACC_CHART_ID = "parent_acc_chart_id";
+    public static final String NO = "no";
+    public static final String TYPE = "type";
+    public static final String LEVEL = "level";
+    public static final String BEGINNING = "beginning";
+    public static final String DOC_TYPE_ID = "doc_type_id";
+    public static final String DAY = "day";
+    public static final String MONTH = "month";
+    public static final String YEAR = "year";
+    public static final String DESC = "desc";
+    public static final String ACC_CHART_ID = "acc_chart_id";
+    public static final String AMT = "amt";
+
+    // Error messages
+    public static final String NO_ROW_EFFECTED_ERR = "Failed, no row affected!";
+    public static final String NO_GENERATED_KEYS_ERR = "Failed, no generated key obtained.";
+    public static final String FISCAL_YEAR_TOO_SMALL_ERR = "Edit aborted! Some journals are not in the new range of fiscal year!";
+    public static final String ACC_CHART_BEING_USED_ERR = "This account chart is being use in some journals.";
+
+    public static Connection getDBConn() throws ClassNotFoundException, SQLException {
+
+        String url = null;
+
+        if (SystemProperty.environment.value() == SystemProperty.Environment.Value.Production) {
+          // Load the class that provides the new "jdbc:google:mysql://" prefix.
+          Class.forName("com.mysql.jdbc.GoogleDriver");
+          url = "jdbc:google:mysql://your-project-id:your-instance-name/thai_accounting?user=root";
+        } else {
+          // Local MySQL instance to use during development.
+          Class.forName("com.mysql.jdbc.Driver");
+          url = "jdbc:mysql://localhost:3306/thai_accounting?user=root";
         }
-        return list;
+
+        return DriverManager.getConnection(url);
     }
-    
-    @SuppressWarnings("unchecked")
-    public Key getSingleKey(PersistenceManager pm, Class<T> cl, String keyString,
-            DbGetCallback callback){
-        Key key = KeyFactory.stringToKey(keyString);
-        List<Key> list = null;
-        Query query = pm.newQuery("select key from " + cl.getName());
-        callback.setQuery(query);
-        try {
-            list = (List<Key>)query.execute(key);
-        } finally {
-            query.closeAll();
-        }
-        return list.isEmpty() ? null : list.get(0);
-    }
-    
-    public interface DbAddCallback<T> {
-        T construct();
-    }
-    
-    public T add(PersistenceManager pm, DbAddCallback<T> callback){
-        T t = callback.construct();
-        pm.makePersistent(t);
-        return t;
-    }
-    
-    public interface DbEditCallback<T> {
-        void edit(T t);
-    }
-    
-    public T edit(PersistenceManager pm, Class<T> cl, String keyString,
-            DbEditCallback<T> callback){
-        Key key = KeyFactory.stringToKey(keyString);
-        T t = pm.getObjectById(cl, key);
-        callback.edit(t);
-        return t;
-    }
-    
-    public interface DbDeleteCallback<T>{
-        void check(T t);
-    }
-    
-    public String delete(PersistenceManager pm, Class<T> cl, String keyString,
-            DbDeleteCallback<T> callback){
-        Key key = KeyFactory.stringToKey(keyString);
-        T t = pm.getObjectById(cl, key);
-        callback.check(t);
-        pm.deletePersistent(t);
-        return keyString;
-    }
-    
-    @SuppressWarnings("unchecked")
-    public static List<FiscalYear> getFiscalYears(PersistenceManager pm,
-            List<Key> comKeyList){
-        List<FiscalYear> fisList = null;        
-        Query query = pm.newQuery(FiscalYear.class);
-        query.setFilter(":p.contains(comKey)");
-        query.setOrdering("beginYear beginMonth asc");
-        try {
-            fisList = (List<FiscalYear>)query.execute(comKeyList);
-        } finally {
-            query.closeAll();
-        }
-        return fisList;
-    }
-    
-    public static SFiscalYear getSetup(PersistenceManager pm, String fisKeyString) {
+
+    public static SFiscalYear getSetup(Connection conn, long fisId) throws SQLException {
         SFiscalYear sFis = new SFiscalYear();
 
-        Db<JournalType> dbJour = new Db<JournalType>();
-        List<JournalType> journalTypeList = dbJour.get(pm, JournalType.class,
-                fisKeyString, new DbGetCallback() {
-            @Override
-            public void setQuery(Query query) {
-                query.setFilter("fisKey == fisKeyParam");
-                query.declareParameters("com.google.appengine.api.datastore.Key fisKeyParam");
-                query.setOrdering("createDate asc");
-            }
-        });
-        if(journalTypeList.size() > 0){
-            for(JournalType journalType : journalTypeList){
-                SJournalType sJournalType = new SJournalType(
-                        journalType.getKeyString(), journalType.getName(), 
-                        journalType.getShortName(), journalType.getCreateDate());
-                sFis.addSJournalType(sJournalType);
-            }
+        String sql;
+        PreparedStatement statement;
+        ResultSet rs;
+
+        sql = "SELECT * FROM journal_type WHERE fiscal_year_id = ? ORDER BY create_date ASC";
+        statement = conn.prepareStatement(sql);
+        statement.setLong(1, fisId);
+        rs = statement.executeQuery();
+        while (rs.next()) {
+            SJournalType sJournalType = new SJournalType(
+                    rs.getLong(ID) + "",
+                    rs.getString(NAME),
+                    rs.getString(SHORT_NAME),
+                    new Date(rs.getTimestamp(CREATE_DATE).getTime()));
+            sFis.addSJournalType(sJournalType);
         }
-        
-        Db<DocType> dbDocType = new Db<DocType>();
-        List<DocType> docTypeList = dbDocType.get(pm, DocType.class, fisKeyString, new DbGetCallback() {
-            @Override
-            public void setQuery(Query query) {
-                query.setFilter("fisKey == fisKeyParam");
-                query.declareParameters("com.google.appengine.api.datastore.Key fisKeyParam");
-                query.setOrdering("createDate asc");
-            }
-        });
-        if(docTypeList.size() > 0){
-            for(DocType docType : docTypeList){
-                SDocType sDocType = new SDocType(docType.getKeyString(), docType.getJournalTypeKeyString(), docType.getCode(), docType.getName(), 
-                        docType.getJournalDesc(), docType.getCreateDate());
-                sFis.addSDocType(sDocType);
-                
-            }
+
+        sql = "SELECT * FROM doc_type WHERE fiscal_year_id = ? ORDER BY create_date ASC";
+        statement = conn.prepareStatement(sql);
+        statement.setLong(1, fisId);
+        rs = statement.executeQuery();
+        while (rs.next()) {
+            SDocType sDocType = new SDocType(
+                    rs.getLong(ID) + "",
+                    rs.getLong(JOURNAL_TYPE_ID) + "",
+                    rs.getString(CODE),
+                    rs.getString(NAME),
+                    rs.getString(JOURNAL_DESC),
+                    new Date(rs.getTimestamp(CREATE_DATE).getTime()));
+            sFis.addSDocType(sDocType);
         }
-        
-        Db<AccGroup> dbAccGrp = new Db<AccGroup>();
-        List<AccGroup> accGrpList = dbAccGrp.get(pm, AccGroup.class, fisKeyString, new DbGetCallback() {
-            @Override
-            public void setQuery(Query query) {
-                query.setFilter("fisKey == fisKeyParam");
-                query.declareParameters("com.google.appengine.api.datastore.Key fisKeyParam");
-                query.setOrdering("createDate asc");
-            }
-        });
-        if(accGrpList.size() > 0){
-            for(AccGroup accGrp : accGrpList){
-                SAccGrp sAccGrp = new SAccGrp(accGrp.getKeyString(), accGrp.getName(), accGrp.getCreateDate());
-                sFis.addSAccGrp(sAccGrp);
-            }
+
+        sql = "SELECT * FROM acc_grp WHERE fiscal_year_id = ? ORDER BY create_date ASC";
+        statement = conn.prepareStatement(sql);
+        statement.setLong(1, fisId);
+        rs = statement.executeQuery();
+        while (rs.next()) {
+            SAccGrp sAccGrp = new SAccGrp(
+                    rs.getLong(ID) + "",
+                    rs.getString(NAME),
+                    new Date(rs.getTimestamp(CREATE_DATE).getTime()));
+            sFis.addSAccGrp(sAccGrp);
         }
-        
-        Db<AccChart> dbAccChart = new Db<AccChart>();
-        List<AccChart> accChartList = dbAccChart.get(pm, AccChart.class, fisKeyString, new DbGetCallback() {
-            @Override
-            public void setQuery(Query query) {
-                query.setFilter("fisKey == fisKeyParam");
-                query.declareParameters("com.google.appengine.api.datastore.Key fisKeyParam");
-            }
-        });
-        if(accChartList.size() > 0){
-            for(AccChart accChart : accChartList){
-                SAccChart sAccChart = new SAccChart(accChart.getKeyString(), accChart.getAccGroupKeyString(), 
-                        accChart.getParentAccChartKeyString(), accChart.getNo(), accChart.getName(), accChart.getType(), accChart.getLevel(), 
-                        accChart.getBeginning());
-                sFis.addSAccChart(sAccChart);
-            }
+
+        sql = "SELECT * FROM acc_chart WHERE fiscal_year_id = ?";
+        statement = conn.prepareStatement(sql);
+        statement.setLong(1, fisId);
+        rs = statement.executeQuery();
+        while (rs.next()) {
+            SAccChart sAccChart = new SAccChart(
+                    rs.getLong(ID) + "",
+                    rs.getLong(ACC_GRP_ID) + "",
+                    rs.getLong(PARENT_ACC_CHART_ID) == 0 ? null : rs.getLong(PARENT_ACC_CHART_ID) + "",
+                    rs.getString(NO),
+                    rs.getString(NAME),
+                    AccType.values()[rs.getInt(TYPE)],
+                    rs.getInt(LEVEL),
+                    rs.getDouble(BEGINNING));
+            sFis.addSAccChart(sAccChart);
         }
-        
-        Db<FinHeader> db = new Db<FinHeader>();
-        List<FinHeader> finList = db.get(pm, FinHeader.class, fisKeyString, new DbGetCallback() {
-            @Override
-            public void setQuery(Query query) {
-                query.setFilter("fisKey == fisKeyParam");
-                query.declareParameters("com.google.appengine.api.datastore.Key fisKeyParam");
-                query.setOrdering("createDate asc");
-            }
-        });
-        if(finList.size() > 0){
-            for(FinHeader finHeader : finList){
-                SFinHeader sFinHeader = new SFinHeader(finHeader.getKeyString(),
-                        finHeader.getName(), finHeader.getCreateDate());
-                
-                for(FinItem finItem : finHeader.getItemSet()){
-                    SFinItem sFinItem = new SFinItem(finItem.getKeyString(),
-                            finItem.getSeq(), finItem.getComm(), finItem.getArg(), 
-                            finItem.getCalCon(), finItem.getPrintCon(),
-                            finItem.getPrintStyle(), finItem.getVar1(), 
-                            finItem.getVar2(), finItem.getVar3(), finItem.getVar4());
-                    sFinHeader.addSFinItem(sFinItem);
-                }
-                
-                sFis.addSFinHeader(sFinHeader);
-            }
-        }
+
         return sFis;
     }
-    
-    public static AccChart setBeginning(PersistenceManager pm, String accChartKeyString, double beginning){
-        Key key = KeyFactory.stringToKey(accChartKeyString);
-        AccChart accChart = pm.getObjectById(AccChart.class, key);
-        
-        accChart.setBeginning(beginning);
-        
-        return accChart;
+
+    public static PreparedStatement getAddJTPreparedStatement(Connection conn, long fiscalYearId)
+            throws SQLException {
+        String sql = "INSERT INTO journal_type (id, fiscal_year_id, `name`, short_name) VALUES( ? , ? , ? , ? )";
+        PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+        statement.setNull(1, Types.INTEGER);
+        statement.setLong(2, fiscalYearId);
+        return statement;
     }
-    
-    public static FinHeader addFinHeader(PersistenceManager pm,
-            String fisKeyString, SFinHeader sFinHeader){
-        FinHeader finHeader = new FinHeader(fisKeyString, sFinHeader.getName(),
-                sFinHeader.getCreateDate());
-        for(SFinItem sFinItem : sFinHeader.getSFinItemList()){
-            FinItem finItem = new FinItem(sFinItem.getSeq(), sFinItem.getComm(),
-                    sFinItem.getArg(), sFinItem.getCalCon(), sFinItem.getPrintCon(),
-                    sFinItem.getPrintStyle(), sFinItem.getVar1(), sFinItem.getVar2(),
-                    sFinItem.getVar3(), sFinItem.getVar4());
-                    finHeader.addItem(finItem);
+
+    public static long addJT(PreparedStatement statement, String name, String shortName)
+            throws SQLException {
+        statement.setString(3, name);
+        statement.setString(4, shortName);
+        int affectedRows = statement.executeUpdate();
+        if (affectedRows != 1) {
+            throw new SQLException(NO_ROW_EFFECTED_ERR);
         }
-        pm.makePersistent(finHeader);
-        return finHeader;
-    }
-    
-    public static FinHeader editFinHeader(PersistenceManager pm,
-            SFinHeader sFinHeader){
-        Key key = KeyFactory.stringToKey(sFinHeader.getKeyString());
-        FinHeader finHeader = pm.getObjectById(FinHeader.class, key);
-        finHeader.setName(sFinHeader.getName());
-        return finHeader;
-    }
-    
-    public static FinItem addFinItem(PersistenceManager pm,
-            String finHeaderKeyString, SFinItem sFinItem){
-        Key finHeaderKey = KeyFactory.stringToKey(finHeaderKeyString);
-        FinHeader finHeader = pm.getObjectById(FinHeader.class, finHeaderKey);
-        FinItem finItem = new FinItem(sFinItem.getSeq(), sFinItem.getComm(),
-                sFinItem.getArg(), sFinItem.getCalCon(), sFinItem.getPrintCon(),
-                sFinItem.getPrintStyle(), sFinItem.getVar1(), sFinItem.getVar2(),
-                sFinItem.getVar3(), sFinItem.getVar4()); 
-        finHeader.addItem(finItem);
-        return finItem;
-    }
-    
-    public static FinItem editFinItem(PersistenceManager pm, SFinItem sFinItem){
-        Key key = KeyFactory.stringToKey(sFinItem.getKeyString());
-        FinItem finItem = pm.getObjectById(FinItem.class, key);
-        finItem.setSeq(sFinItem.getSeq());
-        finItem.setComm(sFinItem.getComm());
-        finItem.setArg(sFinItem.getArg());
-        finItem.setCalCon(sFinItem.getCalCon());
-        finItem.setPrintCon(sFinItem.getPrintCon());
-        finItem.setPrintStyle(sFinItem.getPrintStyle());
-        finItem.setVar1(sFinItem.getVar1());
-        finItem.setVar2(sFinItem.getVar2());
-        finItem.setVar3(sFinItem.getVar3());
-        finItem.setVar4(sFinItem.getVar4());
-        return finItem;
-    }
-    
-    public static JournalHeader addJournal(PersistenceManager pm, String fisKeyString, SJournalHeader sJournal){
-        JournalHeader journal = new JournalHeader(fisKeyString, sJournal.getDocTypeKeyString(), sJournal.getNo(), 
-                sJournal.getDay(), sJournal.getMonth(), sJournal.getYear(), sJournal.getDesc());
-        
-        for(SJournalItem sJournalItem : sJournal.getItemList()){
-            JournalItem journalItem = new JournalItem(sJournalItem.getAccChartKeyString(), sJournalItem.getAmt(),
-                    sJournalItem.getCreateDate());
-            journal.addItem(journalItem);
+
+        ResultSet generatedKeys = statement.getGeneratedKeys();
+        if (generatedKeys.next()) {
+            return generatedKeys.getLong(1);
+        } else {
+            throw new SQLException(NO_GENERATED_KEYS_ERR);
         }
-        
-        pm.makePersistent(journal);
-        return journal;
     }
-    
-    public static JournalHeader editJournal(PersistenceManager pm, SJournalHeader sJournal){
-        Key key = KeyFactory.stringToKey(sJournal.getKeyString());
-        JournalHeader journal = pm.getObjectById(JournalHeader.class, key);
-        
-        journal.setDocTypeKey(sJournal.getDocTypeKeyString());
-        journal.setNo(sJournal.getNo());
-        journal.setDay(sJournal.getDay());
-        journal.setMonth(sJournal.getMonth());
-        journal.setYear(sJournal.getYear());
-        journal.setDesc(sJournal.getDesc());
-        
-        journal.clearItemSet();
-        for(SJournalItem sJournalItem : sJournal.getItemList()){
-            JournalItem journalItem = new JournalItem(sJournalItem.getAccChartKeyString(), sJournalItem.getAmt(),
-                    sJournalItem.getCreateDate());
-            journal.addItem(journalItem);
+
+    public static PreparedStatement getAddDTPreparedStatement(Connection conn, long fiscalYearId)
+            throws SQLException {
+        String sql = "INSERT INTO doc_type (id, fiscal_year_id, journal_type_id, code, `name`, journal_desc) VALUES( ? , ? , ? , ? , ? , ? )";
+        PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+        statement.setNull(1, Types.INTEGER);
+        statement.setLong(2, fiscalYearId);
+        return statement;
+    }
+
+    public static long addDT(PreparedStatement statement, long jTId, String code, String name,
+            String journalDesc) throws SQLException {
+        statement.setLong(3, jTId);
+        statement.setString(4, code);
+        statement.setString(5, name);
+        statement.setString(6, journalDesc);
+        int affectedRows = statement.executeUpdate();
+        if (affectedRows != 1) {
+            throw new SQLException(NO_ROW_EFFECTED_ERR);
         }
-        
-        return journal;
+
+        ResultSet generatedKeys = statement.getGeneratedKeys();
+        if (generatedKeys.next()) {
+            return generatedKeys.getLong(1);
+        } else {
+            throw new SQLException(NO_GENERATED_KEYS_ERR);
+        }
     }
-    
-    public static String deleteFis(PersistenceManager pm, String fisKeyString) {
-        // Delete all children - journal type, doc type, acc grp, 
-        //     acc chart, fin, journal
-        Db<JournalType> dbJour = new Db<JournalType>();
-        List<JournalType> journalTypeList = dbJour.get(pm, JournalType.class,
-                fisKeyString, new DbGetCallback() {
-            @Override
-            public void setQuery(Query query) {
-                query.setFilter("fisKey == fisKeyParam");
-                query.declareParameters("com.google.appengine.api.datastore.Key fisKeyParam");
-            }
-        });
-        pm.deletePersistentAll(journalTypeList);
-        
-        Db<DocType> dbDocType = new Db<DocType>();
-        List<DocType> docTypeList = dbDocType.get(pm, DocType.class, fisKeyString,
-                new DbGetCallback() {
-            @Override
-            public void setQuery(Query query) {
-                query.setFilter("fisKey == fisKeyParam");
-                query.declareParameters("com.google.appengine.api.datastore.Key fisKeyParam");
-            }
-        });
-        pm.deletePersistentAll(docTypeList);
-        
-        Db<AccGroup> dbAccGrp = new Db<AccGroup>();
-        List<AccGroup> accGrpList = dbAccGrp.get(pm, AccGroup.class, fisKeyString, new DbGetCallback() {
-            @Override
-            public void setQuery(Query query) {
-                query.setFilter("fisKey == fisKeyParam");
-                query.declareParameters("com.google.appengine.api.datastore.Key fisKeyParam");
-                query.setOrdering("createDate asc");
-            }
-        });
-        pm.deletePersistentAll(accGrpList);
-        
-        Db<AccChart> dbAccChart = new Db<AccChart>();
-        List<AccChart> accChartList = dbAccChart.get(pm, AccChart.class, fisKeyString, new DbGetCallback() {
-            @Override
-            public void setQuery(Query query) {
-                query.setFilter("fisKey == fisKeyParam");
-                query.declareParameters("com.google.appengine.api.datastore.Key fisKeyParam");
-            }
-        });
-        pm.deletePersistentAll(accChartList);
-        
-        Db<FinHeader> dbFin = new Db<FinHeader>();
-        List<FinHeader> finList = dbFin.get(pm, FinHeader.class, fisKeyString, new DbGetCallback() {
-            @Override
-            public void setQuery(Query query) {
-                query.setFilter("fisKey == fisKeyParam");
-                query.declareParameters("com.google.appengine.api.datastore.Key fisKeyParam");
-                query.setOrdering("createDate asc");
-            }
-        });
-        pm.deletePersistentAll(finList);
-        
-        Db<JournalHeader> dbJournal = new Db<JournalHeader>();
-        List<JournalHeader> journalList = dbJournal.get(pm, JournalHeader.class,
-                fisKeyString, new DbGetCallback() {
-            @Override
-            public void setQuery(Query query) {
-                query.setFilter("fisKey == fisKeyParam");
-                query.declareParameters("com.google.appengine.api.datastore.Key fisKeyParam");
-            }
-        });
-        pm.deletePersistentAll(journalList);
-        
-        Db<FiscalYear> dbFis = new Db<FiscalYear>();
-        dbFis.delete(pm, FiscalYear.class, fisKeyString, new DbDeleteCallback<FiscalYear>() {
-            @Override
-            public void check(FiscalYear t) {
-                
-            }
-        });
-        return fisKeyString;
+
+    public static PreparedStatement getAddAGPreparedStatement(Connection conn, long fiscalYearId)
+            throws SQLException {
+        String sql = "INSERT INTO acc_grp (id, fiscal_year_id, `name`) VALUES( ? , ? , ? )";
+        PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+        statement.setNull(1, Types.INTEGER);
+        statement.setLong(2, fiscalYearId);
+        return statement;
+    }
+
+    public static long addAG(PreparedStatement statement, String name) throws SQLException {
+        statement.setString(3, name);
+        int affectedRows = statement.executeUpdate();
+        if (affectedRows != 1) {
+            throw new SQLException(NO_ROW_EFFECTED_ERR);
+        }
+
+        ResultSet generatedKeys = statement.getGeneratedKeys();
+        if (generatedKeys.next()) {
+            return generatedKeys.getLong(1);
+        } else {
+            throw new SQLException(NO_GENERATED_KEYS_ERR);
+        }
+    }
+
+    public static PreparedStatement getAddACPreparedStatement(Connection conn, long fiscalYearId)
+            throws SQLException {
+        String sql = "INSERT INTO acc_chart (id, fiscal_year_id, acc_grp_id, parent_acc_chart_id, `no`, `name`, `type`, `level`) VALUES( ? , ? , ? , ? , ? , ? , ? , ? )";
+        PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+        statement.setNull(1, Types.INTEGER);
+        statement.setLong(2, fiscalYearId);
+        return statement;
+    }
+
+    public static long addAC(PreparedStatement statement, String no, String name, long aGId,
+            int level, AccType type, long parentACId) throws SQLException {
+        statement.setLong(3, aGId);
+        if (parentACId == 0) {
+            statement.setNull(4, Types.INTEGER);
+        } else {
+            statement.setLong(4, parentACId);
+        }
+        statement.setString(5, no);
+        statement.setString(6, name);
+        statement.setInt(7, type.ordinal());
+        statement.setInt(8, level);
+        int affectedRows = statement.executeUpdate();
+        if (affectedRows != 1) {
+            throw new SQLException(NO_ROW_EFFECTED_ERR);
+        }
+
+        ResultSet generatedKeys = statement.getGeneratedKeys();
+        if (generatedKeys.next()) {
+            return generatedKeys.getLong(1);
+        } else {
+            throw new SQLException(NO_GENERATED_KEYS_ERR);
+        }
+    }
+
+    public static String deleteFromDB(Connection conn, String tableName, String keyString)
+            throws NumberFormatException, SQLException {
+
+        String sql = "DELETE FROM " + tableName + " WHERE id = ?";
+        PreparedStatement statement = conn.prepareStatement(sql);
+        statement.setLong(1, Long.parseLong(keyString));
+        int affectedRows = statement.executeUpdate();
+        if (affectedRows != 1) {
+            throw new SQLException(NO_ROW_EFFECTED_ERR);
+        }
+        return keyString;
+    }
+
+    public static String dot(String t1, String t2) {
+        return t1 + "." + t2;
     }
 }

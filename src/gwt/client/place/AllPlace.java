@@ -33,8 +33,6 @@ public class AllPlace extends Place {
     public static final String BALANCE = "balance";
     public static final String PROFIT = "profit";
     public static final String COST = "cost";
-    public static final String WORK_SHEET = "work_sheet";
-    public static final String FIN = "fin";
 
     // Used by AccChartView
     //     whether to create a new account chart as a child or a sibling.

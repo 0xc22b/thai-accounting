@@ -29,9 +29,19 @@
 	    .clickedBtn:hover {
             border: 1px solid #AAA;
         }
+        
+        .recalAccAmtBtn {
+	        position: absolute;
+	        right: 10px;
+	        bottom: 10px;
+	        color: #222;
+	        background-image: none;
+	        background-color: white;
+	        border: 1px solid #fff;
+	    }
 	    
 	    .reportPanel {
-	       margin: 0;
+	        margin-bottom: 0;
 	    }
 	    
 	    .subMenu {
@@ -78,15 +88,14 @@
     </ui:style>
 
     <g:HTMLPanel>
-        <g:FlowPanel ui:field="setupPanel" styleName='{style.row}'>
+        <g:FlowPanel ui:field="setupPanel" styleName='{style.row} {style.reportPanel}'>
             <g:Button ui:field="journalTypeBtn"></g:Button>
             <g:Button ui:field="docTypeBtn"></g:Button>
             <g:Button ui:field="accGrpBtn"></g:Button>
             <g:Button ui:field="accChartBtn"></g:Button>
             <g:Button ui:field="beginningBtn"></g:Button>
-            <g:Button ui:field="finBtn"></g:Button>
         </g:FlowPanel>
-        <g:FlowPanel ui:field="journalPanel" styleName='{style.row}'>
+        <g:FlowPanel ui:field="journalPanel" styleName='{style.row} {style.reportPanel}'>
         
         </g:FlowPanel>
         <g:FlowPanel ui:field="reportPanel" styleName='{style.row} {style.reportPanel}'>
@@ -97,8 +106,7 @@
             <g:Button ui:field="balanceRepBtn"></g:Button>
             <g:Button ui:field="profitRepBtn"></g:Button>
             <g:Button ui:field="costRepBtn"></g:Button>
-            <g:Button ui:field="workSheetBtn"></g:Button>
-            <g:FlowPanel ui:field="finRepPanel" styleName='{style.finRepPanel}'></g:FlowPanel>
+            <g:Button ui:field="recalAccAmtBtn"></g:Button>
         </g:FlowPanel>
         <g:FlowPanel ui:field="subMenuPanel" styleName='{style.subMenu}'>
             <g:FlowPanel ui:field="journalTypePanel" styleName='{style.row}'>
@@ -116,6 +124,13 @@
                     <c:CustomSuggestBox ui:field="endAccNoSB"></c:CustomSuggestBox>
                     <g:Label ui:field="errEndAccNoLb" styleName='{style.errMsg}'></g:Label>
                 </g:FlowPanel>
+            </g:FlowPanel>
+            <g:FlowPanel ui:field="monthYearPanel" styleName='{style.row}'>
+                <g:Label ui:field="monthLb" styleName='{style.oLb}'></g:Label>
+                <c:CustomIntBox ui:field="monthIB" styleName='{style.input}' visibleLength='2'></c:CustomIntBox>
+                <g:Label ui:field="yearLb" styleName='{style.oLb}'></g:Label>
+                <c:CustomIntBox ui:field="yearIB" styleName='{style.input}' visibleLength='4'></c:CustomIntBox>
+                <g:Label ui:field="errMonthYearLb" styleName='{style.errMsg}'></g:Label>
             </g:FlowPanel>
             <g:FlowPanel ui:field="datePanel">
                 <g:FlowPanel styleName='{style.row}'>

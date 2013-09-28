@@ -140,4 +140,9 @@ public class AccChartListDefImpl extends ListDef<SFiscalYear, SAccChart> {
     public Unit getWidthUnit(int i) {
         return Unit.PCT;
     }
+
+    @Override
+    public int getPageSize() {
+        return 200;
+    }
 }

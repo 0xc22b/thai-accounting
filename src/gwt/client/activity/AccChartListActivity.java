@@ -46,7 +46,6 @@ public class AccChartListActivity extends AbstractActivity implements ListView.P
 
     @Override
     public String mayStop() {
-        clientFactory.getAccChartListView().saveFirstVisibleIndex();
         return null;
     }
 
@@ -85,6 +84,7 @@ public class AccChartListActivity extends AbstractActivity implements ListView.P
         ActionEvent.register(eventBus, ActionNames.ADD, new ActionEvent.Handler(){
             @Override
             public void onAction(ActionEvent event) {
+                clientFactory.getAccChartListView().keepState(0);
                 clientFactory.getPlaceController().goTo(new AllPlace(AllPlace.CHART,
                         AllPlace.NEW, place.getComKeyString(), place.getFisKeyString()));
             }
@@ -92,6 +92,7 @@ public class AccChartListActivity extends AbstractActivity implements ListView.P
         ActionEvent.register(eventBus, ActionNames.VIEW, new ActionEvent.Handler(){
             @Override
             public void onAction(ActionEvent event) {
+                clientFactory.getAccChartListView().keepState(0);
                 clientFactory.getPlaceController().goTo(new AllPlace(AllPlace.CHART,
                         AllPlace.VIEW, place.getComKeyString(), 
                         place.getFisKeyString(),
@@ -101,6 +102,7 @@ public class AccChartListActivity extends AbstractActivity implements ListView.P
         ActionEvent.register(eventBus, ActionNames.EDIT, new ActionEvent.Handler(){
             @Override
             public void onAction(ActionEvent event) {
+                clientFactory.getAccChartListView().keepState(0);
                 clientFactory.getPlaceController().goTo(new AllPlace(AllPlace.CHART,
                         AllPlace.EDIT, place.getComKeyString(),
                         place.getFisKeyString(),
@@ -124,6 +126,7 @@ public class AccChartListActivity extends AbstractActivity implements ListView.P
         ActionEvent.register(eventBus, ActionNames.CHILD, new ActionEvent.Handler(){
             @Override
             public void onAction(ActionEvent event) {
+                clientFactory.getAccChartListView().keepState(0);
                 clientFactory.getPlaceController().goTo(new AllPlace(AllPlace.CHART,
                         AllPlace.NEW, place.getComKeyString(), place.getFisKeyString(),
                         clientFactory.getAccChartListView().getSelectedItemKeyString(),
@@ -133,6 +136,7 @@ public class AccChartListActivity extends AbstractActivity implements ListView.P
         ActionEvent.register(eventBus, ActionNames.SIBLING, new ActionEvent.Handler(){
             @Override
             public void onAction(ActionEvent event) {
+                clientFactory.getAccChartListView().keepState(0);
                 clientFactory.getPlaceController().goTo(new AllPlace(AllPlace.CHART,
                         AllPlace.NEW, place.getComKeyString(), place.getFisKeyString(),
                         clientFactory.getAccChartListView().getSelectedItemKeyString(),
@@ -175,6 +179,7 @@ public class AccChartListActivity extends AbstractActivity implements ListView.P
                 }
                 @Override
                 public void onSuccess(SFiscalYear result) {
+                    clientFactory.getAccChartListView().keepState(0);
                     clientFactory.getAccChartListView().setData(result);
                 }
             });

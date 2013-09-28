@@ -112,5 +112,7 @@ public class AccGrpViewImpl<T> extends Composite implements AccGrpView<T> {
     
     private void setInputsEnabled(boolean enabled){
         nameTB.setEnabled(enabled);
+        
+        if (enabled) nameTB.setFocus(true);
     }
 }

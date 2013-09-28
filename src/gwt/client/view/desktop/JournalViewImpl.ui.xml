@@ -96,6 +96,7 @@
         <div class='{style.row}'>
             <g:Label ui:field="docTypeLb" styleName='{style.label}'></g:Label>
             <c:CustomListBox ui:field="docTypeLB" styleName='{style.input}'></c:CustomListBox>
+            <g:Label ui:field="errDocTypeLb" styleName='{style.errMsg}'></g:Label>
         </div>
         <div class='{style.row}'>
             <g:Label ui:field="noLb" styleName='{style.label}'></g:Label>
@@ -108,9 +109,9 @@
             <g:Label ui:field="dayLb" styleName='{style.fLb}'></g:Label>
             <c:CustomIntBox ui:field="dayIB" styleName='{style.input}' visibleLength='2'></c:CustomIntBox>
             <g:Label ui:field="monthLb" styleName='{style.oLb}'></g:Label>
-            <c:CustomIntBox ui:field="monthIB" styleName='{style.input}' visibleLength='2'></c:CustomIntBox>
+            <g:Label ui:field="monthInputLb" styleName='{style.oLb}'></g:Label>
             <g:Label ui:field="yearLb" styleName='{style.oLb}'></g:Label>
-            <c:CustomIntBox ui:field="yearIB" styleName='{style.input}' visibleLength='4'></c:CustomIntBox>
+            <g:Label ui:field="yearInputLb" styleName='{style.oLb}'></g:Label>
             <g:Label ui:field="errDateLb" styleName='{style.errMsg}'></g:Label>
         </div>
         <div class='{style.row}'>

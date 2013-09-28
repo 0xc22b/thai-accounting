@@ -46,7 +46,6 @@ public class DocTypeListActivity extends AbstractActivity implements ListView.Pr
 
     @Override
     public String mayStop() {
-        clientFactory.getDocTypeListView().saveFirstVisibleIndex();
         return null;
     }
 
@@ -84,6 +83,9 @@ public class DocTypeListActivity extends AbstractActivity implements ListView.Pr
         ActionEvent.register(eventBus, ActionNames.ADD, new ActionEvent.Handler(){
             @Override
             public void onAction(ActionEvent event) {
+                
+                clientFactory.getDocTypeListView().keepState(0);
+
                 clientFactory.getPlaceController().goTo(new AllPlace(AllPlace.DOC, AllPlace.NEW, place.getComKeyString(), 
                         place.getFisKeyString()));
             }
@@ -91,6 +93,9 @@ public class DocTypeListActivity extends AbstractActivity implements ListView.Pr
         ActionEvent.register(eventBus, ActionNames.VIEW, new ActionEvent.Handler(){
             @Override
             public void onAction(ActionEvent event) {
+                
+                clientFactory.getDocTypeListView().keepState(0);
+
                 clientFactory.getPlaceController().goTo(new AllPlace(AllPlace.DOC, AllPlace.VIEW, place.getComKeyString(), 
                         place.getFisKeyString(), clientFactory.getDocTypeListView().getSelectedItemKeyString()));
             }
@@ -98,6 +103,9 @@ public class DocTypeListActivity extends AbstractActivity implements ListView.Pr
         ActionEvent.register(eventBus, ActionNames.EDIT, new ActionEvent.Handler(){
             @Override
             public void onAction(ActionEvent event) {
+                
+                clientFactory.getDocTypeListView().keepState(0);
+                
                 clientFactory.getPlaceController().goTo(new AllPlace(AllPlace.DOC, AllPlace.EDIT, place.getComKeyString(),
                         place.getFisKeyString(), clientFactory.getDocTypeListView().getSelectedItemKeyString()));
             }
@@ -150,6 +158,9 @@ public class DocTypeListActivity extends AbstractActivity implements ListView.Pr
                 }
                 @Override
                 public void onSuccess(SFiscalYear result) {
+                    
+                    clientFactory.getDocTypeListView().keepState(0);
+
                     clientFactory.getDocTypeListView().setData(result);
                 }
             });

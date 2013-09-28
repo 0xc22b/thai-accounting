@@ -129,5 +129,7 @@ public class JournalTypeViewImpl<T> extends Composite implements JournalTypeView
     private void setInputsEnabled(boolean enabled){
         nameTB.setEnabled(enabled);
         shortNameTB.setEnabled(enabled);
+        
+        if (enabled) nameTB.setFocus(true);
     }
 }

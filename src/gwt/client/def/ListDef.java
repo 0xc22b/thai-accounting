@@ -24,4 +24,6 @@ public abstract class ListDef<L, E> {
     public abstract boolean hasWidth(int i);
     public abstract double getWidthValue(int i);
     public abstract Unit getWidthUnit(int i);
+    
+    public abstract int getPageSize();
 }

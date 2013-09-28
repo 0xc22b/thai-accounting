@@ -60,14 +60,6 @@ public class AppActivityMapper implements ActivityMapper {
                 return new BeginListActivity(allPlace, clientFactory);
             }else if(allPlace.getPlace().equals(AllPlace.BEGIN)){
                 return new BeginActivity(allPlace, clientFactory);   
-            }else if(allPlace.getPlace().equals(AllPlace.FIN_HEADER) && allPlace.getAction().equals(AllPlace.LIST)){
-                return new FinHeaderListActivity(allPlace, clientFactory);
-            }else if(allPlace.getPlace().equals(AllPlace.FIN_HEADER)){
-                return new FinHeaderActivity(allPlace, clientFactory);   
-            }else if(allPlace.getPlace().equals(AllPlace.FIN_ITEM) && allPlace.getAction().equals(AllPlace.LIST)){
-                return new FinItemListActivity(allPlace, clientFactory);
-            }else if(allPlace.getPlace().equals(AllPlace.FIN_ITEM)){
-                return new FinItemActivity(allPlace, clientFactory);   
             }else if(allPlace.getPlace().equals(AllPlace.JOUR) && allPlace.getAction().equals(AllPlace.LIST)){
                 return new JournalListActivity(allPlace, clientFactory);
             }else if(allPlace.getPlace().equals(AllPlace.JOUR)){

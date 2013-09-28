@@ -4,32 +4,14 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
+@SuppressWarnings("serial")
 public class SCom implements Serializable{
-
-    public enum ComType {
-        PERSONAL,
-        LIMITED,
-        GOVERN
-    }
-    
-    public enum YearType {
-        INTER,
-        THAI
-    }
-    
-	private static final long serialVersionUID = 1L;
 
 	private String keyString;
 	private String name;
-	private String address;
-    private String telNo;
-    private ComType comType;
-    private String taxID;
-    private String merchantID;
-    private YearType yearType;
-    private double vatRate;
     private Date createDate;
 	
     private ArrayList<SFiscalYear> sFisList = new ArrayList<SFiscalYear>();
@@ -38,17 +20,9 @@ public class SCom implements Serializable{
 		
 	}
 	
-	public SCom(String keyString, String name, String address, String telNo, ComType comType, String taxID,
-            String merchantID, YearType yearType, double vatRate, Date createDate) {
+	public SCom(String keyString, String name, Date createDate) {
         this.keyString = keyString;
         this.name = name;
-        this.address = address;
-        this.telNo = telNo;
-        this.comType = comType;
-        this.taxID = taxID;
-        this.merchantID = merchantID;
-        this.yearType = yearType;
-        this.vatRate = vatRate;
         this.createDate = createDate;
     }
 
@@ -58,34 +32,6 @@ public class SCom implements Serializable{
 	
 	public String getName(){
         return this.name;
-    }
-	
-	public String getAddress() {
-        return address;
-    }
-
-    public String getTelNo() {
-        return telNo;
-    }
-
-    public ComType getComType() {
-        return comType;
-    }
-
-    public String getTaxID() {
-        return taxID;
-    }
-
-    public String getMerchantID() {
-        return merchantID;
-    }
-
-    public YearType getYearType() {
-        return yearType;
-    }
-
-    public double getVatRate() {
-        return vatRate;
     }
 
     public Date getCreateDate() {
@@ -123,12 +69,14 @@ public class SCom implements Serializable{
     }
     
     public void removeSFis(String fisKeyString){
-        for(SFiscalYear sFis : sFisList){
-            if(sFis.getKeyString().equals(fisKeyString)){
-                sFisList.remove(sFis);
-                return;
+        Iterator<SFiscalYear> it = sFisList.iterator();
+        while (it.hasNext()) {
+            SFiscalYear sFis = it.next();
+            if (sFis.getKeyString().equals(fisKeyString)) {
+                it.remove();
+                break;
             }
-        }    
+        }
     }
     
     public void setKeyString(String keyString){
@@ -139,37 +87,7 @@ public class SCom implements Serializable{
         this.name = name;
     }
 
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public void setTelNo(String telNo) {
-        this.telNo = telNo;
-    }
-
-    public void setComType(ComType comType) {
-        this.comType = comType;
-    }
-
-    public void setTaxID(String taxID) {
-        this.taxID = taxID;
-    }
-
-    public void setMerchantID(String merchantID) {
-        this.merchantID = merchantID;
-    }
-
-    public void setYearType(YearType yearType) {
-        this.yearType = yearType;
-    }
-
-    public void setVatRate(double vatRate) {
-        this.vatRate = vatRate;
-    }
-
     public void setCreateDate(Date createDate) {
         this.createDate = createDate;
     }
-    
-    
 }

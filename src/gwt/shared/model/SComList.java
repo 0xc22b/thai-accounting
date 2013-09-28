@@ -3,6 +3,7 @@ package gwt.shared.model;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 public class SComList implements Serializable{
@@ -36,13 +37,6 @@ public class SComList implements Serializable{
 	    for(SCom sCom : sComList){
             if(sCom.getKeyString().equals(newSCom.getKeyString())){
                 sCom.setName(newSCom.getName());
-                sCom.setAddress(newSCom.getAddress());
-                sCom.setTelNo(newSCom.getTelNo());
-                sCom.setComType(newSCom.getComType());
-                sCom.setTaxID(newSCom.getTaxID());
-                sCom.setMerchantID(newSCom.getMerchantID());
-                sCom.setYearType(newSCom.getYearType());
-                sCom.setVatRate(newSCom.getVatRate());
                 return sCom;
             }
         }
@@ -50,11 +44,13 @@ public class SComList implements Serializable{
 	}
 	
 	public void removeSCom(String keyString){
-	    for(SCom sCom : sComList){
-            if(sCom.getKeyString().equals(keyString)){
-                sComList.remove(sCom);
-                return;
+	    Iterator<SCom> it = sComList.iterator();
+	    while (it.hasNext()) {
+            SCom sCom = it.next();
+            if (sCom.getKeyString().equals(keyString)) {
+                it.remove();
+                break;
             }
-	    }
+        }
 	}
 }

@@ -2,11 +2,6 @@ package gwt.shared.model;
 
 import static org.junit.Assert.assertEquals;
 import gwt.shared.model.SAccChart.AccType;
-import gwt.shared.model.SFinItem.CalCon;
-import gwt.shared.model.SFinItem.Comm;
-import gwt.shared.model.SFinItem.Operand;
-import gwt.shared.model.SFinItem.PrintCon;
-import gwt.shared.model.SFinItem.PrintStyle;
 
 import java.util.Date;
 
@@ -272,63 +267,7 @@ public class SFiscalYearTest {
         assertEquals("acKS3", sFis.getSAccChartList().get(4).getKeyString());
     }
     
-    @Test
-    public void testUpdateSFinItemAccChartNo1() {
-        SAccGrp sAG1 = new SAccGrp("agKS1", "accgrpname1", new Date());
-        SAccChart sAC1 = new SAccChart("acKS1", sAG1.getKeyString(), null,
-                "1000100", "accchart1", AccType.CONTROL, 1, 400.34);
-        
-        SFinItem sFI = new SFinItem("fiKS", 3, Comm.ACCNO, "acKS1", CalCon.CAL,
-                PrintCon.PRINT, PrintStyle.BLANK, Operand.CLEAR, Operand.CLEAR,
-                Operand.MINUS, Operand.PLUS);
-        
-        SFinHeader sFH = new SFinHeader("fhKS", "finheadername", new Date());
-        sFH.addSFinItem(sFI);
-        
-        SFiscalYear sFY = new SFiscalYear();
-        sFY.addSAccGrp(sAG1);
-        sFY.addSAccChart(sAC1);
-        sFY.addSFinHeader(sFH);
-        
-        sFis.setSetup(sFY);
-        
-        sFis.updateSFinItemAccChartNo();
-        
-        SFinHeader sFH_tmp = sFis.getSFinHeader("fhKS");
-        SFinItem sFI_tmp = sFH_tmp.getSFinItem("fiKS");
-        assertEquals("1000100", sFI_tmp.getAccChartNo());
-    }
-    
-    @Test
-    public void testUpdateSFinItemAccChartNo2() {
-        SAccGrp sAG1 = new SAccGrp("agKS1", "accgrpname1", new Date());
-        SAccChart sAC1 = new SAccChart("acKS1", sAG1.getKeyString(), null,
-                "1000100", "accchart1", AccType.CONTROL, 1, 400.34);
-        
-        SFinItem sFI = new SFinItem("fiKS", 3, Comm.ACCNO, "acKS1", CalCon.CAL,
-                PrintCon.PRINT, PrintStyle.BLANK, Operand.CLEAR, Operand.CLEAR,
-                Operand.MINUS, Operand.PLUS);
-        
-        SFinHeader sFH = new SFinHeader("fhKS", "finheadername", new Date());
-        sFH.addSFinItem(sFI);
-        
-        SFiscalYear sFY = new SFiscalYear();
-        sFY.addSAccGrp(sAG1);
-        sFY.addSAccChart(sAC1);
-        sFY.addSFinHeader(sFH);
-        
-        sFis.setSetup(sFY);
-        
-        sFis.updateSFinItemAccChartNo(sFI);
-        
-        assertEquals("1000100", sFI.getAccChartNo());
-        
-        SFinHeader sFH_tmp = sFis.getSFinHeader("fhKS");
-        SFinItem sFI_tmp = sFH_tmp.getSFinItem("fiKS");
-        assertEquals("1000100", sFI_tmp.getAccChartNo());
-    }
-    
-    @Test
+    /*@Test
     public void testAddSJournal() {
         
         SJournalHeader sJournal1 = new SJournalHeader("jh1", "dt1", "no", 25,
@@ -535,5 +474,5 @@ public class SFiscalYearTest {
         assertEquals("1000100", sJH1_tmp.getItemList().get(0).getAccChartNo());
         SJournalHeader sJH2_tmp = sFis.getSJournal("sJH2");
         assertEquals(null, sJH2_tmp.getItemList().get(0).getAccChartNo());
-    }
+    }*/
 }

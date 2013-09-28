@@ -1,15 +1,17 @@
 package gwt.client.model;
 
+import gwt.shared.model.SAccAmt;
 import gwt.shared.model.SAccChart;
 import gwt.shared.model.SAccGrp;
 import gwt.shared.model.SCom;
 import gwt.shared.model.SComList;
 import gwt.shared.model.SDocType;
-import gwt.shared.model.SFinHeader;
-import gwt.shared.model.SFinItem;
 import gwt.shared.model.SFiscalYear;
 import gwt.shared.model.SJournalHeader;
 import gwt.shared.model.SJournalType;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
@@ -43,22 +45,20 @@ public interface RpcServiceAsync {
     void deleteAccGrp(String sSID, String sID, String keyString, AsyncCallback<String> callback);
     
     void addAccChart(String sSID, String sID, String fisKeyString, SAccChart sAccChart, AsyncCallback<String> callback);
-    void editAccChart(String sSID, String sID, SAccChart sAccChart, AsyncCallback<String> callback);
+    void editAccChart(String sSID, String sID, String fisKeyString, SAccChart sAccChart, AsyncCallback<String> callback);
     void deleteAccChart(String sSID, String sID, String keyString, AsyncCallback<String> callback);
     
     void setBeginning(String sSID, String sID, String accChartKeyString, double beginning, AsyncCallback<String> callback);
-    
-    void addFinHeader(String sSID, String sID, String fisKeyString, SFinHeader sFin, AsyncCallback<String> callback);
-    void editFinHeader(String sSID, String sID, SFinHeader sFin, AsyncCallback<String> callback);
-    void deleteFinHeader(String sSID, String sID, String keyString, AsyncCallback<String> callback);
-    
-    void addFinItem(String sSID, String sID, String finHeaderKeyString, SFinItem sFinItem, AsyncCallback<String> callback);
-    void editFinItem(String sSID, String sID, SFinItem sFinItem, AsyncCallback<String> callback);
-    void deleteFinItem(String sSID, String sID, String keyString, AsyncCallback<String> callback);
-    
-    void getJournalList(String sSID, String sID, String fisKeyString, AsyncCallback<SFiscalYear> callback);
-    
+
+    void getJournalListWithJT(String sSID, String sID, String fisKeyString,
+            String journalTypeKeyString, int month, int year, AsyncCallback<ArrayList<SJournalHeader>> callback);
+    void getJournalListWithAC(String sSID, String sID, String fisKeyString, String beginACNo,
+            String endACNo, int[] dates, AsyncCallback<HashMap<String, SJournalHeader>> callback);
+
 	void addJournal(String sSID, String sID, String fisKeyString, SJournalHeader sJournal, AsyncCallback<String> callback);
-    void editJournal(String sSID, String sID, SJournalHeader sJournal, AsyncCallback<String> callback);
-    void deleteJournal(String sSID, String sID, String keyString, AsyncCallback<String> callback);
+    void editJournal(String sSID, String sID, String fisKeyString, SJournalHeader sJournal, AsyncCallback<String> callback);
+    void deleteJournal(String sSID, String sID, String fisKeyString, String keyString, AsyncCallback<String> callback);
+
+    void getAccAmtMap(String sSID, String sID, String fisKeyString, AsyncCallback<HashMap<String, SAccAmt>> callback);
+    void recalculateAccAmt(String sSID, String sID, String fisKeyString, AsyncCallback<String> callback);
 }

@@ -5,15 +5,15 @@ import com.google.gwt.user.client.ui.Widget;
 
 public interface MenuView<T> extends IsWidget {
 
-    public interface Presenter {      
+    public interface Presenter {
+
         void goToJournalType();
         void goToDocType();
         void goToAccGrp();
         void goToAccChart();
         void goToBeginning();
-        void goToFin();
         
-        void goToJournal(String keyString);
+        void goToJournal(String journalTypeKeyString, int month, int year);
         
         void goToAccChartRep();
         void goToJournalRep(String journalTypeKeyString, int beginDay,
@@ -31,14 +31,12 @@ public interface MenuView<T> extends IsWidget {
         void goToProfitRep(String incomeACKeyString,
                 String expenseACKeyString, boolean doShowAll, boolean doesSplit);
         void goToCostRep(String costACKeyString, boolean doShowAll);
-        void goToWorkSheet(String assetACKeyString, String debtACKeyString,
-                String shareholderACKeyString, String accruedProfitACKeyString,
-                String incomeACKeyString, String expenseACKeyString,
-                String costACKeyString, boolean doShowAll);
-        void goToFinRep(String finKeyString);
+
+        void recalAccAmt();
     }
 
     Widget asWidget();
     void init(Presenter presenter);
     void setMenu(T t, String action);
+    void setRecalAccAmtBtnText(String text);
 }

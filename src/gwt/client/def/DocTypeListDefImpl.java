@@ -114,5 +114,9 @@ public class DocTypeListDefImpl extends ListDef<SFiscalYear, SDocType> {
     public Unit getWidthUnit(int i) {
         return null;
     }
-     
+
+    @Override
+    public int getPageSize() {
+        return 100;
+    }
 }

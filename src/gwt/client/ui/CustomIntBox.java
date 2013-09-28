@@ -52,6 +52,12 @@ public class CustomIntBox extends TextBox {
         this.end = end;
     }
     
+    public void clearRange() {
+        this.hasRange = false;
+        this.begin = 0;
+        this.end = 0;
+    }
+    
     public void addCustomIntBoxCallback(CustomIntBoxCallback callback){
         this.callback = callback;
     }

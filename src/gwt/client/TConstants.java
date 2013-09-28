@@ -59,6 +59,9 @@ public interface TConstants extends Constants{
     @DefaultStringValue("Are you sure you want to delete?")
     String confirmDelete();
     
+    @DefaultStringValue("Remove")
+    String remove();
+    
     @DefaultStringValue("Begin")
     String begin();
     
@@ -128,8 +131,8 @@ public interface TConstants extends Constants{
     @DefaultStringValue("Cost")
     String costReport();
     
-    @DefaultStringValue("Work sheet")
-    String workSheet();
+    @DefaultStringValue("Wrong numbers? Force to recalculate data for all these reports")
+    String recalAccAmt();
     
     @DefaultStringValue("Acc no.")
     String accNo();
@@ -298,6 +301,9 @@ public interface TConstants extends Constants{
 
     @DefaultStringValue("This name is already in use.")
     String duplicateNameMsg();
+    
+    @DefaultStringValue("Items are required.")
+    String itemRequiredMsg();
     
     @DefaultStringValue("Debt and shareholder")
     String debtAndShareholder();

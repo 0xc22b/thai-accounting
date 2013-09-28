@@ -46,7 +46,6 @@ public class BeginListActivity extends AbstractActivity implements ListView.Pres
 
     @Override
     public String mayStop() {
-        clientFactory.getBeginListView().saveFirstVisibleIndex();
         return null;
     }
 
@@ -85,6 +84,7 @@ public class BeginListActivity extends AbstractActivity implements ListView.Pres
         ActionEvent.register(eventBus, ActionNames.ADD, new ActionEvent.Handler(){
             @Override
             public void onAction(ActionEvent event) {
+                clientFactory.getBeginListView().keepState(0);
                 clientFactory.getPlaceController().goTo(new AllPlace(AllPlace.BEGIN, AllPlace.NEW, allPlace.getComKeyString(), 
                         allPlace.getFisKeyString()));
             }
@@ -92,6 +92,7 @@ public class BeginListActivity extends AbstractActivity implements ListView.Pres
         ActionEvent.register(eventBus, ActionNames.VIEW, new ActionEvent.Handler(){
             @Override
             public void onAction(ActionEvent event) {
+                clientFactory.getBeginListView().keepState(0);
                 clientFactory.getPlaceController().goTo(new AllPlace(AllPlace.BEGIN, AllPlace.VIEW, allPlace.getComKeyString(), 
                         allPlace.getFisKeyString(), clientFactory.getBeginListView().getSelectedItemKeyString()));
             }
@@ -99,6 +100,7 @@ public class BeginListActivity extends AbstractActivity implements ListView.Pres
         ActionEvent.register(eventBus, ActionNames.EDIT, new ActionEvent.Handler(){
             @Override
             public void onAction(ActionEvent event) {
+                clientFactory.getBeginListView().keepState(0);
                 clientFactory.getPlaceController().goTo(new AllPlace(AllPlace.BEGIN, AllPlace.EDIT, allPlace.getComKeyString(),
                         allPlace.getFisKeyString(), clientFactory.getBeginListView().getSelectedItemKeyString()));
             }
@@ -151,6 +153,7 @@ public class BeginListActivity extends AbstractActivity implements ListView.Pres
                 }
                 @Override
                 public void onSuccess(String result) {
+                    clientFactory.getBeginListView().keepState(0);
                     getBeginList();
                 }
             });

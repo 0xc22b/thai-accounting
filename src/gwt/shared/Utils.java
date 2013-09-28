@@ -1,5 +1,7 @@
 package gwt.shared;
 
+import java.util.ArrayList;
+
 public class Utils {
 
     public static int compareDate(int day1, int month1, int year1, int day2, int month2, int year2) {
@@ -72,5 +74,49 @@ public class Utils {
     
     public static boolean hasSpace(String s) {
         return s.indexOf(" ") != -1;
+    }
+ 
+    /**
+     * Find all months from a period
+     * @param beginDate [beginDay, beginMonth, beginYear]
+     * @param endDate [endDay, endMonth, endYear]
+     * @return { [beginDay, beginMonth, beginYear], [0, month2, year2], ..., [endDay, endMonth, endYear] }
+     */
+    public static ArrayList<int[]> findAllMonths(int[] beginDate, int[] endDate) {
+
+        final ArrayList<int[]> months = new ArrayList<int[]>();
+
+        // Find all months
+        if (beginDate[2] == endDate[2]) {
+            for (int i = beginDate[1]; i <= endDate[1]; i++) {
+                int day = 0;
+                if (i == beginDate[1]) {
+                    day = beginDate[0];
+                } else if (i == endDate[1]) {
+                    day = endDate[0];
+                }
+                int[] month = { day, i, beginDate[2] };
+                months.add(month);
+            }
+        } else {
+            for (int i = beginDate[1]; i <= 12; i++) {
+                int day = 0;
+                if (i == beginDate[1]) {
+                    day = beginDate[0];
+                }
+                int[] month = { day, i, beginDate[2] };
+                months.add(month);
+            }
+            for (int i = 1; i <= endDate[1]; i++) {
+                int day = 0;
+                if (i == endDate[1]) {
+                    day = endDate[0];
+                }
+                int[] month = { day, i, endDate[2] };
+                months.add(month);
+            }
+        }
+
+        return months;
     }
 }

@@ -46,7 +46,6 @@ public class JournalTypeListActivity extends AbstractActivity implements ListVie
 
     @Override
     public String mayStop() {
-        clientFactory.getJournalTypeListView().saveFirstVisibleIndex();
         return null;
     }
 
@@ -84,6 +83,9 @@ public class JournalTypeListActivity extends AbstractActivity implements ListVie
         ActionEvent.register(eventBus, ActionNames.ADD, new ActionEvent.Handler(){
             @Override
             public void onAction(ActionEvent event) {
+                
+                clientFactory.getJournalTypeListView().keepState(0);
+
                 clientFactory.getPlaceController().goTo(new AllPlace(AllPlace.JOURT, AllPlace.NEW, place.getComKeyString(), 
                         place.getFisKeyString()));
             }
@@ -91,6 +93,9 @@ public class JournalTypeListActivity extends AbstractActivity implements ListVie
         ActionEvent.register(eventBus, ActionNames.VIEW, new ActionEvent.Handler(){
             @Override
             public void onAction(ActionEvent event) {
+                
+                clientFactory.getJournalTypeListView().keepState(0);
+
                 clientFactory.getPlaceController().goTo(new AllPlace(AllPlace.JOURT, AllPlace.VIEW, place.getComKeyString(), 
                         place.getFisKeyString(), clientFactory.getJournalTypeListView().getSelectedItemKeyString()));
             }
@@ -98,6 +103,9 @@ public class JournalTypeListActivity extends AbstractActivity implements ListVie
         ActionEvent.register(eventBus, ActionNames.EDIT, new ActionEvent.Handler(){
             @Override
             public void onAction(ActionEvent event) {
+                
+                clientFactory.getJournalTypeListView().keepState(0);
+
                 clientFactory.getPlaceController().goTo(new AllPlace(AllPlace.JOURT, AllPlace.EDIT, place.getComKeyString(),
                         place.getFisKeyString(), clientFactory.getJournalTypeListView().getSelectedItemKeyString()));
             }
@@ -150,6 +158,9 @@ public class JournalTypeListActivity extends AbstractActivity implements ListVie
                 }
                 @Override
                 public void onSuccess(SFiscalYear result) {
+                    
+                    clientFactory.getJournalTypeListView().keepState(0);
+
                     clientFactory.getJournalTypeListView().setData(result);
                 }
             });

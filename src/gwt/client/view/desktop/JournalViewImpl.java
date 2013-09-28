@@ -1,11 +1,9 @@
 package gwt.client.view.desktop;
 
-import java.util.ArrayList;
-import java.util.Date;
-
 import gwt.client.TCF;
 import gwt.client.TConstants;
 import gwt.client.def.FisDef;
+import gwt.client.def.JournalDef;
 import gwt.client.ui.CustomDoubleBox;
 import gwt.client.ui.CustomDoubleBox.DoubleBoxCallback;
 import gwt.client.ui.CustomIntBox;
@@ -14,6 +12,9 @@ import gwt.client.ui.CustomSuggestBox;
 import gwt.client.view.JournalView;
 import gwt.shared.InvalidValueException;
 import gwt.shared.Utils;
+
+import java.util.ArrayList;
+import java.util.Date;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -25,6 +26,7 @@ import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiTemplate;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -32,7 +34,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
-public class JournalViewImpl<T> extends Composite implements JournalView<T> {
+public class JournalViewImpl<T, J> extends Composite implements JournalView<T, J> {
 
     private class Item extends Composite {
 
@@ -41,6 +43,7 @@ public class JournalViewImpl<T> extends Composite implements JournalView<T> {
         CustomSuggestBox accNoSB;
         CustomDoubleBox debitDB;
         CustomDoubleBox creditDB;
+        Button removeBtn;
 
         public Item(T t) {
             panel = new FlowPanel();
@@ -72,14 +75,19 @@ public class JournalViewImpl<T> extends Composite implements JournalView<T> {
             creditDB.addDoubleBoxCallback(doubleBoxCallback);
             panel.add(creditDB);
 
+            removeBtn = new Button(constants.remove());
+            removeBtn.addStyleName(style.cell());
+            removeBtn.addClickHandler(removeBtnClickHandler);
+            panel.add(removeBtn);
+            
             initWidget(panel);
         }
 
-        public Item(T t, String journalKeyString, int i) {
+        public Item(T t, J j, int i) {
             this(t);
 
-            accNoSB.setKey(fisDef.getJItemACKeyString(t, journalKeyString, i));
-            double amt = fisDef.getJItemAmt(t, journalKeyString, i);
+            accNoSB.setKey(journalDef.getItemACKeyString(j, i));
+            double amt = journalDef.getItemAmt(j, i);
             if (amt > 0) {
                 debitDB.setCustomValue(amt);
             } else {
@@ -91,6 +99,7 @@ public class JournalViewImpl<T> extends Composite implements JournalView<T> {
             accNoSB.setEnabled(enabled);
             debitDB.setEnabled(enabled);
             creditDB.setEnabled(enabled);
+            removeBtn.setEnabled(enabled);
         }
         
         public void setErrText(String text) {
@@ -120,6 +129,15 @@ public class JournalViewImpl<T> extends Composite implements JournalView<T> {
                 if (validateInputs()) {
                     validateTotal();
                 }
+            }
+        };
+        
+        private ClickHandler removeBtnClickHandler = new ClickHandler() {
+
+            @Override
+            public void onClick(ClickEvent event) {
+                Item.this.removeFromParent();
+                validateTotal();
             }
         };
         
@@ -195,6 +213,8 @@ public class JournalViewImpl<T> extends Composite implements JournalView<T> {
     @UiField
     CustomListBox docTypeLB;
     @UiField
+    Label errDocTypeLb;
+    @UiField
     Label noLb;
     @UiField
     TextBox noTB;
@@ -211,11 +231,11 @@ public class JournalViewImpl<T> extends Composite implements JournalView<T> {
     @UiField
     Label monthLb;
     @UiField
-    CustomIntBox monthIB;
+    Label monthInputLb;
     @UiField
     Label yearLb;
     @UiField
-    CustomIntBox yearIB;
+    Label yearInputLb;
     @UiField
     Label errDateLb;
     @UiField
@@ -242,17 +262,26 @@ public class JournalViewImpl<T> extends Composite implements JournalView<T> {
     private static final TConstants constants = TCF.get();
 
     private Presenter presenter;
+
     private FisDef<T> fisDef;
+    private JournalDef<J> journalDef;
+
     private String keyString;
+
+    private int month;
+    private int year;
+    
     private int beginMonth;
     private int beginYear;
     private int endMonth;
     private int endYear;
 
-    public JournalViewImpl(FisDef<T> fisDef) {
+    public JournalViewImpl(FisDef<T> fisDef, JournalDef<J> journalDef) {
         this.fisDef = fisDef;
+        this.journalDef = journalDef;
         initWidget(uiBinder.createAndBindUi(this));
 
+        journalTypeLb.setText(constants.journalType() + ":");
         docTypeLb.setText(constants.docType());
         noLb.setText(constants.journalNo());
         dateLb.setText(constants.date());
@@ -266,7 +295,6 @@ public class JournalViewImpl<T> extends Composite implements JournalView<T> {
         creditLb.setText(constants.credit());
 
         dayIB.setRange(1, 31);
-        monthIB.setRange(1, 12);
 
         docTypeLB.addChangeHandler(docTypeChangeHandler);
         suggestedNoBtn.addClickHandler(suggestedNoBtnClickHandler);
@@ -282,25 +310,31 @@ public class JournalViewImpl<T> extends Composite implements JournalView<T> {
         this.presenter = presenter;
 
         keyString = null;
+        
+        month = 0;
+        year = 0;
+
         beginMonth = 0;
         beginYear = 0;
         endMonth = 0;
         endYear = 0;
 
         docTypeLB.clear();
-        journalTypeLb.setText("");
+
         journalTypeInputLb.setText("");
 
         // Don't reset here as it will be used for suggestion later.
         //noTB.setText("");
+        errDocTypeLb.setText("");
 
         suggestedNoBtn.setVisible(false);
         errNoLb.setText("");
-        dayIB.clear();
 
         // Leave them here as suggestions.
-        //monthIB.clear();
-        //yearIB.clear();
+        //dayIB.clear();
+
+        monthInputLb.setText("");
+        yearInputLb.setText("");
 
         errDateLb.setText("");
         descTB.setText("");
@@ -311,28 +345,36 @@ public class JournalViewImpl<T> extends Composite implements JournalView<T> {
     }
 
     @Override
-    public void setJournal(T t, String journalTypeKeyString, String keyString, boolean editable) {
+    public void setJournal(T t, String journalTypeKeyString, int month, int year, J j,
+            boolean editable) {
 
         beginMonth = fisDef.getFBeginMonth(t);
         beginYear = fisDef.getFBeginYear(t);
         endMonth = fisDef.getFEndMonth(t);
         endYear = fisDef.getFEndYear(t);
 
-        journalTypeLb.setText(constants.journalType() + ":");
         journalTypeInputLb.setText(fisDef.getJTShortName(t, journalTypeKeyString));
 
-        for (int i = 0; i < fisDef.getDTListSize(t); i++) {
-            if (fisDef.getDTJTKeyString(t, i).equals(journalTypeKeyString)) {
-                docTypeLB.addItem(fisDef.getDTCode(t, i), fisDef.getDTKeyString(t, i));
+        if (fisDef.getDTListSize(t) != 0) {
+            for (int i = 0; i < fisDef.getDTListSize(t); i++) {
+                if (fisDef.getDTJTKeyString(t, i).equals(journalTypeKeyString)) {
+                    docTypeLB.addItem(fisDef.getDTCode(t, i), fisDef.getDTKeyString(t, i));
+                }
             }
+            
+            // change docTypeLB -> update descTB
+            descTB.setText(fisDef.getDTJournalDesc(t, docTypeLB.getValue()));
+        } else {
+            errDocTypeLb.setText(constants.invalidMsg());
         }
-        
-        // change docTypeLB -> update descTB
-        descTB.setText(fisDef.getDTJournalDesc(t, docTypeLB.getValue()));
 
-        yearIB.setRange(fisDef.getFBeginYear(t), fisDef.getFEndYear(t));
+        this.month = month;
+        this.year = year;
 
-        if (keyString == null) {
+        monthInputLb.setText(month + "");
+        yearInputLb.setText(year + "");
+
+        if (j == null) {
             // Try to get suggested no.
             String no = noTB.getValue();
             try {
@@ -347,17 +389,16 @@ public class JournalViewImpl<T> extends Composite implements JournalView<T> {
             itemPanel.add(new Item(t));
             itemPanel.add(new Item(t));
         } else {
-            this.keyString = keyString;
+            this.keyString = journalDef.getKeyString(j);
 
-            noTB.setText(fisDef.getJNo(t, keyString));
-            dayIB.setCustomValue(fisDef.getJDay(t, keyString));
-            monthIB.setCustomValue(fisDef.getJMonth(t, keyString));
-            yearIB.setCustomValue(fisDef.getJYear(t, keyString));
-            descTB.setText(fisDef.getJDesc(t, keyString));
+            noTB.setText(journalDef.getNo(j));
+            dayIB.setCustomValue(journalDef.getDay(j));
+
+            descTB.setText(journalDef.getDesc(j));
 
             //Items
-            for (int i = 0; i < fisDef.getJItemListSize(t, keyString); i++) {
-                Item journalItemPanel = new Item(t, keyString, i);
+            for (int i = 0; i < journalDef.getItemListSize(j); i++) {
+                Item journalItemPanel = new Item(t, j, i);
                 itemPanel.add(journalItemPanel);
             }
             
@@ -373,8 +414,8 @@ public class JournalViewImpl<T> extends Composite implements JournalView<T> {
         }
 
         ArrayList<ItemData> itemDataList = genItemDataList();
-        presenter.addJournal(docTypeLB.getValue(), noTB.getValue(), dayIB.getCustomValue(), monthIB.getCustomValue(), yearIB.getCustomValue(),
-                descTB.getValue(), itemDataList);
+        presenter.addJournal(docTypeLB.getValue(), noTB.getValue(), dayIB.getCustomValue(),
+                month, year, descTB.getValue(), itemDataList);
     }
 
     @Override
@@ -384,8 +425,8 @@ public class JournalViewImpl<T> extends Composite implements JournalView<T> {
         }
 
         ArrayList<ItemData> itemDataList = genItemDataList();
-        presenter.editJournal(keyString, docTypeLB.getValue(), noTB.getValue(), dayIB.getCustomValue(), monthIB.getCustomValue(),
-                yearIB.getCustomValue(), descTB.getValue(), itemDataList);
+        presenter.editJournal(keyString, docTypeLB.getValue(), noTB.getValue(),
+                dayIB.getCustomValue(), month, year, descTB.getValue(), itemDataList);
     }
 
     @Override
@@ -408,8 +449,6 @@ public class JournalViewImpl<T> extends Composite implements JournalView<T> {
         docTypeLB.setEnabled(enabled);
         noTB.setEnabled(enabled);
         dayIB.setEnabled(enabled);
-        monthIB.setEnabled(enabled);
-        yearIB.setEnabled(enabled);
         descTB.setEnabled(enabled);
 
         for (int i = 0; i < itemPanel.getWidgetCount(); i++) {
@@ -417,11 +456,20 @@ public class JournalViewImpl<T> extends Composite implements JournalView<T> {
             Item item = (Item) itemPanel.getWidget(i);
             item.setEnabled(enabled);
         }
+        
+        if (enabled) noTB.setFocus(true);
     }
 
     private boolean validateInputs() {
         boolean isValid = true;
 
+        if (docTypeLB.getValue() == null) {
+            errDocTypeLb.setText(constants.invalidMsg());
+            isValid = false;
+        } else {
+            errDocTypeLb.setText("");
+        }
+        
         if (noTB.getValue().isEmpty() || Utils.hasSpace(noTB.getValue())) {
             errNoLb.setText(constants.invalidMsg());
             isValid = false;
@@ -438,11 +486,10 @@ public class JournalViewImpl<T> extends Composite implements JournalView<T> {
 
         try {
             int day = dayIB.getCustomValue();
-            int month = monthIB.getCustomValue();
-            int year = yearIB.getCustomValue();
 
             if (Utils.compareDate(day, month, year, 1, beginMonth, beginYear) < 0
-                    || Utils.compareDate(day, month, year, Utils.getLastDay(endMonth, endYear), endMonth, endYear) > 0) {
+                    || Utils.compareDate(day, month, year,
+                    Utils.getLastDay(endMonth, endYear), endMonth, endYear) > 0) {
                 errDateLb.setText(constants.invalidMsg());
                 isValid = false;
             } else {
@@ -481,9 +528,13 @@ public class JournalViewImpl<T> extends Composite implements JournalView<T> {
             }
             if (!doHaveItems) {
                 isValid = false;
-                @SuppressWarnings("unchecked")
-                Item item = (Item) itemPanel.getWidget(0);
-                item.setErrText(constants.invalidMsg());
+                if (itemPanel.getWidgetCount() > 0) {
+                    @SuppressWarnings("unchecked")
+                    Item item = (Item) itemPanel.getWidget(0);
+                    item.setErrText(constants.invalidMsg());
+                } else {
+                    Window.alert(constants.itemRequiredMsg());
+                }
             }
         }
         return isValid;

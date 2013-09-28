@@ -28,6 +28,9 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.cellview.client.Header;
+import com.google.gwt.user.cellview.client.LoadingStateChangeEvent;
+import com.google.gwt.user.cellview.client.LoadingStateChangeEvent.Handler;
+import com.google.gwt.user.cellview.client.LoadingStateChangeEvent.LoadingState;
 import com.google.gwt.user.cellview.client.SafeHtmlHeader;
 import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.cellview.client.SimplePager.TextLocation;
@@ -46,16 +49,16 @@ public class ListViewImpl<L, E> extends Composite implements ListView<L, E> {
         @Source({ DataGrid.Style.DEFAULT_CSS, "DataGridOverride.css" })
         DataGrid.Style dataGridStyle();
     }
-    
+
     private static DataGridResource dataGridResource = GWT.create(DataGridResource.class);
-    
+
     @SuppressWarnings("rawtypes")
     @UiTemplate("ListViewImpl.ui.xml")
     interface MyUiBinder extends UiBinder<Widget, ListViewImpl> {
     }
-    
+
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
-    
+
     interface Style extends CssResource {
         String clickColumn();
     }
@@ -65,22 +68,23 @@ public class ListViewImpl<L, E> extends Composite implements ListView<L, E> {
 
     @UiField(provided = true)
     DataGrid<E> dataGrid;
-    
+
     @UiField(provided = true)
     SimplePager pager;
 
     private static final TConstants constants = TCF.get();
-    
+
     private Presenter presenter;
     private ListDef<L, E> listDef;
     private SingleSelectionModel<E> selectionModel;
     private ListDataProvider<E> dataProvider;
 
-    private int firstVisibleIndex;
+    private boolean doKeepState = false;
+    private int scrollTop = 0;
 
     public ListViewImpl(ListDef<L, E> listDef) {
         this.listDef = listDef;
-        initialize(); 
+        initialize();
     }
 
     @Override
@@ -91,78 +95,104 @@ public class ListViewImpl<L, E> extends Composite implements ListView<L, E> {
     @Override
     public void init(Presenter presenter) {
         this.presenter = presenter;
-        dataGrid.setVisible(false);
+
+        if (!doKeepState) {
+            dataGrid.setEmptyTableWidget(new Label(""));
+
+            dataProvider.getList().clear();
+            dataProvider.refresh();
+
+            pager.setPage(0);
+            scrollTop = 0;
+        }
+        doKeepState = false;
     }
 
     @Override
     public void setData(L l) {
-        
-        List<E> list = listDef.getList(l);  
+
+        dataGrid.setEmptyTableWidget(new Label(constants.noData()));
+
+        List<E> list = listDef.getList(l);
+
         dataProvider.getList().clear();
         dataProvider.getList().addAll(list);
         dataProvider.refresh();
-        
+
         // Clear selected item
         if(selectionModel.getSelectedObject()!=null){
             selectionModel.setSelected(selectionModel.getSelectedObject(), false);
         }
-        
+
         // Clear sort
         dataGrid.getColumnSortList().clear();
-        
-        dataGrid.setVisible(true);
-
-        if (firstVisibleIndex > 0) {
-            new Timer() {
-                public void run() {
-                    Element el = dataGrid.getRowContainer();
-                    el = el.getParentElement().getParentElement().getParentElement();
-                    el.setScrollTop(firstVisibleIndex);
-                    // Prevent scrolling after delete.
-                    firstVisibleIndex = 0;
-                }
-            }.schedule(1000);
-        }
     }
-    
+
     @Override
     public String getSelectedItemKeyString() {
         return selectionModel.getSelectedObject() == null ? null : listDef.getKeyString(selectionModel.getSelectedObject());
     }
 
     @Override
-    public void saveFirstVisibleIndex() {
+    public void keepState(int scrollMore) {
+
+        doKeepState = true;
+
         Element el = dataGrid.getRowContainer();
         for (int i = 0; i < 3; i++) {
             el = el.getParentElement();
             if (el == null) return;
         }
-        firstVisibleIndex = el.getScrollTop();
+        scrollTop = el.getScrollTop() + scrollMore;
     }
-    
+
+    private Handler loadingStateChangeHandler = new Handler() {
+
+        @Override
+        public void onLoadingStateChanged(LoadingStateChangeEvent event) {
+
+            LoadingState ls = event.getLoadingState();
+            if (ls.equals(LoadingState.LOADED)) {
+                if (scrollTop > 0) {
+                    // TODO: scrollMore = 0, No need timer
+                    new Timer() {
+                        public void run() {
+                            Element el = dataGrid.getRowContainer();
+                            el = el.getParentElement().getParentElement().getParentElement();
+                            el.setScrollTop(scrollTop);
+                            scrollTop = 0;
+                        }
+                    }.schedule(1);
+                }
+            }
+        }
+    };
+
     private void initialize() {
         // Create a DataGrid.
 
         // Set a key provider that provides a unique key for each contact. If key is
         // used to identify contacts when fields (such as the name and address)
         // change.
-        dataGrid = new DataGrid<E>(200, dataGridResource, listDef.getKeyProvider(), null);
-        
-        // Set the message to display when the table is empty.
-        dataGrid.setEmptyTableWidget(new Label(constants.noData()));
-        
-        // Attach a column sort handler to sort the list.
+        dataGrid = new DataGrid<E>(listDef.getPageSize(), dataGridResource,
+                listDef.getKeyProvider(), null);
+
+        // Set the message to display when the table is empty. (Loading or No data.)
+        dataGrid.setEmptyTableWidget(new Label(""));
+
         dataProvider = new ListDataProvider<E>();
         dataProvider.setList(new ArrayList<E>());
+        dataProvider.addDataDisplay(dataGrid);
+
+        // Attach a column sort handler to sort the list.
         ListHandler<E> sortHandler = new ListHandler<E>(dataProvider.getList());
         dataGrid.addColumnSortHandler(sortHandler);
-        dataProvider.addDataDisplay(dataGrid);
-        
+
         // Create a Pager to control the table.
         SimplePager.Resources pagerResources = GWT.create(SimplePager.Resources.class);
         pager = new SimplePager(TextLocation.CENTER, pagerResources, false, 0, true);
         pager.setDisplay(dataGrid);
-        
+
         // Add a selection model so we can select cells.
         selectionModel = new SingleSelectionModel<E>(listDef.getKeyProvider());
         dataGrid.setSelectionModel(selectionModel, DefaultSelectionEventManager.<E> createCheckboxManager(0));
@@ -174,7 +204,7 @@ public class ListViewImpl<L, E> extends Composite implements ListView<L, E> {
         });
 
         // Initialize the columns.
-        
+
         // Checkbox column. This table will uses a checkbox column for selection.
         // Alternatively, you can call dataGrid.setSelectionEnabled(true) to enable
         // mouse selection.
@@ -187,7 +217,7 @@ public class ListViewImpl<L, E> extends Composite implements ListView<L, E> {
         };
         dataGrid.addColumn(checkColumn, SafeHtmlUtils.fromSafeConstant("<br/>"));
         dataGrid.setColumnWidth(checkColumn, 60, Unit.PX);
-        
+
         // Clickable column
         Column<E, String> clickColumn = new Column<E, String>(new ClickableTextCell()){
             @Override
@@ -217,7 +247,7 @@ public class ListViewImpl<L, E> extends Composite implements ListView<L, E> {
                     return listDef.getFooterValue(items, 0);
                 }
             };
-            
+
             dataGrid.addColumn(clickColumn, new SafeHtmlHeader(SafeHtmlUtils.fromSafeConstant(listDef.getColumnName(0))), footer);
         }else{
             dataGrid.addColumn(clickColumn, listDef.getColumnName(0));
@@ -226,11 +256,11 @@ public class ListViewImpl<L, E> extends Composite implements ListView<L, E> {
             dataGrid.setColumnWidth(clickColumn, listDef.getWidthValue(0),
                     listDef.getWidthUnit(0));
         }
-        
+
         for (int i = 1; i < listDef.getColumnSize(); i++) {
-            
+
             final int fI = i;
-            
+
             Column<E, SafeHtml> column = new Column<E, SafeHtml>(new SafeHtmlCell()) {
                 @Override
                 public SafeHtml getValue(E object) {
@@ -255,7 +285,7 @@ public class ListViewImpl<L, E> extends Composite implements ListView<L, E> {
                         return listDef.getFooterValue(items, fI);
                     }
                 };
-                
+
                 dataGrid.addColumn(column, new SafeHtmlHeader(SafeHtmlUtils.fromSafeConstant(listDef.getColumnName(fI))), footer);
             }else{
                 dataGrid.addColumn(column, listDef.getColumnName(fI));
@@ -268,7 +298,9 @@ public class ListViewImpl<L, E> extends Composite implements ListView<L, E> {
 
         // Create the UiBinder.
         initWidget(uiBinder.createAndBindUi(this));
-        
+
         dataGrid.getColumn(1).setCellStyleNames(style.clickColumn());
+
+        dataGrid.addLoadingStateChangeHandler(loadingStateChangeHandler);
     }
 }

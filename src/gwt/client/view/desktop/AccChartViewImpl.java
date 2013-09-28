@@ -288,5 +288,7 @@ public class AccChartViewImpl<T> extends Composite implements AccChartView<T> {
         typeLB.setEnabled(enabled);
         levelLB.setEnabled(enabled);
         accGrpLB.setEnabled(enabled);
+        
+        if (enabled) noSB.setFocus(true);
     }
 }

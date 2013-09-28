@@ -10,8 +10,6 @@ import gwt.client.event.ActionNames;
 import gwt.client.place.AllPlace;
 import gwt.client.view.ComView;
 import gwt.shared.model.SCom;
-import gwt.shared.model.SCom.ComType;
-import gwt.shared.model.SCom.YearType;
 
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
@@ -58,10 +56,9 @@ public class ComActivity extends AbstractActivity implements ComView.Presenter {
     }
     
     @Override
-    public void addCom(String name, String address, String telNo, ComType comType, String taxID, String merchantID,
-            YearType yearType, Double vatRate) {
+    public void addCom(String name) {
         
-        SCom sCom = new SCom(null, name, address, telNo, comType, taxID, merchantID, yearType, vatRate, new Date());
+        SCom sCom = new SCom(null, name, new Date());
 
         clientFactory.getShell().setLoading();
         clientFactory.getModel().addCom(sCom, new AsyncCallback<String>() {
@@ -78,10 +75,9 @@ public class ComActivity extends AbstractActivity implements ComView.Presenter {
     }
 
     @Override
-    public void editCom(String keyString, String name, String address, String telNo, ComType comType, 
-            String taxID, String merchantID, YearType yearType, Double vatRate) {
+    public void editCom(String keyString, String name) {
 
-        SCom sCom = new SCom(keyString, name, address, telNo, comType, taxID, merchantID, yearType, vatRate, null);
+        SCom sCom = new SCom(keyString, name, null);
 
         clientFactory.getShell().setLoading();
         clientFactory.getModel().editCom(sCom, new AsyncCallback<String>() {

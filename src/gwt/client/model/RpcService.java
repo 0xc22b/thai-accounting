@@ -1,16 +1,18 @@
 package gwt.client.model;
 
 import gwt.shared.NotLoggedInException;
+import gwt.shared.model.SAccAmt;
 import gwt.shared.model.SAccChart;
 import gwt.shared.model.SAccGrp;
 import gwt.shared.model.SCom;
 import gwt.shared.model.SComList;
 import gwt.shared.model.SDocType;
-import gwt.shared.model.SFinHeader;
-import gwt.shared.model.SFinItem;
+import gwt.shared.model.SFiscalYear;
 import gwt.shared.model.SJournalHeader;
 import gwt.shared.model.SJournalType;
-import gwt.shared.model.SFiscalYear;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
@@ -46,22 +48,20 @@ public interface RpcService extends RemoteService {
     String deleteAccGrp(String sSID, String sID, String keyString) throws NotLoggedInException, IllegalArgumentException;
     
     String addAccChart(String sSID, String sID, String fisKeyString, SAccChart sAccChart) throws NotLoggedInException;
-    String editAccChart(String sSID, String sID, SAccChart sAccChart) throws NotLoggedInException;
+    String editAccChart(String sSID, String sID, String fisKeyString, SAccChart sAccChart) throws NotLoggedInException;
     String deleteAccChart(String sSID, String sID, String keyString) throws NotLoggedInException, IllegalArgumentException;
     
     String setBeginning(String sSID, String sID, String accChartKeyString, double beginning) throws NotLoggedInException;
-    
-    String addFinHeader(String sSID, String sID, String fisKeyString, SFinHeader sFinHeader) throws NotLoggedInException;
-    String editFinHeader(String sSID, String sID, SFinHeader sFinHeader) throws NotLoggedInException;
-    String deleteFinHeader(String sSID, String sID, String keyString) throws NotLoggedInException;
-    
-    String addFinItem(String sSID, String sID, String finHeaderKeyString, SFinItem sFinItem) throws NotLoggedInException;
-    String editFinItem(String sSID, String sID, SFinItem sFinItem) throws NotLoggedInException;
-    String deleteFinItem(String sSID, String sID, String keyString) throws NotLoggedInException;
-    
-    SFiscalYear getJournalList(String sSID, String sID, String fisKeyString) throws NotLoggedInException;
-    
+
+    ArrayList<SJournalHeader> getJournalListWithJT(String sSID, String sID, String fisKeyString,
+            String journalTypeKeyString, int month, int year) throws NotLoggedInException;
+    HashMap<String, SJournalHeader> getJournalListWithAC(String sSID, String sID,
+            String fisKeyString, String beginACNo, String endACNo, int[] dates) throws NotLoggedInException;
+
     String addJournal(String sSID, String sID, String fisKeyString, SJournalHeader sJournal) throws NotLoggedInException;
-    String editJournal(String sSID, String sID, SJournalHeader sJournal) throws NotLoggedInException;
-    String deleteJournal(String sSID, String sID, String keyString) throws NotLoggedInException;
+    String editJournal(String sSID, String sID, String fisKeyString, SJournalHeader sJournal) throws NotLoggedInException;
+    String deleteJournal(String sSID, String sID, String fisKeyString, String keyString) throws NotLoggedInException;
+    
+    HashMap<String, SAccAmt> getAccAmtMap(String sSID, String sID, String fisKeyString) throws NotLoggedInException;
+    String recalculateAccAmt(String sSID, String sID, String fisKeyString) throws NotLoggedInException;
 }

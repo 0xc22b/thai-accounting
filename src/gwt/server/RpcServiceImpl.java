@@ -3,46 +3,38 @@ package gwt.server;
 import gwt.client.model.RpcService;
 import gwt.server.account.CreateSetup;
 import gwt.server.account.Db;
-import gwt.server.account.Db.DbAddCallback;
-import gwt.server.account.Db.DbDeleteCallback;
-import gwt.server.account.Db.DbEditCallback;
-import gwt.server.account.Db.DbGetCallback;
-import gwt.server.account.model.AccChart;
-import gwt.server.account.model.AccGroup;
-import gwt.server.account.model.Com;
-import gwt.server.account.model.DocType;
-import gwt.server.account.model.FinHeader;
-import gwt.server.account.model.FinItem;
-import gwt.server.account.model.FiscalYear;
-import gwt.server.account.model.JournalHeader;
-import gwt.server.account.model.JournalItem;
-import gwt.server.account.model.JournalType;
 import gwt.server.user.UserManager;
 import gwt.server.user.model.User;
 import gwt.server.user.model.UserData;
 import gwt.shared.NotLoggedInException;
 import gwt.shared.SConstants;
 import gwt.shared.Utils;
+import gwt.shared.model.SAccAmt;
 import gwt.shared.model.SAccChart;
+import gwt.shared.model.SAccChart.AccType;
 import gwt.shared.model.SAccGrp;
 import gwt.shared.model.SCom;
 import gwt.shared.model.SComList;
 import gwt.shared.model.SDocType;
-import gwt.shared.model.SFinHeader;
-import gwt.shared.model.SFinItem;
 import gwt.shared.model.SFiscalYear;
 import gwt.shared.model.SJournalHeader;
 import gwt.shared.model.SJournalItem;
 import gwt.shared.model.SJournalType;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.jdo.PersistenceManager;
-import javax.jdo.Query;
 
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 /**
@@ -53,191 +45,277 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
 
     @Override
     public SComList getComList(String sSID, String sID) throws NotLoggedInException {
-        SComList sComList = new SComList();
+        User user = null;
         PersistenceManager pm = PMF.get().getPersistenceManager();
         try{
-            User user = UserManager.checkLoggedInAndGetUser(sSID, sID);
-            Db<Com> db = new Db<Com>();
-            List<Com> comList = db.get(pm, Com.class, user.getKeyString(), new DbGetCallback(){
-                @Override
-                public void setQuery(Query query) {
-                    query.setFilter("userKey == userKeyParam");
-                    query.declareParameters("com.google.appengine.api.datastore.Key userKeyParam");
-                    query.setOrdering("createDate asc");
-                }
-            });
-            if(comList.size() > 0){
-                ArrayList<Key> comKeyList = new ArrayList<Key>();
-                for(Com com : comList){
-                    comKeyList.add(com.getKey());
-                }
-                
-                List<FiscalYear> fisList = Db.getFiscalYears(pm, comKeyList);
-                
-                for(Com com : comList){
-                    SCom sCom = new SCom(com.getKeyString(), com.getName(), com.getAddress(),
-                            com.getTelNo(), com.getComType(), com.getTaxID(), com.getMerchantID(), com.getYearType(), com.getVatRate(), 
-                            com.getCreateDate());
-                    for(FiscalYear fis : fisList){
-                        if(fis.getComKey().equals(com.getKey())){
-                            SFiscalYear sFis = new SFiscalYear(fis.getKeyString(), fis.getBeginMonth(), fis.getBeginYear(), fis.getEndMonth(), 
-                                    fis.getEndYear());
-                            sCom.addSFis(sFis);
-                        }
-                    }
-                    sComList.addSCom(sCom);
-                }
-            }
-        }finally{
+            user = UserManager.checkLoggedInAndGetUser(sSID, sID);
+        } finally{
             pm.close();
         }
-        return sComList;
+
+        try {
+            Connection conn = Db.getDBConn();
+            try {
+                SComList sComList = new SComList();
+
+                String sql = "SELECT * FROM com LEFT JOIN fiscal_year ON com.id = fiscal_year.com_id WHERE com.user_key_string = ? ORDER BY com.create_date ASC, fiscal_year.begin_month ASC, fiscal_year.begin_year ASC";
+                PreparedStatement statement = conn.prepareStatement(sql);
+                statement.setString(1, user.getKeyString());
+                ResultSet rs = statement.executeQuery();
+
+                SCom sCom = null;
+                long id;
+                while (rs.next()) {
+                    id = rs.getLong(Db.dot(Db.COM, Db.ID));
+                    if (sCom == null || !sCom.getKeyString().equals(id + "")) {
+                        sCom = new SCom(id + "", rs.getString(Db.dot(Db.COM, Db.NAME)),
+                                new Date(rs.getTimestamp(Db.CREATE_DATE).getTime()));
+                        sComList.addSCom(sCom);
+                    }
+
+                    id = rs.getLong(Db.dot(Db.FISCAL_YEAR, Db.ID));
+                    if (id != 0) {
+                        SFiscalYear sFis = new SFiscalYear(
+                                id + "",
+                                rs.getInt(Db.dot(Db.FISCAL_YEAR, Db.BEGIN_MONTH)),
+                                rs.getInt(Db.dot(Db.FISCAL_YEAR, Db.BEGIN_YEAR)),
+                                rs.getInt(Db.dot(Db.FISCAL_YEAR, Db.END_MONTH)),
+                                rs.getInt(Db.dot(Db.FISCAL_YEAR, Db.END_YEAR)));
+                        sCom.addSFis(sFis);
+                    }
+                }
+                return sComList;
+            } finally {
+                conn.close();
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
+        }
     }
 
     @Override
     public String addCom(String sSID, String sID, final SCom sCom) throws NotLoggedInException {
+
+        User user = null;
         PersistenceManager pm = PMF.get().getPersistenceManager();
         try{
-            final User user = UserManager.checkLoggedInAndGetUser(sSID, sID);
-            Db<Com> db = new Db<Com>();
-            Com com = db.add(pm, new DbAddCallback<Com>(){
-                @Override
-                public Com construct() {
-                    return new Com(user.getKey(), sCom.getName(), sCom.getAddress(), sCom.getTelNo(), sCom.getComType(),
-                            sCom.getTaxID(), sCom.getMerchantID(), sCom.getYearType(), sCom.getVatRate(), sCom.getCreateDate());
-                }
-            });
-            return KeyFactory.keyToString(com.getKey());
-        }finally{
+            user = UserManager.checkLoggedInAndGetUser(sSID, sID);
+        } finally{
             pm.close();
+        }
+
+        try {
+            Connection conn = Db.getDBConn();
+            try {
+                String sql = "INSERT INTO com (id, user_key_string, `name`) VALUES( ? , ? , ? )";
+                PreparedStatement statement = conn.prepareStatement(sql,
+                        Statement.RETURN_GENERATED_KEYS);
+                statement.setNull(1, Types.INTEGER);
+                statement.setString(2, user.getKeyString());
+                statement.setString(3, sCom.getName());
+                int affectedRows = statement.executeUpdate();
+                if (affectedRows != 1) {
+                    throw new SQLException(Db.NO_ROW_EFFECTED_ERR);
+                }
+
+                ResultSet generatedKeys = statement.getGeneratedKeys();
+                if (generatedKeys.next()) {
+                    return generatedKeys.getLong(1) + "";
+                } else {
+                    throw new SQLException(Db.NO_GENERATED_KEYS_ERR);
+                }
+            } finally {
+                conn.close();
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
         }
     }
 
     @Override
     public String editCom(String sSID, String sID, final SCom sCom) throws NotLoggedInException {
+
         PersistenceManager pm = PMF.get().getPersistenceManager();
         try{
-            final User user = UserManager.checkLoggedInAndGetUser(sSID, sID);
-            Db<Com> db = new Db<Com>();
-            Com com = db.edit(pm, Com.class, sCom.getKeyString(), new DbEditCallback<Com>(){
-                @Override
-                public void edit(Com t) {
-                    if(!t.getUserKey().equals(user.getKey())){
-                        throw new IllegalArgumentException();
-                    }
-                    
-                    t.setName(sCom.getName());
-                    t.setAddress(sCom.getAddress());
-                    t.setTelNo(sCom.getTelNo());
-                    t.setComType(sCom.getComType());
-                    t.setTaxID(sCom.getTaxID());
-                    t.setMerchantID(sCom.getMerchantID());
-                    t.setYearType(sCom.getYearType());
-                    t.setVatRate(sCom.getVatRate());
-                }
-            });
-            return KeyFactory.keyToString(com.getKey());
-        }finally{
+            UserManager.checkLoggedInAndGetUser(sSID, sID);
+        } finally{
             pm.close();
+        }
+
+        try {
+            Connection conn = Db.getDBConn();
+            try {
+                String sql = "UPDATE com SET `name` = ? WHERE id = ?";
+                PreparedStatement statement = conn.prepareStatement(sql);
+                statement.setString(1, sCom.getName());
+                statement.setLong(2, Long.parseLong(sCom.getKeyString()));
+                int affectedRows = statement.executeUpdate();
+                if (affectedRows != 1) {
+                    throw new SQLException(Db.NO_ROW_EFFECTED_ERR);
+                }
+
+                return sCom.getKeyString();
+            } finally {
+                conn.close();
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
         }
     }
 
     @Override
     public String deleteCom(String sSID, String sID, String keyString) throws NotLoggedInException {
+
         PersistenceManager pm = PMF.get().getPersistenceManager();
         try{
-            final User user = UserManager.checkLoggedInAndGetUser(sSID, sID);
-
-            List<Key> comKeyList = new ArrayList<Key>();
-            comKeyList.add(KeyFactory.stringToKey(keyString));
-
-            List<FiscalYear> fisList = Db.getFiscalYears(pm, comKeyList);
-            for (FiscalYear fis : fisList) {
-                Db.deleteFis(pm, fis.getKeyString());
-            }
-
-            Db<Com> db = new Db<Com>();
-            db.delete(pm, Com.class, keyString, new DbDeleteCallback<Com>(){
-                @Override
-                public void check(Com t) {
-                    if(!t.getUserKey().equals(user.getKey())){
-                        throw new IllegalArgumentException();
-                    }
-                }
-            });
-            
-            return keyString;
-        }finally{
+            UserManager.checkLoggedInAndGetUser(sSID, sID);
+        } finally{
             pm.close();
+        }
+
+        try {
+            Connection conn = Db.getDBConn();
+            try {
+                // Can be deleted only if no restrict references
+                return Db.deleteFromDB(conn, Db.COM, keyString);
+            } finally {
+                conn.close();
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
         }
     }
 
     @Override
     public String addFis(String sSID, String sID, final String comKeyString,
             final int setupType, final SFiscalYear sFis) throws NotLoggedInException {
+        User user = null;
         PersistenceManager pm = PMF.get().getPersistenceManager();
         try{
-            User user = UserManager.checkLoggedInAndGetUser(sSID, sID);
-            Db<FiscalYear> db = new Db<FiscalYear>();
-            FiscalYear fis =  db.add(pm, new DbAddCallback<FiscalYear>() {
-                @Override
-                public FiscalYear construct() {
-                    return new FiscalYear(comKeyString, sFis.getBeginMonth(), sFis.getBeginYear(), sFis.getEndMonth(), sFis.getEndYear());
-                }
-            });
-            
-            if(setupType == SConstants.ADD_FIS_WITH_DEFAULT_SETUP){
-                UserData userData = UserManager.getUserData(user.getKey());
-                if (userData.getLang().equals("th")) {
-                    CreateSetup.createInThai(pm, fis.getKeyString());
-                } else {
-                    CreateSetup.createInEnglish(pm, fis.getKeyString());
-                }
-            } else if (setupType == SConstants.ADD_FIS_WITH_PREVIOUS_SETUP) {
-                CreateSetup.createFromPrev(pm, comKeyString, fis.getKeyString());
-            }
-            return KeyFactory.keyToString(fis.getKey());
-        }finally{
+            user = UserManager.checkLoggedInAndGetUser(sSID, sID);
+        } finally{
             pm.close();
+        }
+
+        try {
+            Connection conn = Db.getDBConn();
+            try {
+                long comId = Long.parseLong(comKeyString);
+
+                String sql = "INSERT INTO fiscal_year (id, com_id, begin_month, begin_year, end_month, end_year) VALUES( ? , ? , ? , ? , ? , ? )";
+                PreparedStatement statement = conn.prepareStatement(sql,
+                        Statement.RETURN_GENERATED_KEYS);
+                statement.setNull(1, Types.INTEGER);
+                statement.setLong(2, comId);
+                statement.setInt(3, sFis.getBeginMonth());
+                statement.setInt(4, sFis.getBeginYear());
+                statement.setInt(5, sFis.getEndMonth());
+                statement.setInt(6, sFis.getEndYear());
+                int affectedRows = statement.executeUpdate();
+                if (affectedRows != 1) {
+                    throw new SQLException(Db.NO_ROW_EFFECTED_ERR);
+                }
+
+                ResultSet generatedKeys = statement.getGeneratedKeys();
+                if (generatedKeys.next()) {
+
+                    long fisId = generatedKeys.getLong(1);
+
+                    if(setupType == SConstants.ADD_FIS_WITH_DEFAULT_SETUP){
+                        UserData userData = UserManager.getUserData(user.getKey());
+                        if (userData.getLang().equals("th")) {
+                            CreateSetup.createInThai(conn, fisId);
+                        } else {
+                            CreateSetup.createInEnglish(conn, fisId);
+                        }
+                    } else if (setupType == SConstants.ADD_FIS_WITH_PREVIOUS_SETUP) {
+                        CreateSetup.createFromPrev(conn, comId, fisId);
+                    }
+
+                    return fisId + "";
+                } else {
+                    throw new SQLException(Db.NO_GENERATED_KEYS_ERR);
+                }
+            } finally {
+                conn.close();
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
         }
     }
 
     @Override
-    public String editFis(String sSID, String sID, final SFiscalYear sFis) throws NotLoggedInException {
+    public String editFis(String sSID, String sID, final SFiscalYear sFis)
+            throws NotLoggedInException {
+
         PersistenceManager pm = PMF.get().getPersistenceManager();
         try{
             UserManager.checkLoggedInAndGetUser(sSID, sID);
-            
-            // Can be edited? Check journal date!! 
-            Db<JournalHeader> jDb = new Db<JournalHeader>();
-            List<JournalHeader> journalList = jDb.get(pm, JournalHeader.class, sFis.getKeyString(), new DbGetCallback(){
-                @Override
-                public void setQuery(Query query) {
-                    query.setFilter("fisKey == fisKeyParam");
-                    query.declareParameters("com.google.appengine.api.datastore.Key fisKeyParam");
-                    query.setOrdering("no asc");
-                }
-            });
-            for(JournalHeader journal : journalList){
-                if(journal.compareDate(1, sFis.getBeginMonth(), sFis.getBeginYear()) < 0 || 
-                        journal.compareDate(Utils.getLastDay(sFis.getEndMonth(), sFis.getEndYear()), sFis.getEndMonth(), sFis.getEndYear()) > 0){
-                    throw new IllegalArgumentException("Edit aborted! Some journals are not in the new range of fiscal year!");
-                }
-            }
-            
-            Db<FiscalYear> db = new Db<FiscalYear>();
-            FiscalYear fis = db.edit(pm, FiscalYear.class, sFis.getKeyString(), new DbEditCallback<FiscalYear>() {
-                @Override
-                public void edit(FiscalYear fis) {
-                    fis.setBeginMonth(sFis.getBeginMonth());
-                    fis.setBeginYear(sFis.getBeginYear());
-                    fis.setEndMonth(sFis.getEndMonth());
-                    fis.setEndYear(sFis.getEndYear());
-                }
-            });
-            return KeyFactory.keyToString(fis.getKey());
-        }finally{
+        } finally{
             pm.close();
+        }
+
+        try {
+            Connection conn = Db.getDBConn();
+            try {
+                Long fisId = Long.parseLong(sFis.getKeyString());
+
+                String sql = "SELECT id FROM journal_header WHERE fiscal_year_id = ? && (year < ? || (year = ? && month < ?) || year > ? || (year = ? && month > ?)) LIMIT 1";
+                PreparedStatement statement = conn.prepareStatement(sql);
+                statement.setLong(1, fisId);
+                statement.setInt(2, sFis.getBeginYear());
+                statement.setInt(3, sFis.getBeginYear());
+                statement.setInt(4, sFis.getBeginMonth());
+                statement.setInt(5, sFis.getEndYear());
+                statement.setInt(6, sFis.getEndYear());
+                statement.setInt(7, sFis.getEndMonth());
+                ResultSet rs = statement.executeQuery();
+                if (rs.next()) {
+                    throw new IllegalArgumentException(Db.FISCAL_YEAR_TOO_SMALL_ERR);
+                }
+
+                sql = "UPDATE fiscal_year SET begin_month = ?, begin_year = ?, end_month = ?, end_year = ? WHERE id = ?";
+                statement = conn.prepareStatement(sql);
+                statement.setInt(1, sFis.getBeginMonth());
+                statement.setInt(2, sFis.getBeginYear());
+                statement.setInt(3, sFis.getEndMonth());
+                statement.setInt(4, sFis.getEndYear());
+                statement.setLong(5, fisId);
+                int affectedRows = statement.executeUpdate();
+                if (affectedRows != 1) {
+                    throw new SQLException(Db.NO_ROW_EFFECTED_ERR);
+                }
+
+                return sFis.getKeyString();
+            } finally {
+                conn.close();
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
         }
     }
 
@@ -246,200 +324,305 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
         PersistenceManager pm = PMF.get().getPersistenceManager();
         try{
             UserManager.checkLoggedInAndGetUser(sSID, sID);
-            return Db.deleteFis(pm, keyString);
-        }finally{
+        } finally{
             pm.close();
         }
-    }
 
-    @Override
-    public SFiscalYear getSetup(String sSID, String sID, final String fisKeyString) throws NotLoggedInException {
-        PersistenceManager pm = PMF.get().getPersistenceManager();
-        try{
-            UserManager.checkLoggedInAndGetUser(sSID, sID);
-            return Db.getSetup(pm, fisKeyString);
-        }finally{
-            pm.close();
-        }
-    }
-
-    @Override
-    public String addJournalType(String sSID, String sID, final String fisKeyString, final SJournalType sJournalType) throws NotLoggedInException {
-        PersistenceManager pm = PMF.get().getPersistenceManager();
-        try{
-            UserManager.checkLoggedInAndGetUser(sSID, sID);
-            Db<JournalType> db = new Db<JournalType>();
-            JournalType journalType = db.add(pm, new DbAddCallback<JournalType>() {
-                @Override
-                public JournalType construct() {
-                    return new JournalType(fisKeyString, sJournalType.getName(), sJournalType.getShortName(), sJournalType.getCreateDate());
-                }
-            });
-            return KeyFactory.keyToString(journalType.getKey());
-        }finally{
-            pm.close();
-        }
-    }
-
-    @Override
-    public String editJournalType(String sSID, String sID, final SJournalType sJournalType) throws NotLoggedInException {
-        PersistenceManager pm = PMF.get().getPersistenceManager();
-        try{
-            UserManager.checkLoggedInAndGetUser(sSID, sID);
-            Db<JournalType> db = new Db<JournalType>();
-            JournalType journalType = db.edit(pm, JournalType.class, sJournalType.getKeyString(), new DbEditCallback<JournalType>() {
-                @Override
-                public void edit(JournalType t) {
-                    t.setName(sJournalType.getName());
-                    t.setShortName(sJournalType.getShortName());
-                }
-            });
-            return KeyFactory.keyToString(journalType.getKey());
-        }finally{
-            pm.close();
-        }
-    }
-
-    @Override
-    public String deleteJournalType(String sSID, String sID, String keyString) throws NotLoggedInException {
-        PersistenceManager pm = PMF.get().getPersistenceManager();
-        try{
-            UserManager.checkLoggedInAndGetUser(sSID, sID);
-            
-            // Check can be deleted.
-            Db<DocType> dDb = new Db<DocType>();
-            Key dKey = dDb.getSingleKey(pm, DocType.class, keyString, new DbGetCallback() {
-                @Override
-                public void setQuery(Query query) {
-                    query.setFilter("journalTypeKey == journalTypeKeyParam");
-                    query.declareParameters("com.google.appengine.api.datastore.Key journalTypeKeyParam");
-                }
-            });
-            if(dKey != null){
-                throw new IllegalArgumentException("Deletion abort! This journal type is still used by some doc types.");
+        try {
+            Connection conn = Db.getDBConn();
+            try {
+                // Can be deleted only if no restrict references
+                return Db.deleteFromDB(conn, Db.FISCAL_YEAR, keyString);
+            } finally {
+                conn.close();
             }
-            
-            // Delete
-            Db<JournalType> db = new Db<JournalType>();
-            db.delete(pm, JournalType.class, keyString, new DbDeleteCallback<JournalType>() {
-                @Override
-                public void check(JournalType t) {
-
-                }
-            });
-            
-            return keyString;
-        }finally{
-            pm.close();
-        }
-    }
-    
-    @Override
-    public String addDocType(String sSID, String sID, final String fisKeyString, final SDocType sDocType) throws NotLoggedInException {
-        PersistenceManager pm = PMF.get().getPersistenceManager();
-        try{
-            UserManager.checkLoggedInAndGetUser(sSID, sID);
-            Db<DocType> db = new Db<DocType>();
-            DocType docType = db.add(pm, new DbAddCallback<DocType>() {
-                @Override
-                public DocType construct() {
-                    return new DocType(fisKeyString, sDocType.getJournalTypeKeyString(), sDocType.getCode(),
-                            sDocType.getName(), sDocType.getJournalDesc(), sDocType.getCreateDate());
-                }
-            });
-            return KeyFactory.keyToString(docType.getKey());
-        }finally{
-            pm.close();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
         }
     }
 
     @Override
-    public String editDocType(String sSID, String sID, final SDocType sDocType) throws NotLoggedInException {
+    public SFiscalYear getSetup(String sSID, String sID, final String fisKeyString)
+            throws NotLoggedInException {
+
         PersistenceManager pm = PMF.get().getPersistenceManager();
         try{
             UserManager.checkLoggedInAndGetUser(sSID, sID);
-            Db<DocType> db = new Db<DocType>();
-            DocType docType = db.edit(pm, DocType.class, sDocType.getKeyString(), new DbEditCallback<DocType>() {
-                @Override
-                public void edit(DocType docType) {
-                    docType.setJournalTypeKey(sDocType.getJournalTypeKeyString());
-                    docType.setCode(sDocType.getCode());
-                    docType.setName(sDocType.getName());
-                    docType.setJournalDesc(sDocType.getJournalDesc());
-                }
-            });
-            return KeyFactory.keyToString(docType.getKey());
-        }finally{
+        } finally{
             pm.close();
         }
-    }
 
-    @Override
-    public String deleteDocType(String sSID, String sID, final String keyString) throws NotLoggedInException {
-        PersistenceManager pm = PMF.get().getPersistenceManager();
-        try{
-            UserManager.checkLoggedInAndGetUser(sSID, sID);
-            
-            // Check can be deleted.
-            Db<JournalHeader> jDb = new Db<JournalHeader>();
-            Key jKey = jDb.getSingleKey(pm, JournalHeader.class, keyString, new DbGetCallback() {
-                @Override
-                public void setQuery(Query query) {
-                    query.setFilter("docTypeKey == docTypeKeyParam");
-                    query.declareParameters("com.google.appengine.api.datastore.Key docTypeKeyParam");
-                }
-            });
-            if(jKey != null){
-                throw new IllegalArgumentException("Deletion abort! This doc type is still used by some journals.");
+        try {
+            Connection conn = Db.getDBConn();
+            try {
+                Long fisId = Long.parseLong(fisKeyString);
+                return Db.getSetup(conn, fisId);
+            } finally {
+                conn.close();
             }
-            
-            // Delete
-            Db<DocType> db = new Db<DocType>();
-            db.delete(pm, DocType.class, keyString, new DbDeleteCallback<DocType>() {
-                @Override
-                public void check(DocType t) {
-                    
-                }
-            });
-            return keyString;
-        }finally{
-            pm.close();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
         }
     }
 
     @Override
-    public String addAccGrp(String sSID, String sID, final String fisKeyString, final SAccGrp sAccGrp) throws NotLoggedInException {
+    public String addJournalType(String sSID, String sID, final String fisKeyString,
+            final SJournalType sJournalType) throws NotLoggedInException {
+
         PersistenceManager pm = PMF.get().getPersistenceManager();
         try{
             UserManager.checkLoggedInAndGetUser(sSID, sID);
-            Db<AccGroup> db = new Db<AccGroup>();
-            AccGroup accGrp = db.add(pm, new DbAddCallback<AccGroup>() {
-                @Override
-                public AccGroup construct() {
-                    return new AccGroup(fisKeyString, sAccGrp.getName(), sAccGrp.getCreateDate());
-                }
-            });
-            return KeyFactory.keyToString(accGrp.getKey());
-        }finally{
+        } finally{
             pm.close();
+        }
+
+        try {
+            Connection conn = Db.getDBConn();
+            try {
+                PreparedStatement statement = Db.getAddJTPreparedStatement(conn,
+                        Long.parseLong(fisKeyString));
+                return Db.addJT(statement, sJournalType.getName(), sJournalType.getShortName()) + "";
+            } finally {
+                conn.close();
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
         }
     }
 
     @Override
-    public String editAccGrp(String sSID, String sID, final SAccGrp sAccGrp) throws NotLoggedInException {
+    public String editJournalType(String sSID, String sID, final SJournalType sJournalType)
+            throws NotLoggedInException {
         PersistenceManager pm = PMF.get().getPersistenceManager();
         try{
             UserManager.checkLoggedInAndGetUser(sSID, sID);
-            Db<AccGroup> db = new Db<AccGroup>();
-            AccGroup accGrp = db.edit(pm, AccGroup.class, sAccGrp.getKeyString(), new DbEditCallback<AccGroup>() {
-                @Override
-                public void edit(AccGroup t) {
-                    t.setName(sAccGrp.getName());
-                }
-            });
-            return KeyFactory.keyToString(accGrp.getKey());
-        }finally{
+        } finally{
             pm.close();
+        }
+
+        try {
+            Connection conn = Db.getDBConn();
+            try {
+                String sql = "UPDATE journal_type SET `name` = ?, short_name = ? WHERE id = ?";
+                PreparedStatement statement = conn.prepareStatement(sql);
+                statement.setString(1, sJournalType.getName());
+                statement.setString(2, sJournalType.getShortName());
+                statement.setLong(3, Long.parseLong(sJournalType.getKeyString()));
+                int affectedRows = statement.executeUpdate();
+                if (affectedRows != 1) {
+                    throw new SQLException(Db.NO_ROW_EFFECTED_ERR);
+                }
+
+                return sJournalType.getKeyString();
+            } finally {
+                conn.close();
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
+        }
+    }
+
+    @Override
+    public String deleteJournalType(String sSID, String sID, String keyString)
+            throws NotLoggedInException {
+        PersistenceManager pm = PMF.get().getPersistenceManager();
+        try{
+            UserManager.checkLoggedInAndGetUser(sSID, sID);
+        } finally{
+            pm.close();
+        }
+
+        try {
+            Connection conn = Db.getDBConn();
+            try {
+                // Checking that it can be deleted was delegated to MySQL Foreign key
+                return Db.deleteFromDB(conn, Db.JOURNAL_TYPE, keyString);
+            } finally {
+                conn.close();
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
+        }
+    }
+
+    @Override
+    public String addDocType(String sSID, String sID, final String fisKeyString,
+            final SDocType sDocType) throws NotLoggedInException {
+        PersistenceManager pm = PMF.get().getPersistenceManager();
+        try{
+            UserManager.checkLoggedInAndGetUser(sSID, sID);
+        } finally{
+            pm.close();
+        }
+
+        try {
+            Connection conn = Db.getDBConn();
+            try {
+
+                PreparedStatement statement = Db.getAddDTPreparedStatement(conn,
+                        Long.parseLong(fisKeyString));
+                return Db.addDT(
+                        statement,
+                        Long.parseLong(sDocType.getJournalTypeKeyString()),
+                        sDocType.getCode(),
+                        sDocType.getName(),
+                        sDocType.getJournalDesc()) + "";
+            } finally {
+                conn.close();
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
+        }
+    }
+
+    @Override
+    public String editDocType(String sSID, String sID, final SDocType sDocType)
+            throws NotLoggedInException {
+        PersistenceManager pm = PMF.get().getPersistenceManager();
+        try{
+            UserManager.checkLoggedInAndGetUser(sSID, sID);
+        } finally{
+            pm.close();
+        }
+
+        try {
+            Connection conn = Db.getDBConn();
+            try {
+                String sql = "UPDATE doc_type SET journal_type_id = ?, code = ?, `name` = ?, journal_desc = ? WHERE id = ?";
+                PreparedStatement statement = conn.prepareStatement(sql);
+                statement.setLong(1, Long.parseLong(sDocType.getJournalTypeKeyString()));
+                statement.setString(2, sDocType.getCode());
+                statement.setString(3, sDocType.getName());
+                statement.setString(4, sDocType.getJournalDesc());
+                statement.setLong(5, Long.parseLong(sDocType.getKeyString()));
+                int affectedRows = statement.executeUpdate();
+                if (affectedRows != 1) {
+                    throw new SQLException(Db.NO_ROW_EFFECTED_ERR);
+                }
+                return sDocType.getKeyString();
+            } finally {
+                conn.close();
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
+        }
+    }
+
+    @Override
+    public String deleteDocType(String sSID, String sID, final String keyString)
+            throws NotLoggedInException {
+        PersistenceManager pm = PMF.get().getPersistenceManager();
+        try{
+            UserManager.checkLoggedInAndGetUser(sSID, sID);
+        } finally{
+            pm.close();
+        }
+
+        try {
+            Connection conn = Db.getDBConn();
+            try {
+                // Checking that it can be deleted was delegated to MySQL Foreign key
+                return Db.deleteFromDB(conn, Db.DOC_TYPE, keyString);
+            } finally {
+                conn.close();
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
+        }
+    }
+
+    @Override
+    public String addAccGrp(String sSID, String sID, final String fisKeyString,
+            final SAccGrp sAccGrp) throws NotLoggedInException {
+        PersistenceManager pm = PMF.get().getPersistenceManager();
+        try{
+            UserManager.checkLoggedInAndGetUser(sSID, sID);
+        } finally{
+            pm.close();
+        }
+
+        try {
+            Connection conn = Db.getDBConn();
+            try {
+                PreparedStatement statement = Db.getAddAGPreparedStatement(conn,
+                        Long.parseLong(fisKeyString));
+                return Db.addAG(statement, sAccGrp.getName()) + "";
+            } finally {
+                conn.close();
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
+        }
+    }
+
+    @Override
+    public String editAccGrp(String sSID, String sID, final SAccGrp sAccGrp)
+            throws NotLoggedInException {
+        PersistenceManager pm = PMF.get().getPersistenceManager();
+        try{
+            UserManager.checkLoggedInAndGetUser(sSID, sID);
+        } finally{
+            pm.close();
+        }
+
+        try {
+            Connection conn = Db.getDBConn();
+            try {
+                String sql = "UPDATE acc_grp SET `name` = ? WHERE id = ?";
+                PreparedStatement statement = conn.prepareStatement(sql);
+                statement.setString(1, sAccGrp.getName());
+                statement.setLong(2, Long.parseLong(sAccGrp.getKeyString()));
+                int affectedRows = statement.executeUpdate();
+                if (affectedRows != 1) {
+                    throw new SQLException(Db.NO_ROW_EFFECTED_ERR);
+                }
+
+                return sAccGrp.getKeyString();
+            } finally {
+                conn.close();
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
         }
     }
 
@@ -448,73 +631,121 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
         PersistenceManager pm = PMF.get().getPersistenceManager();
         try{
             UserManager.checkLoggedInAndGetUser(sSID, sID);
-            
-            // Check can be deleted.
-            Db<AccChart> aDb = new Db<AccChart>();
-            Key aKey = aDb.getSingleKey(pm, AccChart.class, keyString, new DbGetCallback() {
-                @Override
-                public void setQuery(Query query) {
-                    query.setFilter("accGroupKey == accGroupKeyParam");
-                    query.declareParameters("com.google.appengine.api.datastore.Key accGroupKeyParam");
-                }
-            });
-            if(aKey != null){
-                throw new IllegalArgumentException("Deletion abort! This acc group is still used in acc chart.");
+        } finally{
+            pm.close();
+        }
+
+        try {
+            Connection conn = Db.getDBConn();
+            try {
+                // Checking that it can be deleted was delegated to MySQL Foreign key
+                return Db.deleteFromDB(conn, Db.ACC_GRP, keyString);
+            } finally {
+                conn.close();
             }
-            
-            // Delete
-            Db<AccGroup> db = new Db<AccGroup>();
-            db.delete(pm, AccGroup.class, keyString, new DbDeleteCallback<AccGroup>() {
-                @Override
-                public void check(AccGroup t) {
-                    
-                }
-            });
-            return keyString;
-        }finally{
-            pm.close();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
         }
     }
 
     @Override
-    public String addAccChart(String sSID, String sID, final String fisKeyString, final SAccChart sAccChart) throws NotLoggedInException {
+    public String addAccChart(String sSID, String sID, final String fisKeyString,
+            final SAccChart sAccChart) throws NotLoggedInException {
         PersistenceManager pm = PMF.get().getPersistenceManager();
         try{
             UserManager.checkLoggedInAndGetUser(sSID, sID);
-            Db<AccChart> db = new Db<AccChart>();
-            AccChart accChart = db.add(pm, new DbAddCallback<AccChart>() {
-                @Override
-                public AccChart construct() {
-                    return new AccChart(fisKeyString, sAccChart.getAccGroupKeyString(), sAccChart.getParentAccChartKeyString(), sAccChart.getNo(), 
-                            sAccChart.getName(), sAccChart.getType(), sAccChart.getLevel(), sAccChart.getBeginning());
-                }
-            });
-            return KeyFactory.keyToString(accChart.getKey());
-        }finally{
+        } finally{
             pm.close();
+        }
+
+        try {
+            Connection conn = Db.getDBConn();
+            try {
+                long parentAccChartId = sAccChart.getParentAccChartKeyString() == null ? 0
+                        : Long.parseLong(sAccChart.getParentAccChartKeyString());
+
+                PreparedStatement statement = Db.getAddACPreparedStatement(conn,
+                        Long.parseLong(fisKeyString));
+                return Db.addAC(
+                        statement,
+                        sAccChart.getNo(),
+                        sAccChart.getName(),
+                        Long.parseLong(sAccChart.getAccGroupKeyString()),
+                        sAccChart.getLevel(),
+                        sAccChart.getType(),
+                        parentAccChartId) + "";
+            } finally {
+                conn.close();
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
         }
     }
 
     @Override
-    public String editAccChart(String sSID, String sID, final SAccChart sAccChart) throws NotLoggedInException {
+    public String editAccChart(String sSID, String sID, String fisKeyString,
+            final SAccChart sAccChart) throws NotLoggedInException {
         PersistenceManager pm = PMF.get().getPersistenceManager();
         try{
             UserManager.checkLoggedInAndGetUser(sSID, sID);
-            Db<AccChart> db = new Db<AccChart>();
-            AccChart accChart = db.edit(pm, AccChart.class, sAccChart.getKeyString(), new DbEditCallback<AccChart>() {
-                @Override
-                public void edit(AccChart accChart) {
-                    accChart.setAccGroupKey(sAccChart.getAccGroupKeyString());
-                    accChart.setParentAccChartKey(sAccChart.getParentAccChartKeyString());
-                    accChart.setNo(sAccChart.getNo());
-                    accChart.setName(sAccChart.getName());
-                    accChart.setType(sAccChart.getType());
-                    accChart.setLevel(sAccChart.getLevel());
-                }
-            });
-            return KeyFactory.keyToString(accChart.getKey());
-        }finally{
+        } finally{
             pm.close();
+        }
+
+        try {
+            Connection conn = Db.getDBConn();
+            try {
+                long accChartId = Long.parseLong(sAccChart.getKeyString());
+
+                // In case of change from control to entry, already check in client
+                // Change from entry to control, check if there is any journals
+                if (sAccChart.getType() == AccType.CONTROL) {
+                    String journalSql = "SELECT journal_item.id FROM journal_item JOIN journal_header ON journal_item.journal_header_id = journal_header.id WHERE journal_item.acc_chart_id = ? && journal_header.fiscal_year_id = ? LIMIT 1";
+                    PreparedStatement journalStatement = conn.prepareStatement(journalSql);
+                    journalStatement.setLong(1, Long.parseLong(fisKeyString));
+                    journalStatement.setLong(2, accChartId);
+                    ResultSet rs = journalStatement.executeQuery();
+                    if (rs.next()) {
+                        throw new SQLException(Db.ACC_CHART_BEING_USED_ERR);
+                    }
+                }
+
+                String sql = "UPDATE acc_chart SET acc_grp_id = ?, parent_acc_chart_id = ?, `no` = ?, `name` = ?, `type` = ?, `level` = ? WHERE id = ?";
+                PreparedStatement statement = conn.prepareStatement(sql);
+                statement.setLong(1, Long.parseLong(sAccChart.getAccGroupKeyString()));
+                if (sAccChart.getParentAccChartKeyString() == null) {
+                    statement.setNull(2, Types.INTEGER);
+                } else {
+                    statement.setLong(2, Long.parseLong(sAccChart.getParentAccChartKeyString()));
+                }
+                statement.setString(3, sAccChart.getNo());
+                statement.setString(4, sAccChart.getName());
+                statement.setInt(5, sAccChart.getType().ordinal());
+                statement.setInt(6, sAccChart.getLevel());
+                statement.setLong(7, accChartId);
+                int affectedRows = statement.executeUpdate();
+                if (affectedRows != 1) {
+                    throw new SQLException(Db.NO_ROW_EFFECTED_ERR);
+                }
+
+                return accChartId + "";
+            } finally {
+                conn.close();
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
         }
     }
 
@@ -523,208 +754,575 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
         PersistenceManager pm = PMF.get().getPersistenceManager();
         try{
             UserManager.checkLoggedInAndGetUser(sSID, sID);
-            
-            // Check can be deleted.
-            Db<JournalItem> jDb = new Db<JournalItem>();
-            Key jKey = jDb.getSingleKey(pm, JournalItem.class, keyString, new DbGetCallback() {
-                @Override
-                public void setQuery(Query query) {
-                    query.setFilter("accChartKey == accChartKeyParam");
-                    query.declareParameters("com.google.appengine.api.datastore.Key accChartKeyParam");
-                }
-            });
-            if(jKey != null){
-                throw new IllegalArgumentException("Deletion abort! This acc chart is still used by some journals.");
+        } finally{
+            pm.close();
+        }
+
+        try {
+            Connection conn = Db.getDBConn();
+            try {
+                // Checking that it can be deleted was delegated to MySQL Foreign key
+                return Db.deleteFromDB(conn, Db.ACC_CHART, keyString);
+            } finally {
+                conn.close();
             }
-            
-            // This account chart might still be using in financial statements (in table FinItem).
-            //     Alert will be shown when using that fin item.
-            
-            // Delete
-            Db<AccChart> db = new Db<AccChart>();
-            db.delete(pm, AccChart.class, keyString, new DbDeleteCallback<AccChart>() {
-                @Override
-                public void check(AccChart t) {
-                    
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
+        }
+    }
+
+    @Override
+    public String setBeginning(String sSID, String sID, String accChartKeyString, double beginning)
+            throws NotLoggedInException {
+        PersistenceManager pm = PMF.get().getPersistenceManager();
+        try{
+            UserManager.checkLoggedInAndGetUser(sSID, sID);
+        } finally{
+            pm.close();
+        }
+
+        try {
+            Connection conn = Db.getDBConn();
+            try {
+                String sql = "UPDATE acc_chart SET beginning = ? WHERE id = ?";
+                PreparedStatement statement = conn.prepareStatement(sql);
+                statement.setDouble(1, beginning);
+                statement.setLong(2, Long.parseLong(accChartKeyString));
+                int affectedRows = statement.executeUpdate();
+                if (affectedRows != 1) {
+                    throw new SQLException(Db.NO_ROW_EFFECTED_ERR);
                 }
-            });
-            return keyString;
-        }finally{
-            pm.close();
+
+                return accChartKeyString;
+            } finally {
+                conn.close();
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
         }
     }
 
     @Override
-    public String setBeginning(String sSID, String sID, String accChartKeyString, double beginning) throws NotLoggedInException {
+    public ArrayList<SJournalHeader> getJournalListWithJT(String sSID, String sID, String fisKeyString,
+            String journalTypeKeyString, int month, int year) throws NotLoggedInException {
         PersistenceManager pm = PMF.get().getPersistenceManager();
         try{
             UserManager.checkLoggedInAndGetUser(sSID, sID);
-            AccChart accChart = Db.setBeginning(pm, accChartKeyString, beginning);
-            return KeyFactory.keyToString(accChart.getKey());
-        }finally{
+        } finally{
             pm.close();
         }
-    }
-    
-    @Override
-    public String addFinHeader(String sSID, String sID, String fisKeyString, SFinHeader sFinHeader) throws NotLoggedInException {
-        PersistenceManager pm = PMF.get().getPersistenceManager();
-        try{
-            UserManager.checkLoggedInAndGetUser(sSID, sID);
-            FinHeader finHeader = Db.addFinHeader(pm, fisKeyString, sFinHeader);
-            return KeyFactory.keyToString(finHeader.getKey());
-        }finally{
-            pm.close();
+
+        try {
+            Connection conn = Db.getDBConn();
+            try {
+                String sql = "SELECT * FROM doc_type LEFT JOIN journal_header ON doc_type.id = journal_header.doc_type_id LEFT JOIN journal_item ON journal_header.id = journal_item.journal_header_id WHERE doc_type.fiscal_year_id = ? && doc_type.journal_type_id = ? && journal_header.month = ? && journal_header.year = ? ORDER BY journal_header.day ASC, journal_header.no ASC";
+                PreparedStatement statement = conn.prepareStatement(sql);
+                statement.setLong(1, Long.parseLong(fisKeyString));
+                statement.setLong(2, Long.parseLong(journalTypeKeyString));
+                statement.setInt(3, month);
+                statement.setInt(4, year);
+                ResultSet rs = statement.executeQuery();
+
+                return populateJournalList(rs);
+            } finally {
+                conn.close();
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
         }
     }
 
     @Override
-    public String editFinHeader(String sSID, String sID, SFinHeader sFinHeader) throws NotLoggedInException {
-        PersistenceManager pm = PMF.get().getPersistenceManager();
-        try{
-            UserManager.checkLoggedInAndGetUser(sSID, sID);
-            FinHeader finHeader = Db.editFinHeader(pm, sFinHeader);
-            return KeyFactory.keyToString(finHeader.getKey());
-        }finally{
-            pm.close();
-        }
-    }
+    public HashMap<String, SJournalHeader> getJournalListWithAC(String sSID,
+            String sID, String fisKeyString, String beginACNo, String endACNo, int[] dates)
+            throws NotLoggedInException {
 
-    @Override
-    public String deleteFinHeader(String sSID, String sID, String keyString) throws NotLoggedInException {
         PersistenceManager pm = PMF.get().getPersistenceManager();
         try{
             UserManager.checkLoggedInAndGetUser(sSID, sID);
-            Db<FinHeader> db = new Db<FinHeader>();
-            db.delete(pm, FinHeader.class, keyString, new DbDeleteCallback<FinHeader>() {
-                @Override
-                public void check(FinHeader t) {
-                    
-                }
-            });
-            return keyString;
-        }finally{
+        } finally{
             pm.close();
         }
-    }
-    
-    @Override
-    public String addFinItem(String sSID, String sID, String finHeaderKeyString, SFinItem sFinItem) throws NotLoggedInException {
-        PersistenceManager pm = PMF.get().getPersistenceManager();
-        try{
-            UserManager.checkLoggedInAndGetUser(sSID, sID);
-            FinItem finItem= Db.addFinItem(pm, finHeaderKeyString, sFinItem);
-            return KeyFactory.keyToString(finItem.getKey());
-        }finally{
-            pm.close();
-        }
-    }
 
-    @Override
-    public String editFinItem(String sSID, String sID, SFinItem sFinItem) throws NotLoggedInException {
-        PersistenceManager pm = PMF.get().getPersistenceManager();
-        try{
-            UserManager.checkLoggedInAndGetUser(sSID, sID);
-            FinItem finItem = Db.editFinItem(pm, sFinItem);
-            return KeyFactory.keyToString(finItem.getKey());
-        }finally{
-            pm.close();
-        }
-    }
+        try {
+            Connection conn = Db.getDBConn();
+            try {
 
-    @Override
-    public String deleteFinItem(String sSID, String sID, String keyString) throws NotLoggedInException {
-        PersistenceManager pm = PMF.get().getPersistenceManager();
-        try{
-            UserManager.checkLoggedInAndGetUser(sSID, sID);
-            Db<FinItem> db = new Db<FinItem>();
-            db.delete(pm, FinItem.class, keyString, new DbDeleteCallback<FinItem>() {
-                @Override
-                public void check(FinItem t) {
-                    
-                }
-            });
-            return keyString;
-        }finally{
-            pm.close();
-        }
-    }
+                // TODO: Performance?
+                String sql = "SELECT * FROM journal_item LEFT JOIN journal_header ON journal_item.journal_header_id = journal_header.id LEFT JOIN acc_chart ON journal_item.acc_chart_id = acc_chart.id LEFT JOIN doc_type ON journal_header.doc_type_id = doc_type.id LEFT JOIN journal_type ON doc_type.journal_type_id = journal_type.id WHERE journal_header.fiscal_year_id = ? && STRCMP(acc_chart.no, ? ) >= 0 && STRCMP(acc_chart.no, ? ) <= 0 && journal_header.year >= ? && journal_header.year <= ? && (journal_header.year > ? || journal_header.month >= ?) && (journal_header.year < ? || journal_header.month <= ?) && (journal_header.year != ? || journal_header.month != ? || journal_header.day >= ?) && (journal_header.year != ? || journal_header.month != ? || journal_header.day <= ?) ORDER BY acc_chart.no ASC, journal_header.year ASC, journal_header.month ASC, journal_header.day ASC, journal_header.no ASC";
 
-    @Override
-    public SFiscalYear getJournalList(String sSID, String sID, final String fisKeyString) throws NotLoggedInException {
-        SFiscalYear sFis = new SFiscalYear();
-        PersistenceManager pm = PMF.get().getPersistenceManager();
-        try{
-            UserManager.checkLoggedInAndGetUser(sSID, sID);
-            Db<JournalHeader> db = new Db<JournalHeader>();
-            List<JournalHeader> journalList = db.get(pm, JournalHeader.class, fisKeyString, new DbGetCallback() {
-                @Override
-                public void setQuery(Query query) {
-                    query.setFilter("fisKey == fisKeyParam");
-                    query.declareParameters("com.google.appengine.api.datastore.Key fisKeyParam");
-                    query.setOrdering("no asc");
-                }
-            });
-            if(journalList.size() > 0){
-                for(JournalHeader journal : journalList){
-                    SJournalHeader sJournal = new SJournalHeader(journal.getKeyString(), journal.getDocTypeKeyString(), journal.getNo(), 
-                            journal.getDay(), journal.getMonth(), journal.getYear(), journal.getDesc());
-                    
-                    for(JournalItem journalItem : journal.getItemSet()){
-                        SJournalItem sJournalItem = new SJournalItem(journalItem.getKeyString(), journalItem.getAccChartKeyString(),
-                                journalItem.getAmt(), journalItem.getCreateDate());
-                        sJournal.addItem(sJournalItem);
+                PreparedStatement statement = conn.prepareStatement(sql);
+                statement.setLong(1, Long.parseLong(fisKeyString));
+                statement.setString(2, beginACNo);
+                statement.setString(3, endACNo);
+                statement.setInt(4, dates[2]);
+                statement.setInt(5, dates[5]);
+                statement.setInt(6, dates[2]);
+                statement.setInt(7, dates[1]);
+                statement.setInt(8, dates[5]);
+                statement.setInt(9, dates[4]);
+                statement.setInt(10, dates[2]);
+                statement.setInt(11, dates[1]);
+                statement.setInt(12, dates[0]);
+                statement.setInt(13, dates[5]);
+                statement.setInt(14, dates[4]);
+                statement.setInt(15, dates[3]);
+                ResultSet rs = statement.executeQuery();
+
+                HashMap<String, SJournalHeader> aJList =
+                        new HashMap<String, SJournalHeader>();
+
+                String acKeyString = null;
+                // This is just being used instead of ArrayList, no data in it.
+                //     All needed data is in an item using extra fields.
+                SJournalHeader sJournal = null;
+
+                while (rs.next()) {
+                    String s = rs.getLong(Db.dot(Db.JOURNAL_ITEM, Db.ACC_CHART_ID)) + "";
+                    if ( acKeyString == null || !acKeyString.equals(s)) {
+                        acKeyString = s;
+                        sJournal = new SJournalHeader();
+                        aJList.put(acKeyString, sJournal);
                     }
-                    
-                    sFis.addSJournal(sJournal);
+
+                    SJournalItem sJournalItem = new SJournalItem(
+                            rs.getLong(Db.dot(Db.JOURNAL_ITEM, Db.ID)) + "",
+                            rs.getLong(Db.dot(Db.JOURNAL_ITEM, Db.ACC_CHART_ID)) + "",
+                            rs.getDouble(Db.dot(Db.JOURNAL_ITEM, Db.AMT)),
+                            new Date(rs.getTimestamp(Db.dot(Db.JOURNAL_ITEM, Db.CREATE_DATE)).getTime()));
+
+                    sJournalItem.day = rs.getInt(Db.dot(Db.JOURNAL_HEADER, Db.DAY));
+                    sJournalItem.month = rs.getInt(Db.dot(Db.JOURNAL_HEADER, Db.MONTH));
+                    sJournalItem.year = rs.getInt(Db.dot(Db.JOURNAL_HEADER, Db.YEAR));
+                    sJournalItem.journalTypeShortName = rs.getString(Db.dot(Db.JOURNAL_TYPE, Db.SHORT_NAME));
+                    sJournalItem.journalNo = rs.getString(Db.dot(Db.JOURNAL_HEADER, Db.NO));
+                    sJournalItem.journalDesc = rs.getString(Db.dot(Db.JOURNAL_HEADER, Db.DESC));
+
+                    sJournal.addItem(sJournalItem);
                 }
+
+                return aJList;
+            } finally {
+                conn.close();
             }
-        }finally{
-            pm.close();
-        }
-        return sFis;
-    }
-
-    @Override
-    public String addJournal(String sSID, String sID, String fisKeyString, SJournalHeader sJournal) throws NotLoggedInException {
-        PersistenceManager pm = PMF.get().getPersistenceManager();
-        try{
-            UserManager.checkLoggedInAndGetUser(sSID, sID);
-            JournalHeader journal = Db.addJournal(pm, fisKeyString, sJournal);
-            return KeyFactory.keyToString(journal.getKey());
-        }finally{
-            pm.close();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
         }
     }
 
-    @Override
-    public String editJournal(String sSID, String sID, SJournalHeader sJournal) throws NotLoggedInException {
-        PersistenceManager pm = PMF.get().getPersistenceManager();
-        try{
-            UserManager.checkLoggedInAndGetUser(sSID, sID);
-            JournalHeader journal = Db.editJournal(pm, sJournal);
-            return KeyFactory.keyToString(journal.getKey());
-        }finally{
-            pm.close();
+    private ArrayList<SJournalHeader> populateJournalList(ResultSet rs) throws SQLException {
+        ArrayList<SJournalHeader> sJournalList = new ArrayList<SJournalHeader>();
+
+        SJournalHeader sJournal = null;
+        long id;
+        while (rs.next()) {
+            id = rs.getLong(Db.dot(Db.JOURNAL_HEADER, Db.ID));
+            if (sJournal == null || !sJournal.getKeyString().equals(id + "")) {
+                sJournal = new SJournalHeader(
+                        id + "",
+                        rs.getLong(Db.dot(Db.JOURNAL_HEADER, Db.DOC_TYPE_ID)) + "",
+                        rs.getString(Db.dot(Db.JOURNAL_HEADER, Db.NO)),
+                        rs.getInt(Db.dot(Db.JOURNAL_HEADER, Db.DAY)),
+                        rs.getInt(Db.dot(Db.JOURNAL_HEADER, Db.MONTH)),
+                        rs.getInt(Db.dot(Db.JOURNAL_HEADER, Db.YEAR)),
+                        rs.getString(Db.dot(Db.JOURNAL_HEADER, Db.DESC)));
+
+                sJournalList.add(sJournal);
+            }
+
+            id = rs.getLong(Db.dot(Db.JOURNAL_ITEM, Db.ID));
+            if (id != 0) {
+                SJournalItem sJournalItem = new SJournalItem(
+                        id + "",
+                        rs.getLong(Db.dot(Db.JOURNAL_ITEM, Db.ACC_CHART_ID)) + "",
+                        rs.getDouble(Db.dot(Db.JOURNAL_ITEM, Db.AMT)),
+                        new Date(rs.getTimestamp(Db.dot(Db.JOURNAL_ITEM, Db.CREATE_DATE)).getTime()));
+
+                sJournal.addItem(sJournalItem);
+            }
         }
+        return sJournalList;
     }
 
     @Override
-    public String deleteJournal(String sSID, String sID, String keyString) throws NotLoggedInException {
+    public String addJournal(String sSID, String sID, String fisKeyString, SJournalHeader sJournal)
+            throws NotLoggedInException {
+
         PersistenceManager pm = PMF.get().getPersistenceManager();
         try{
             UserManager.checkLoggedInAndGetUser(sSID, sID);
-            Db<JournalHeader> db = new Db<JournalHeader>();
-            db.delete(pm, JournalHeader.class, keyString, new DbDeleteCallback<JournalHeader>() {
-                @Override
-                public void check(JournalHeader t) {
-                    
+        } finally{
+            pm.close();
+        }
+
+        try {
+            Connection conn = Db.getDBConn();
+            try {
+                // Transaction
+                conn.setAutoCommit(false);
+
+                // Add header
+                String addHeaderSql = "INSERT INTO journal_header (id, fiscal_year_id, doc_type_id, `no`, `day`, `month`, `year`, `desc`) VALUES ( ? , ? , ? , ? , ?, ? , ? , ? )";
+                PreparedStatement addHeaderStatement = conn.prepareStatement(addHeaderSql,
+                        Statement.RETURN_GENERATED_KEYS);
+                addHeaderStatement.setNull(1, Types.INTEGER);
+                addHeaderStatement.setLong(2, Long.parseLong(fisKeyString));
+                addHeaderStatement.setLong(3, Long.parseLong(sJournal.getDocTypeKeyString()));
+                addHeaderStatement.setString(4, sJournal.getNo());
+                addHeaderStatement.setInt(5, sJournal.getDay());
+                addHeaderStatement.setInt(6, sJournal.getMonth());
+                addHeaderStatement.setInt(7, sJournal.getYear());
+                addHeaderStatement.setString(8, sJournal.getDesc());
+                int affectedRows = addHeaderStatement.executeUpdate();
+                if (affectedRows != 1) {
+                    throw new SQLException(Db.NO_ROW_EFFECTED_ERR);
                 }
-            });
-            return keyString;
-        }finally{
-            pm.close();
+
+                Long headerId;
+                ResultSet generatedKeys = addHeaderStatement.getGeneratedKeys();
+                if (generatedKeys.next()) {
+                    headerId = generatedKeys.getLong(1);
+                } else {
+                    throw new SQLException(Db.NO_GENERATED_KEYS_ERR);
+                }
+
+                addJournalItems(conn, fisKeyString, headerId, sJournal.getItemList());
+
+                // end transaction
+                conn.commit();
+
+                return headerId + "";
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            } finally {
+                conn.close();
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
         }
     }
 
+    private void addJournalItems(Connection conn, String fisKeyString, long headerId,
+            List<SJournalItem> itemList) throws SQLException {
+
+        // Add items
+        String addItemSql = "INSERT INTO journal_item (id, journal_header_id, acc_chart_id, amt) VALUES ( ? , ? , ? , ? )";
+        PreparedStatement addItemStatement = conn.prepareStatement(addItemSql);
+
+        // Plus to acc_amt
+        String plusSql = "INSERT INTO acc_amt (fiscal_year_id, acc_chart_id, amt) VALUES ( ?, ?, ? ) ON DUPLICATE KEY UPDATE amt = amt + ?";
+        PreparedStatement plusStatement = conn.prepareStatement(plusSql);
+
+        int affectedRows;
+
+        for (SJournalItem sJournalItem : itemList) {
+            addItemStatement.setNull(1, Types.INTEGER);
+            addItemStatement.setLong(2, headerId);
+            addItemStatement.setLong(3, Long.parseLong(sJournalItem.getAccChartKeyString()));
+            addItemStatement.setDouble(4, sJournalItem.getAmt());
+
+            affectedRows = addItemStatement.executeUpdate();
+            if (affectedRows != 1) {
+                throw new SQLException(Db.NO_ROW_EFFECTED_ERR);
+            }
+
+            plusStatement.setLong(1, Long.parseLong(fisKeyString));
+            plusStatement.setLong(2, Long.parseLong(sJournalItem.getAccChartKeyString()));
+            plusStatement.setDouble(3, sJournalItem.getAmt());
+            plusStatement.setDouble(4, sJournalItem.getAmt());
+
+            affectedRows = plusStatement.executeUpdate();
+            // With ON DUPLICATE KEY UPDATE, the affected-rows value per row is 1
+            //     if the row is inserted as a new row and 2 if an existing row is updated.
+            if (affectedRows != 1 && affectedRows != 2) {
+                throw new SQLException(Db.NO_ROW_EFFECTED_ERR);
+            }
+        }
+    }
+
+    @Override
+    public String editJournal(String sSID, String sID, String fisKeyString, SJournalHeader sJournal)
+            throws NotLoggedInException {
+
+        PersistenceManager pm = PMF.get().getPersistenceManager();
+        try{
+            UserManager.checkLoggedInAndGetUser(sSID, sID);
+        } finally{
+            pm.close();
+        }
+
+        try {
+            Connection conn = Db.getDBConn();
+            try {
+                // Transaction
+                conn.setAutoCommit(false);
+
+                long headerId = Long.parseLong(sJournal.getKeyString());
+
+                // Edit header
+                String updateSql = "UPDATE journal_header SET doc_type_id = ?, `no` = ?, `day` = ?, `month` = ?, `year` = ?, `desc` = ? WHERE id = ?";
+                PreparedStatement updateStatement = conn.prepareStatement(updateSql);
+                updateStatement.setLong(1, Long.parseLong(sJournal.getDocTypeKeyString()));
+                updateStatement.setString(2, sJournal.getNo());
+                updateStatement.setInt(3, sJournal.getDay());
+                updateStatement.setInt(4, sJournal.getMonth());
+                updateStatement.setInt(5, sJournal.getYear());
+                updateStatement.setString(6, sJournal.getDesc());
+                updateStatement.setLong(7, headerId);
+                int affectedRows = updateStatement.executeUpdate();
+                if (affectedRows != 1) {
+                    throw new SQLException(Db.NO_ROW_EFFECTED_ERR);
+                }
+
+                // deduct amt from old items
+                deductAccAmt(conn, fisKeyString, sJournal.getKeyString());
+
+                // delete old items
+                String deleteSql = "DELETE FROM journal_item WHERE journal_header_id = ?";
+                PreparedStatement deleteStatement = conn.prepareStatement(deleteSql);
+                deleteStatement.setLong(1, headerId);
+                affectedRows = deleteStatement.executeUpdate();
+                if (affectedRows <= 0) {
+                    throw new SQLException(Db.NO_ROW_EFFECTED_ERR);
+                }
+
+                // add new items and plus amt from new items to acc_amt
+                addJournalItems(conn, fisKeyString, headerId, sJournal.getItemList());
+
+                // end transaction
+                conn.commit();
+
+                return sJournal.getKeyString();
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            } finally {
+                conn.close();
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
+        }
+    }
+
+    @Override
+    public String deleteJournal(String sSID, String sID, String fisKeyString, String keyString)
+            throws NotLoggedInException {
+
+        PersistenceManager pm = PMF.get().getPersistenceManager();
+        try{
+            UserManager.checkLoggedInAndGetUser(sSID, sID);
+        } finally{
+            pm.close();
+        }
+
+        try {
+            Connection conn = Db.getDBConn();
+            try {
+                // Transaction
+                conn.setAutoCommit(false);
+
+                deductAccAmt(conn, fisKeyString, keyString);
+
+                // delete items and header
+                //     (Checking that it can be deleted was delegated to MySQL Foreign key)
+                Db.deleteFromDB(conn, Db.JOURNAL_HEADER, keyString);
+
+                // end transaction
+                conn.commit();
+
+                return keyString;
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            } finally {
+                conn.close();
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
+        }
+    }
+
+    private void deductAccAmt(Connection conn, String fisKeyString, String journalHeaderKeyString)
+            throws SQLException {
+
+        // Get items
+        String getItemSql = "SELECT * FROM journal_item WHERE journal_item.journal_header_id = ?";
+        PreparedStatement getItemStatement = conn.prepareStatement(getItemSql);
+        getItemStatement.setLong(1, Long.parseLong(journalHeaderKeyString));
+
+        // deduct amt from acc_amt
+        String deductSql = "UPDATE acc_amt SET amt = amt - ? WHERE fiscal_year_id = ? && acc_chart_id = ?";
+        PreparedStatement deductStatement = conn.prepareStatement(deductSql);
+
+        ResultSet getItemRs = getItemStatement.executeQuery();
+        while (getItemRs.next()) {
+            deductStatement.setDouble(1, getItemRs.getDouble(Db.AMT));
+            deductStatement.setLong(2, Long.parseLong(fisKeyString));
+            deductStatement.setLong(3, getItemRs.getLong(Db.ACC_CHART_ID));
+            int affectedRows = deductStatement.executeUpdate();
+            if (affectedRows != 1) {
+                throw new SQLException(Db.NO_ROW_EFFECTED_ERR);
+            }
+        }
+    }
+
+    @Override
+    public HashMap<String, SAccAmt> getAccAmtMap(String sSID, String sID, String fisKeyString)
+            throws NotLoggedInException {
+        PersistenceManager pm = PMF.get().getPersistenceManager();
+        try{
+            UserManager.checkLoggedInAndGetUser(sSID, sID);
+        } finally{
+            pm.close();
+        }
+
+        try {
+            Connection conn = Db.getDBConn();
+            try {
+                HashMap<String, SAccAmt> sAccAmtMap = new HashMap<String, SAccAmt>();
+
+                String sql = "SELECT * FROM acc_amt WHERE fiscal_year_id = ?";
+                PreparedStatement statement = conn.prepareStatement(sql);
+                statement.setLong(1, Long.parseLong(fisKeyString));
+                ResultSet rs = statement.executeQuery();
+                while (rs.next()) {
+                    String accChartKeyString = rs.getLong(Db.ACC_CHART_ID) + "";
+                    SAccAmt sAccAmt = new SAccAmt(
+                            accChartKeyString,
+                            rs.getDouble(Db.AMT),
+                            new Date(rs.getTimestamp(Db.CREATE_DATE).getTime()));
+                    sAccAmtMap.put(accChartKeyString, sAccAmt);
+                }
+
+                return sAccAmtMap;
+            } finally {
+                conn.close();
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
+        }
+    }
+
+    @Override
+    public String recalculateAccAmt(String sSID, String sID, String fisKeyString)
+            throws NotLoggedInException {
+
+        PersistenceManager pm = PMF.get().getPersistenceManager();
+        try{
+            UserManager.checkLoggedInAndGetUser(sSID, sID);
+        } finally{
+            pm.close();
+        }
+
+        try {
+            Connection conn = Db.getDBConn();
+            try {
+
+                long fisId = Long.parseLong(fisKeyString);
+
+                // clear acc amts
+                String clearSql = "DELETE FROM acc_amt WHERE fiscal_year_id = ?";
+                PreparedStatement clearStatement = conn.prepareStatement(clearSql);
+                clearStatement.setLong(1, fisId);
+                clearStatement.executeUpdate();
+
+                // Get begin end month year
+                String fiscalSql = "SELECT * FROM fiscal_year where id = ?";
+                PreparedStatement fiscalStatement = conn.prepareStatement(fiscalSql);
+                fiscalStatement.setLong(1, fisId);
+                ResultSet rs = fiscalStatement.executeQuery();
+                if (!rs.first()) {
+                    throw new SQLException(Db.NO_ROW_EFFECTED_ERR);
+                }
+
+                int[] beginDate = {0, rs.getInt(Db.BEGIN_MONTH), rs.getInt(Db.BEGIN_YEAR)};
+                int[] endDate = {0, rs.getInt(Db.END_MONTH), rs.getInt(Db.END_YEAR)};
+
+                ArrayList<int[]> months = Utils.findAllMonths(beginDate, endDate);
+
+                String journalSql = "SELECT * FROM journal_item LEFT JOIN journal_header ON journal_item.journal_header_id = journal_header.id WHERE journal_header.fiscal_year_id = ? && journal_header.month = ? && journal_header.year = ?";
+                PreparedStatement journalStatement = conn.prepareStatement(journalSql);
+                journalStatement.setLong(1, Long.parseLong(fisKeyString));
+
+                HashMap<Long, Double> accAmtMap = new HashMap<Long, Double>();
+
+                String plusSql = "INSERT INTO acc_amt (fiscal_year_id, acc_chart_id, amt) VALUES ( ?, ?, ?) ON DUPLICATE KEY UPDATE amt = amt + ?";;
+                PreparedStatement plusStatement = conn.prepareStatement(plusSql);
+                plusStatement.setLong(1, fisId);
+
+                // loop for each month
+                for (int[] month : months) {
+
+                    // Make sure to clear it first
+                    accAmtMap.clear();
+
+                    // get journal
+                    journalStatement.setInt(2, month[1]);
+                    journalStatement.setInt(3, month[2]);
+                    rs = journalStatement.executeQuery();
+
+                    // sum up
+                    while (rs.next()) {
+                        long acId = rs.getLong(Db.dot(Db.JOURNAL_ITEM, Db.ACC_CHART_ID));
+                        double amt = rs.getDouble(Db.dot(Db.JOURNAL_ITEM, Db.AMT));
+                        if (accAmtMap.containsKey(acId)) {
+                            accAmtMap.put(acId, accAmtMap.get(acId) + amt);
+                        } else {
+                            accAmtMap.put(acId, amt);
+                        }
+                    }
+
+                    // update(not replace) to acc amts as batch update
+                    for (Map.Entry<Long, Double> entry : accAmtMap.entrySet()) {
+                        plusStatement.setLong(2, entry.getKey());
+                        plusStatement.setDouble(3, entry.getValue());
+                        plusStatement.setDouble(4, entry.getValue());
+                    }
+                }
+
+                return "succeeded";
+            } finally {
+                conn.close();
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
+        }
+    }
 }

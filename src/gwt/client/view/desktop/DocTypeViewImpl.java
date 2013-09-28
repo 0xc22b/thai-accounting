@@ -165,5 +165,7 @@ public class DocTypeViewImpl<T> extends Composite implements DocTypeView<T> {
         codeTB.setEnabled(enabled);
         nameTB.setEnabled(enabled);
         journalDescTB.setEnabled(enabled);
+        
+        if (enabled) codeTB.setFocus(true);
     }
 }

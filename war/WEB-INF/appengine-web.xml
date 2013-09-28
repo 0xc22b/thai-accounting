@@ -46,4 +46,5 @@
     <service>mail</service>
   </inbound-services>
 
+  <use-google-connector-j>true</use-google-connector-j>
 </appengine-web-app>

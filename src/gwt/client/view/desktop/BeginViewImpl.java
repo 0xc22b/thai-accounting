@@ -97,6 +97,10 @@ public class BeginViewImpl<T> extends Composite implements BeginView<T> {
                 }
             }
             noSB.setEnabled(true);
+            
+            setInputsEnabled(true);
+
+            noSB.setFocus(true);
         }else{    
             this.keyString = keyString;
             
@@ -109,8 +113,10 @@ public class BeginViewImpl<T> extends Composite implements BeginView<T> {
             }else{
                 creditDB.setCustomValue(Math.abs(fisDef.getACBeginning(t, keyString)));
             }
+
+            setInputsEnabled(editable);
+            if (editable) debitDB.setFocus(true);
         }
-        setInputsEnabled(editable);
     }
 
     @Override

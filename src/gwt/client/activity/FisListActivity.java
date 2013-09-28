@@ -46,7 +46,6 @@ public class FisListActivity extends AbstractActivity implements ListView.Presen
 
     @Override
     public String mayStop() {
-        clientFactory.getFisListView().saveFirstVisibleIndex();
         return null;
     }
 
@@ -84,12 +83,18 @@ public class FisListActivity extends AbstractActivity implements ListView.Presen
         ActionEvent.register(eventBus, ActionNames.ADD, new ActionEvent.Handler(){
             @Override
             public void onAction(ActionEvent event) {
+                
+                clientFactory.getFisListView().keepState(0);
+
                 clientFactory.getPlaceController().goTo(new AllPlace(AllPlace.FIS, AllPlace.NEW, place.getComKeyString()));
             }
         });
         ActionEvent.register(eventBus, ActionNames.VIEW, new ActionEvent.Handler(){
             @Override
             public void onAction(ActionEvent event) {
+                
+                clientFactory.getFisListView().keepState(0);
+
                 clientFactory.getPlaceController().goTo(new AllPlace(AllPlace.FIS, AllPlace.VIEW, place.getComKeyString(), 
                         clientFactory.getFisListView().getSelectedItemKeyString()));
             }
@@ -97,6 +102,9 @@ public class FisListActivity extends AbstractActivity implements ListView.Presen
         ActionEvent.register(eventBus, ActionNames.EDIT, new ActionEvent.Handler(){
             @Override
             public void onAction(ActionEvent event) {
+                
+                clientFactory.getFisListView().keepState(0);
+
                 clientFactory.getPlaceController().goTo(new AllPlace(AllPlace.FIS, AllPlace.EDIT, place.getComKeyString(),
                         clientFactory.getFisListView().getSelectedItemKeyString()));
             }
@@ -146,6 +154,9 @@ public class FisListActivity extends AbstractActivity implements ListView.Presen
                 }
                 @Override
                 public void onSuccess(SCom result) {
+                    
+                    clientFactory.getFisListView().keepState(0);
+
                     clientFactory.getFisListView().setData(result);
                 }
             });

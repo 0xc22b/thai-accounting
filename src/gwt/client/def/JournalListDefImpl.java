@@ -2,7 +2,6 @@ package gwt.client.def;
 
 import gwt.client.TCF;
 import gwt.client.TConstants;
-import gwt.shared.model.SFiscalYear;
 import gwt.shared.model.SJournalHeader;
 import gwt.shared.model.SJournalItem;
 
@@ -12,7 +11,7 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.view.client.ProvidesKey;
 
-public class JournalListDefImpl extends ListDef<SFiscalYear, SJournalHeader> {
+public class JournalListDefImpl extends ListDef<List<SJournalHeader>, SJournalHeader> {
 
     private static final TConstants constants = TCF.get();
     private static JournalListDefImpl instance = null;
@@ -25,8 +24,8 @@ public class JournalListDefImpl extends ListDef<SFiscalYear, SJournalHeader> {
     }
 
     @Override
-    public List<SJournalHeader> getList(SFiscalYear l) {
-        return l.getSJournalList();
+    public List<SJournalHeader> getList(List<SJournalHeader> l) {
+        return l;
     }
 
     @Override
@@ -132,5 +131,10 @@ public class JournalListDefImpl extends ListDef<SFiscalYear, SJournalHeader> {
     @Override
     public Unit getWidthUnit(int i) {
         return null;
+    }
+    
+    @Override
+    public int getPageSize() {
+        return 500;
     }
 }

@@ -85,16 +85,10 @@ public class MenuActivity extends AbstractActivity implements MenuView.Presenter
     }
     
     @Override
-    public void goToJournal(String keyString) {
+    public void goToJournal(String journalTypeKeyString, int month, int year) {
         clientFactory.getPlaceController().goTo(new AllPlace(AllPlace.JOUR,
                 AllPlace.LIST, place.getComKeyString(), place.getFisKeyString(),
-                keyString));
-    }
-    
-    @Override
-    public void goToFin() {
-        clientFactory.getPlaceController().goTo(new AllPlace(AllPlace.FIN_HEADER,
-                AllPlace.LIST, place.getComKeyString(), place.getFisKeyString()));
+                journalTypeKeyString, month + "", year + ""));
     }
 
     @Override
@@ -189,25 +183,22 @@ public class MenuActivity extends AbstractActivity implements MenuView.Presenter
     }
 
     @Override
-    public void goToWorkSheet(String assetACKeyString, String debtACKeyString,
-            String shareholderACKeyString, String accruedProfitACKeyString,
-            String incomeACKeyString, String expenseACKeyString,
-            String costACKeyString, boolean doShowAll) {
-        String doShowAllString = doShowAll ? AllPlace.SHOW_ALL : null;
-        clientFactory.getPlaceController().goTo(new AllPlace(AllPlace.REPORT,
-                AllPlace.WORK_SHEET, place.getComKeyString(), place.getFisKeyString(),
-                assetACKeyString, debtACKeyString, shareholderACKeyString,
-                accruedProfitACKeyString, incomeACKeyString, expenseACKeyString,
-                costACKeyString, doShowAllString));
+    public void recalAccAmt() {
+        clientFactory.getModel().recalculateAccAmt(place.getComKeyString(), place.getFisKeyString(),
+                new AsyncCallback<String>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+                Window.alert(caught.getMessage());
+            }
+
+            @Override
+            public void onSuccess(String result) {
+                clientFactory.getMenuView().setRecalAccAmtBtnText(result);
+            }
+        });
     }
-    
-    @Override
-    public void goToFinRep(String finKeyString) {
-        clientFactory.getPlaceController().goTo(new AllPlace(AllPlace.REPORT,
-                AllPlace.FIN, place.getComKeyString(), place.getFisKeyString(),
-                finKeyString));
-    }
-    
+
     private void getSetup(){
         // 1. Waiting for getting data
         clientFactory.getShell().setLoading();
@@ -280,8 +271,7 @@ public class MenuActivity extends AbstractActivity implements MenuView.Presenter
                 new AsyncCallback<SCom>() {
             @Override
             public void onFailure(Throwable caught) {
-                // TODO Auto-generated method stub
-                
+                Window.alert(caught.getMessage());
             }
             
             @Override
@@ -291,8 +281,7 @@ public class MenuActivity extends AbstractActivity implements MenuView.Presenter
                         place.getFisKeyString(), new AsyncCallback<SFiscalYear>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        // TODO Auto-generated method stub
-                        
+                        Window.alert(caught.getMessage());
                     }
                     
                     @Override

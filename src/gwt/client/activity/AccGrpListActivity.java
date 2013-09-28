@@ -46,7 +46,6 @@ public class AccGrpListActivity extends AbstractActivity implements ListView.Pre
 
     @Override
     public String mayStop() {
-        clientFactory.getAccGrpListView().saveFirstVisibleIndex();
         return null;
     }
 
@@ -83,6 +82,9 @@ public class AccGrpListActivity extends AbstractActivity implements ListView.Pre
         ActionEvent.register(eventBus, ActionNames.ADD, new ActionEvent.Handler(){
             @Override
             public void onAction(ActionEvent event) {
+
+                clientFactory.getAccGrpListView().keepState(0);
+
                 clientFactory.getPlaceController().goTo(new AllPlace(AllPlace.GRP, AllPlace.NEW, place.getComKeyString(), 
                         place.getFisKeyString()));
             }
@@ -90,6 +92,9 @@ public class AccGrpListActivity extends AbstractActivity implements ListView.Pre
         ActionEvent.register(eventBus, ActionNames.VIEW, new ActionEvent.Handler(){
             @Override
             public void onAction(ActionEvent event) {
+
+                clientFactory.getAccGrpListView().keepState(0);
+
                 clientFactory.getPlaceController().goTo(new AllPlace(AllPlace.GRP, AllPlace.VIEW, place.getComKeyString(), 
                         place.getFisKeyString(), clientFactory.getAccGrpListView().getSelectedItemKeyString()));
             }
@@ -97,6 +102,9 @@ public class AccGrpListActivity extends AbstractActivity implements ListView.Pre
         ActionEvent.register(eventBus, ActionNames.EDIT, new ActionEvent.Handler(){
             @Override
             public void onAction(ActionEvent event) {
+                
+                clientFactory.getAccGrpListView().keepState(0);
+
                 clientFactory.getPlaceController().goTo(new AllPlace(AllPlace.GRP, AllPlace.EDIT, place.getComKeyString(),
                         place.getFisKeyString(), clientFactory.getAccGrpListView().getSelectedItemKeyString()));
             }
@@ -150,6 +158,9 @@ public class AccGrpListActivity extends AbstractActivity implements ListView.Pre
                 }
                 @Override
                 public void onSuccess(SFiscalYear result) {
+                    
+                    clientFactory.getAccGrpListView().keepState(0);
+
                     clientFactory.getAccGrpListView().setData(result);
                 }
             });
