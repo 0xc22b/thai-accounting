@@ -58,5 +58,15 @@
      + Put mysql-connector-java-5.1.26-bin.jar in war/WEB-INF/lib/
      + [Eclipse only] At Run Configurations, Classpath -> Add JARs...
 
+* Slow query log
+** Enable log temporarily
+   - Start MySQL server with the extra options
+       mysql.server start --slow-query-log=1 --log-queries-not-using-indexes=1
+** Run tests
+** Log files at /usr/local/var/mysql/
+
+* Debug information log
+  - mysqladmin  -u root -p debug
+
 * Backup
   - MySQLDump & MYSQLImport
