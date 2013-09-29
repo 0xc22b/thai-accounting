@@ -2,75 +2,74 @@ package gwt.shared.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
 public class SFiscalYear implements Serializable{
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private String keyString;
-	private int beginMonth;
-	private int beginYear;
-	private int endMonth;
-	private int endYear;
-	private ArrayList<SJournalType> sJournalTypeList = new ArrayList<SJournalType>();
-	private ArrayList<SDocType> sDocTypeList = new ArrayList<SDocType>();
-	private ArrayList<SAccGrp> sAccGrpList = new ArrayList<SAccGrp>();
-	private ArrayList<SAccChart> sAccChartList = new ArrayList<SAccChart>();
-	
-	public SFiscalYear(){
-		
-	}
-	
-	public SFiscalYear(String keyString, int beginMonth, int beginYear, int endMonth, int endYear){
+    private String keyString;
+    private int beginMonth;
+    private int beginYear;
+    private int endMonth;
+    private int endYear;
+    private ArrayList<SJournalType> sJournalTypeList = new ArrayList<SJournalType>();
+    private ArrayList<SDocType> sDocTypeList = new ArrayList<SDocType>();
+    private ArrayList<SAccGrp> sAccGrpList = new ArrayList<SAccGrp>();
+    private ArrayList<SAccChart> sAccChartList = new ArrayList<SAccChart>();
+
+    public SFiscalYear(){
+
+    }
+
+    public SFiscalYear(String keyString, int beginMonth, int beginYear, int endMonth, int endYear){
         this.keyString = keyString;
         this.beginMonth = beginMonth;
         this.beginYear = beginYear;
         this.endMonth = endMonth;
         this.endYear = endYear;
     }
-	
-	public String getKeyString(){
+
+    public String getKeyString(){
         return this.keyString;
     }
-	
-	public int getBeginMonth(){
-	    return this.beginMonth;
-	}
-	
-	public int getEndMonth(){
+
+    public int getBeginMonth(){
+        return this.beginMonth;
+    }
+
+    public int getEndMonth(){
         return this.endMonth;
     }
-	
-	public int getBeginYear(){
+
+    public int getBeginYear(){
         return this.beginYear;
     }
-	
-	public int getEndYear(){
+
+    public int getEndYear(){
         return this.endYear;
     }
-	
-	public List<SJournalType> getSJournalTypeList(){
-        return Collections.unmodifiableList(sJournalTypeList);
+
+    public List<SJournalType> getSJournalTypeList(){
+        return sJournalTypeList;
     }
-	
-	public List<SDocType> getSDocTypeList(){
-        return Collections.unmodifiableList(sDocTypeList);
+
+    public List<SDocType> getSDocTypeList(){
+        return sDocTypeList;
     }
-	
-	public List<SAccGrp> getSAccGrpList(){
-        return Collections.unmodifiableList(sAccGrpList);
+
+    public List<SAccGrp> getSAccGrpList(){
+        return sAccGrpList;
     }
-	
-	public List<SAccChart> getSAccChartList(){
-        return Collections.unmodifiableList(sAccChartList);
+
+    public List<SAccChart> getSAccChartList(){
+        return sAccChartList;
     }
-	
-	public void setKeyString(String keyString){
-	    this.keyString = keyString;
-	}
+
+    public void setKeyString(String keyString){
+        this.keyString = keyString;
+    }
 
     public void setBeginMonth(int beginMonth) {
         this.beginMonth = beginMonth;
@@ -79,7 +78,7 @@ public class SFiscalYear implements Serializable{
     public void setBeginYear(int beginYear) {
         this.beginYear = beginYear;
     }
-    
+
     public void setEndMonth(int endMonth) {
         this.endMonth = endMonth;
     }
@@ -87,29 +86,29 @@ public class SFiscalYear implements Serializable{
     public void setEndYear(int endYear) {
         this.endYear = endYear;
     }
-    
+
     public void setSetup(SFiscalYear sFis){
         sJournalTypeList.clear();
         for(SJournalType sJournalType : sFis.getSJournalTypeList()){
             addSJournalType(sJournalType);
         }
-        
+
         sDocTypeList.clear();
         for(SDocType sDocType : sFis.getSDocTypeList()){
             addSDocType(sDocType);
         }
-        
+
         sAccGrpList.clear();
         for(SAccGrp sAccGrp : sFis.getSAccGrpList()){
             addSAccGrp(sAccGrp);
         }
-        
+
         sAccChartList.clear();
         for(SAccChart sAccChart : sFis.getSAccChartList()){
             addSAccChart(sAccChart);
         }
     }
-	
+
     public SJournalType getSJournalType(String journalTypeKeyString){
         for(SJournalType sJournalType : sJournalTypeList){
             if(sJournalType.getKeyString().equals(journalTypeKeyString)){
@@ -118,11 +117,11 @@ public class SFiscalYear implements Serializable{
         }
         return null;
     }
-    
+
     public void addSJournalType(SJournalType sJournalType){
         sJournalTypeList.add(sJournalType);
     }
-    
+
     public SJournalType editSJournalType(SJournalType newSJournalType){
         for(SJournalType sJournalType : sJournalTypeList){
             if(sJournalType.getKeyString().equals(newSJournalType.getKeyString())){
@@ -133,7 +132,7 @@ public class SFiscalYear implements Serializable{
         }
         return null;
     }
-    
+
     public void removeSJournalType(String keyString){
         Iterator<SJournalType> it = sJournalTypeList.iterator();
         while (it.hasNext()) {
@@ -144,7 +143,7 @@ public class SFiscalYear implements Serializable{
             }
         }
     }
-    
+
     public SDocType getSDocType(String docTypeKeyString){
         for(SDocType sDocType : sDocTypeList){
             if(sDocType.getKeyString().equals(docTypeKeyString)){
@@ -153,11 +152,11 @@ public class SFiscalYear implements Serializable{
         }
         return null;
     }
-    
+
     public void addSDocType(SDocType sDocType){
         sDocTypeList.add(sDocType);
     }
-    
+
     public SDocType editSDocType(SDocType newSDocType){
         for(SDocType sDocType : sDocTypeList){
             if(sDocType.getKeyString().equals(newSDocType.getKeyString())){
@@ -170,7 +169,7 @@ public class SFiscalYear implements Serializable{
         }
         return null;
     }
-    
+
     public void removeSDocType(String keyString){
         Iterator<SDocType> it = sDocTypeList.iterator();
         while (it.hasNext()) {
@@ -181,25 +180,25 @@ public class SFiscalYear implements Serializable{
             }
         }
     }
-    
+
     public void updateSDocTypeJournalTypeShortName(){
         for (SDocType sDocType : sDocTypeList) {
             updateSDocTypeJournalTypeShortName(sDocType);
         }
     }
-    
+
     public void updateSDocTypeJournalTypeShortName(SDocType sDocType){
-        
+
         assert sDocType != null;
         assert sJournalTypeList != null && !sJournalTypeList.isEmpty();
-        
+
         // Try to update journalTypeShortDesc
         SJournalType sJournalType = getSJournalType(sDocType.getJournalTypeKeyString());
         if(sJournalType != null){
             sDocType.setJournalTypeShortName(sJournalType.getShortName());
         }
     }
-    
+
     public SAccGrp getSAccGrp(String accGrpKeyString){
         for(SAccGrp sAccGrp : sAccGrpList){
             if(sAccGrp.getKeyString().equals(accGrpKeyString)){
@@ -208,11 +207,11 @@ public class SFiscalYear implements Serializable{
         }
         return null;
     }
-    
+
     public void addSAccGrp(SAccGrp sAccGrp){
         sAccGrpList.add(sAccGrp);
     }
-    
+
     public SAccGrp editSAccGrp(SAccGrp newSAccGrp){
         for(SAccGrp sAccGrp : sAccGrpList){
             if(sAccGrp.getKeyString().equals(newSAccGrp.getKeyString())){
@@ -222,7 +221,7 @@ public class SFiscalYear implements Serializable{
         }
         return null;
     }
-    
+
     public void removeSAccGrp(String keyString){
         Iterator<SAccGrp> it = sAccGrpList.iterator();
         while (it.hasNext()) {
@@ -233,7 +232,7 @@ public class SFiscalYear implements Serializable{
             }
         }
     }
-    
+
     public SAccChart getSAccChart(String accChartKeyString){
         for(SAccChart sAccChart : sAccChartList){
             if(sAccChart.getKeyString().equals(accChartKeyString)){
@@ -242,11 +241,11 @@ public class SFiscalYear implements Serializable{
         }
         return null;
     }
-    
+
     public void addSAccChart(SAccChart sAccChart){
         sAccChartList.add(sAccChart);
     }
-    
+
     public SAccChart editSAccChart(SAccChart newSAccChart){
         for(SAccChart sAccChart : sAccChartList){
             if(sAccChart.getKeyString().equals(newSAccChart.getKeyString())){
@@ -262,7 +261,7 @@ public class SFiscalYear implements Serializable{
         }
         return null;
     }
-    
+
     public void removeSAccChart(String keyString){
         Iterator<SAccChart> it = sAccChartList.iterator();
         while (it.hasNext()) {
@@ -273,34 +272,34 @@ public class SFiscalYear implements Serializable{
             }
         }
     }
-    
+
     public void updateSAccChartAccGrpName(){
         for(SAccChart sAccChart : sAccChartList){
             updateSAccChartAccGrpName(sAccChart);
         }
     }
-    
+
     public void updateSAccChartAccGrpName(SAccChart sAccChart){
-        
+
         assert sAccChart != null;
         assert sAccGrpList != null && !sAccGrpList.isEmpty();
-        
+
         // Try to update accGrpName
         SAccGrp sAccGrp = getSAccGrp(sAccChart.getAccGroupKeyString());
         if(sAccGrp != null){
             sAccChart.setAccGroupName(sAccGrp.getName());
         }
     }
-    
+
     public void updateSAccChartParentAccChartNo(){
         for(SAccChart sAccChart : sAccChartList){
             updateSAccChartParentAccChartNo(sAccChart);
         }
     }
-    
+
     public void updateSAccChartParentAccChartNo(SAccChart sAccChart){
         assert sAccChart != null;
-        
+
         // Try to update parentAccChartNo
         if(sAccChart.getParentAccChartKeyString() != null){
             SAccChart parentSAccChart = getSAccChart(
@@ -309,7 +308,7 @@ public class SFiscalYear implements Serializable{
             sAccChart.setParentAccChartLevel(parentSAccChart.getLevel());
         }
     }
-    
+
     public void sortSAccChartList(){
         ArrayList<SAccChart> sortedList = new ArrayList<SAccChart>();
         for(SAccGrp sAccGrp : sAccGrpList){
@@ -317,7 +316,7 @@ public class SFiscalYear implements Serializable{
         }
         sAccChartList = sortedList;
     }
-    
+
     private void genSortedSAccChartList(ArrayList<SAccChart> sortedList,
             String accGrpKeyString, String parentKeyString){
         ArrayList<SAccChart> sameParentList = getSAccChartList(accGrpKeyString, parentKeyString);
@@ -326,7 +325,7 @@ public class SFiscalYear implements Serializable{
             genSortedSAccChartList(sortedList, accGrpKeyString, each.getKeyString());
         }
     }
-    
+
     private ArrayList<SAccChart> getSAccChartList(String accGrpKeyString,
             String parentKeyString){
         ArrayList<SAccChart> sortedList = new ArrayList<SAccChart>();
@@ -334,8 +333,8 @@ public class SFiscalYear implements Serializable{
         for(SAccChart sAccChart : sAccChartList){
             if(sAccChart.getAccGroupKeyString().equals(accGrpKeyString)){
                 if((sAccChart.getParentAccChartKeyString() == null &&
-                        sAccChart.getParentAccChartKeyString() == parentKeyString) || 
-                        (sAccChart.getParentAccChartKeyString() !=null && 
+                        sAccChart.getParentAccChartKeyString() == parentKeyString) ||
+                        (sAccChart.getParentAccChartKeyString() !=null &&
                         sAccChart.getParentAccChartKeyString().equals(parentKeyString))){
                     didPut = false;
                     for(int i=0; i<sortedList.size(); i++){

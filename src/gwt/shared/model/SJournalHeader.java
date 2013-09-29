@@ -4,7 +4,6 @@ import gwt.shared.Utils;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class SJournalHeader implements Serializable {
@@ -18,11 +17,11 @@ public class SJournalHeader implements Serializable {
     private int month;
     private int year;
     private String desc;
-    
+
     private ArrayList<SJournalItem> itemList = new ArrayList<SJournalItem>();
-    
+
 	public SJournalHeader(){
-		
+
 	}
 
     public SJournalHeader(String keyString, String docTypeKeyString, String no, int day, int month, int year, String desc) {
@@ -34,7 +33,7 @@ public class SJournalHeader implements Serializable {
         this.year = year;
         this.desc = desc;
     }
-    
+
     public void addItem(SJournalItem newSJournalItem) {
         // Sorting by inserting a new item into the correct order,
         // better in performance.
@@ -67,11 +66,11 @@ public class SJournalHeader implements Serializable {
     public int getDay() {
         return day;
     }
-    
+
     public int getMonth() {
         return month;
     }
-    
+
     public int getYear() {
         return year;
     }
@@ -81,7 +80,7 @@ public class SJournalHeader implements Serializable {
     }
 
     public List<SJournalItem> getItemList() {
-        return Collections.unmodifiableList(itemList);
+        return itemList;
     }
 
     public void setKeyString(String keyString) {
@@ -103,11 +102,11 @@ public class SJournalHeader implements Serializable {
     public void setDay(int day) {
         this.day = day;
     }
-    
+
     public void setMonth(int month) {
         this.month = month;
     }
-    
+
     public void setYear(int year) {
         this.year = year;
     }
