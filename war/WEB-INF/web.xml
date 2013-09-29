@@ -72,6 +72,16 @@
     </servlet-mapping>
 
     <servlet>
+        <servlet-name>StressTestServlet</servlet-name>
+        <servlet-class>gwt.server.StressTestServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>StressTestServlet</servlet-name>
+        <url-pattern>/stresstest</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
         <servlet-name>mailHandler</servlet-name>
         <servlet-class>gwt.server.MailHandlerServlet</servlet-class>
     </servlet>

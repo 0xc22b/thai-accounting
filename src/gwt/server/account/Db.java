@@ -5,6 +5,8 @@ import gwt.shared.model.SAccChart.AccType;
 import gwt.shared.model.SAccGrp;
 import gwt.shared.model.SDocType;
 import gwt.shared.model.SFiscalYear;
+import gwt.shared.model.SJournalHeader;
+import gwt.shared.model.SJournalItem;
 import gwt.shared.model.SJournalType;
 
 import java.sql.Connection;
@@ -15,6 +17,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.Date;
+import java.util.List;
 
 import com.google.appengine.api.utils.SystemProperty;
 
@@ -257,6 +260,81 @@ public class Db {
             return generatedKeys.getLong(1);
         } else {
             throw new SQLException(NO_GENERATED_KEYS_ERR);
+        }
+    }
+
+    public static long addJournal(Connection conn, long fisId, SJournalHeader sJournal)
+            throws SQLException {
+
+        // Careful, conn for this method need to be a transaction to guarantee the accuracy of acc_amt
+
+        // Add header
+        String addHeaderSql = "INSERT INTO journal_header (id, fiscal_year_id, doc_type_id, `no`, `day`, `month`, `year`, `desc`) VALUES ( ? , ? , ? , ? , ?, ? , ? , ? )";
+        PreparedStatement addHeaderStatement = conn.prepareStatement(addHeaderSql,
+                Statement.RETURN_GENERATED_KEYS);
+        addHeaderStatement.setNull(1, Types.INTEGER);
+        addHeaderStatement.setLong(2, fisId);
+        addHeaderStatement.setLong(3, Long.parseLong(sJournal.getDocTypeKeyString()));
+        addHeaderStatement.setString(4, sJournal.getNo());
+        addHeaderStatement.setInt(5, sJournal.getDay());
+        addHeaderStatement.setInt(6, sJournal.getMonth());
+        addHeaderStatement.setInt(7, sJournal.getYear());
+        addHeaderStatement.setString(8, sJournal.getDesc());
+        int affectedRows = addHeaderStatement.executeUpdate();
+        if (affectedRows != 1) {
+            throw new SQLException(Db.NO_ROW_EFFECTED_ERR);
+        }
+
+        Long headerId;
+        ResultSet generatedKeys = addHeaderStatement.getGeneratedKeys();
+        if (generatedKeys.next()) {
+            headerId = generatedKeys.getLong(1);
+        } else {
+            throw new SQLException(Db.NO_GENERATED_KEYS_ERR);
+        }
+
+        addJournalItems(conn, fisId, headerId, sJournal.getItemList());
+
+        return headerId;
+    }
+
+    public static void addJournalItems(Connection conn, long fisId, long headerId,
+            List<SJournalItem> itemList) throws SQLException {
+
+        // Careful, conn for this method need to be a transaction to guarantee the accuracy of acc_amt
+
+        // Add items
+        String addItemSql = "INSERT INTO journal_item (id, journal_header_id, acc_chart_id, amt) VALUES ( ? , ? , ? , ? )";
+        PreparedStatement addItemStatement = conn.prepareStatement(addItemSql);
+
+        // Plus to acc_amt
+        String plusSql = "INSERT INTO acc_amt (fiscal_year_id, acc_chart_id, amt) VALUES ( ?, ?, ? ) ON DUPLICATE KEY UPDATE amt = amt + ?";
+        PreparedStatement plusStatement = conn.prepareStatement(plusSql);
+
+        int affectedRows;
+
+        for (SJournalItem sJournalItem : itemList) {
+            addItemStatement.setNull(1, Types.INTEGER);
+            addItemStatement.setLong(2, headerId);
+            addItemStatement.setLong(3, Long.parseLong(sJournalItem.getAccChartKeyString()));
+            addItemStatement.setDouble(4, sJournalItem.getAmt());
+
+            affectedRows = addItemStatement.executeUpdate();
+            if (affectedRows != 1) {
+                throw new SQLException(Db.NO_ROW_EFFECTED_ERR);
+            }
+
+            plusStatement.setLong(1, fisId);
+            plusStatement.setLong(2, Long.parseLong(sJournalItem.getAccChartKeyString()));
+            plusStatement.setDouble(3, sJournalItem.getAmt());
+            plusStatement.setDouble(4, sJournalItem.getAmt());
+
+            affectedRows = plusStatement.executeUpdate();
+            // With ON DUPLICATE KEY UPDATE, the affected-rows value per row is 1
+            //     if the row is inserted as a new row and 2 if an existing row is updated.
+            if (affectedRows != 1 && affectedRows != 2) {
+                throw new SQLException(Db.NO_ROW_EFFECTED_ERR);
+            }
         }
     }
 

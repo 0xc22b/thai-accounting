@@ -30,7 +30,6 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.jdo.PersistenceManager;
@@ -974,40 +973,16 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
         try {
             Connection conn = Db.getDBConn();
             try {
+
                 // Transaction
                 conn.setAutoCommit(false);
 
-                // Add header
-                String addHeaderSql = "INSERT INTO journal_header (id, fiscal_year_id, doc_type_id, `no`, `day`, `month`, `year`, `desc`) VALUES ( ? , ? , ? , ? , ?, ? , ? , ? )";
-                PreparedStatement addHeaderStatement = conn.prepareStatement(addHeaderSql,
-                        Statement.RETURN_GENERATED_KEYS);
-                addHeaderStatement.setNull(1, Types.INTEGER);
-                addHeaderStatement.setLong(2, Long.parseLong(fisKeyString));
-                addHeaderStatement.setLong(3, Long.parseLong(sJournal.getDocTypeKeyString()));
-                addHeaderStatement.setString(4, sJournal.getNo());
-                addHeaderStatement.setInt(5, sJournal.getDay());
-                addHeaderStatement.setInt(6, sJournal.getMonth());
-                addHeaderStatement.setInt(7, sJournal.getYear());
-                addHeaderStatement.setString(8, sJournal.getDesc());
-                int affectedRows = addHeaderStatement.executeUpdate();
-                if (affectedRows != 1) {
-                    throw new SQLException(Db.NO_ROW_EFFECTED_ERR);
-                }
-
-                Long headerId;
-                ResultSet generatedKeys = addHeaderStatement.getGeneratedKeys();
-                if (generatedKeys.next()) {
-                    headerId = generatedKeys.getLong(1);
-                } else {
-                    throw new SQLException(Db.NO_GENERATED_KEYS_ERR);
-                }
-
-                addJournalItems(conn, fisKeyString, headerId, sJournal.getItemList());
+                long journalId = Db.addJournal(conn, Long.parseLong(fisKeyString), sJournal);
 
                 // end transaction
                 conn.commit();
 
-                return headerId + "";
+                return journalId + "";
             } catch (SQLException e) {
                 conn.rollback();
                 throw e;
@@ -1020,44 +995,6 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
         } catch (SQLException e) {
             e.printStackTrace();
             throw new RuntimeException(e.getMessage(), e.getCause());
-        }
-    }
-
-    private void addJournalItems(Connection conn, String fisKeyString, long headerId,
-            List<SJournalItem> itemList) throws SQLException {
-
-        // Add items
-        String addItemSql = "INSERT INTO journal_item (id, journal_header_id, acc_chart_id, amt) VALUES ( ? , ? , ? , ? )";
-        PreparedStatement addItemStatement = conn.prepareStatement(addItemSql);
-
-        // Plus to acc_amt
-        String plusSql = "INSERT INTO acc_amt (fiscal_year_id, acc_chart_id, amt) VALUES ( ?, ?, ? ) ON DUPLICATE KEY UPDATE amt = amt + ?";
-        PreparedStatement plusStatement = conn.prepareStatement(plusSql);
-
-        int affectedRows;
-
-        for (SJournalItem sJournalItem : itemList) {
-            addItemStatement.setNull(1, Types.INTEGER);
-            addItemStatement.setLong(2, headerId);
-            addItemStatement.setLong(3, Long.parseLong(sJournalItem.getAccChartKeyString()));
-            addItemStatement.setDouble(4, sJournalItem.getAmt());
-
-            affectedRows = addItemStatement.executeUpdate();
-            if (affectedRows != 1) {
-                throw new SQLException(Db.NO_ROW_EFFECTED_ERR);
-            }
-
-            plusStatement.setLong(1, Long.parseLong(fisKeyString));
-            plusStatement.setLong(2, Long.parseLong(sJournalItem.getAccChartKeyString()));
-            plusStatement.setDouble(3, sJournalItem.getAmt());
-            plusStatement.setDouble(4, sJournalItem.getAmt());
-
-            affectedRows = plusStatement.executeUpdate();
-            // With ON DUPLICATE KEY UPDATE, the affected-rows value per row is 1
-            //     if the row is inserted as a new row and 2 if an existing row is updated.
-            if (affectedRows != 1 && affectedRows != 2) {
-                throw new SQLException(Db.NO_ROW_EFFECTED_ERR);
-            }
         }
     }
 
@@ -1095,8 +1032,10 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
                     throw new SQLException(Db.NO_ROW_EFFECTED_ERR);
                 }
 
+                long fisId = Long.parseLong(fisKeyString);
+
                 // deduct amt from old items
-                deductAccAmt(conn, fisKeyString, sJournal.getKeyString());
+                deductAccAmt(conn, fisId, sJournal.getKeyString());
 
                 // delete old items
                 String deleteSql = "DELETE FROM journal_item WHERE journal_header_id = ?";
@@ -1108,7 +1047,7 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
                 }
 
                 // add new items and plus amt from new items to acc_amt
-                addJournalItems(conn, fisKeyString, headerId, sJournal.getItemList());
+                Db.addJournalItems(conn, fisId, headerId, sJournal.getItemList());
 
                 // end transaction
                 conn.commit();
@@ -1146,7 +1085,7 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
                 // Transaction
                 conn.setAutoCommit(false);
 
-                deductAccAmt(conn, fisKeyString, keyString);
+                deductAccAmt(conn, Long.parseLong(fisKeyString), keyString);
 
                 // delete items and header
                 //     (Checking that it can be deleted was delegated to MySQL Foreign key)
@@ -1171,7 +1110,7 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
         }
     }
 
-    private void deductAccAmt(Connection conn, String fisKeyString, String journalHeaderKeyString)
+    private void deductAccAmt(Connection conn, long fisId, String journalHeaderKeyString)
             throws SQLException {
 
         // Get items
@@ -1186,7 +1125,7 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
         ResultSet getItemRs = getItemStatement.executeQuery();
         while (getItemRs.next()) {
             deductStatement.setDouble(1, getItemRs.getDouble(Db.AMT));
-            deductStatement.setLong(2, Long.parseLong(fisKeyString));
+            deductStatement.setLong(2, fisId);
             deductStatement.setLong(3, getItemRs.getLong(Db.ACC_CHART_ID));
             int affectedRows = deductStatement.executeUpdate();
             if (affectedRows != 1) {
