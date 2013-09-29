@@ -27,7 +27,7 @@ import com.google.gwt.user.client.ui.FlexTable.FlexCellFormatter;
 import com.google.gwt.user.client.ui.HTMLTable.RowFormatter;
 import com.google.gwt.user.client.ui.Widget;
 
-public class ReportViewImpl<T, J, A> extends Composite implements ReportView<T, J, A> {
+public class ReportViewImpl<T, J, M, A> extends Composite implements ReportView<T, J, M, A> {
 
     public interface Resources extends ClientBundle {
         @Source("ReportViewImpl.css")
@@ -63,14 +63,14 @@ public class ReportViewImpl<T, J, A> extends Composite implements ReportView<T, 
     private static final TConstants constants = TCF.get();
 
     private FisDef<T> fisDef;
-    private JournalDef<J> journalDef;
+    private JournalDef<J, M> journalDef;
     private AccAmtDef<A> accAmtDef;
 
     private CustomFlexTable flexTable;
     private FlexCellFormatter flexCellFormatter;
     private RowFormatter flexRowFormatter;
 
-    public ReportViewImpl(FisDef<T> fisDef, JournalDef<J> journalDef, AccAmtDef<A> accAmtDef) {
+    public ReportViewImpl(FisDef<T> fisDef, JournalDef<J, M> journalDef, AccAmtDef<A> accAmtDef) {
 
         this.fisDef = fisDef;
         this.journalDef = journalDef;
@@ -95,6 +95,11 @@ public class ReportViewImpl<T, J, A> extends Composite implements ReportView<T, 
     public void init(Presenter presenter) {
         //this.presenter = presenter;
 
+        flexTable.clear();
+    }
+    
+    @Override
+    public void hideFlexTable() {
         flexTable.clear();
     }
 
@@ -196,14 +201,14 @@ public class ReportViewImpl<T, J, A> extends Composite implements ReportView<T, 
 
                 double debit = 0;
                 double credit = 0;
-                for (int k = 0; k < journalDef.getItemListSize(j); k++) {
+                for (M m : journalDef.getItemList(j)) {
 
-                    String accChartKeyString = journalDef.getItemACKeyString(j, k);
+                    String accChartKeyString = journalDef.getItemACKeyString(m);
                     flexTable.setHTML(row, 0, fisDef.getACNo(t, accChartKeyString));
                     flexTable.setHTML(row, 1, fisDef.getACName(t, accChartKeyString));
                     flexTable.setHTML(row, 2, journalDef.getDesc(j));
 
-                    double amt = journalDef.getItemAmt(j, k);
+                    double amt = journalDef.getItemAmt(m);
                     if (amt > 0) {
                         flexTable.setHTML(row, 3, NumberFormat.getFormat("#,##0.00").format(amt));
                         flexTable.setHTML(row, 4, "&nbsp;");
@@ -253,7 +258,7 @@ public class ReportViewImpl<T, J, A> extends Composite implements ReportView<T, 
     }
 
     @Override
-    public void setLedgerData(T t, HashMap<String, J> aJList, int[] dates, String comName,
+    public void setLedgerData(T t, HashMap<String, ArrayList<M>> aJList, int[] dates, String comName,
             String beginACNo, String endACNo, boolean doShowAll) {
 
         flexTable.setStyleName("flexTable ledger");
@@ -319,38 +324,38 @@ public class ReportViewImpl<T, J, A> extends Composite implements ReportView<T, 
 
             row += 1;
 
-            J j = aJList.get(acKeyString);
+            List<M> mList = aJList.get(acKeyString);
 
             double debit = 0;
             double credit = 0;
 
-            if (j != null) {    // Can be null if doShowAll = true
-                for (int k = 0; k < journalDef.getItemListSize(j); k++) {
+            if (mList != null) {    // Can be null if doShowAll = true
+                for (M m : mList) {
 
-                    flexTable.setHTML(row, 0, journalDef.getItemDay(j, k) + "/"
-                            + journalDef.getItemMonth(j, k) + "/"
-                            + journalDef.getItemYear(j, k));
-                    flexTable.setHTML(row, 1, journalDef.getItemJTShortName(j, k));
-                    flexTable.setHTML(row, 2, journalDef.getItemJNo(j, k));
-                    flexTable.setHTML(row, 3, journalDef.getItemJDesc(j, k));
-    
-                    double amt = journalDef.getItemAmt(j, k);
+                    flexTable.setHTML(row, 0, journalDef.getItemDay(m) + "/"
+                            + journalDef.getItemMonth(m) + "/"
+                            + journalDef.getItemYear(m));
+                    flexTable.setHTML(row, 1, journalDef.getItemJTShortName(m));
+                    flexTable.setHTML(row, 2, journalDef.getItemJNo(m));
+                    flexTable.setHTML(row, 3, journalDef.getItemJDesc(m));
+
+                    double amt = journalDef.getItemAmt(m);
                     String formattedAmt = NumberFormat.getFormat("#,##0.00").format(
                             Math.abs(amt));
                     if (amt > 0) {
                         flexTable.setHTML(row, 4, formattedAmt);
                         flexTable.setHTML(row, 5, "&nbsp;");
-    
+
                         beginning += amt;
                         debit += amt;
                     } else {
                         flexTable.setHTML(row, 4, "&nbsp;");
                         flexTable.setHTML(row, 5, formattedAmt);
-    
+
                         beginning += amt;
                         credit += amt;
                     }
-    
+
                     formattedBeginning = NumberFormat.getFormat(
                             "#,##0.00;(#,##0.00)").format(Math.abs(beginning));
                     flexTable.setHTML(row, 6, formattedBeginning);

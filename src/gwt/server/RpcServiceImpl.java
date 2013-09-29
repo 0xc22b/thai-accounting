@@ -844,7 +844,7 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
     }
 
     @Override
-    public HashMap<String, SJournalHeader> getJournalListWithAC(String sSID,
+    public HashMap<String, ArrayList<SJournalItem>> getJournalListWithAC(String sSID,
             String sID, String fisKeyString, String beginACNo, String endACNo, int[] dates)
             throws NotLoggedInException {
 
@@ -880,20 +880,20 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
                 statement.setInt(15, dates[3]);
                 ResultSet rs = statement.executeQuery();
 
-                HashMap<String, SJournalHeader> aJList =
-                        new HashMap<String, SJournalHeader>();
+                HashMap<String, ArrayList<SJournalItem>> aJList =
+                        new HashMap<String, ArrayList<SJournalItem>>();
 
                 String acKeyString = null;
                 // This is just being used instead of ArrayList, no data in it.
                 //     All needed data is in an item using extra fields.
-                SJournalHeader sJournal = null;
+                ArrayList<SJournalItem> iList = null;
 
                 while (rs.next()) {
                     String s = rs.getLong(Db.dot(Db.JOURNAL_ITEM, Db.ACC_CHART_ID)) + "";
                     if ( acKeyString == null || !acKeyString.equals(s)) {
                         acKeyString = s;
-                        sJournal = new SJournalHeader();
-                        aJList.put(acKeyString, sJournal);
+                        iList = new ArrayList<SJournalItem>();
+                        aJList.put(acKeyString, iList);
                     }
 
                     SJournalItem sJournalItem = new SJournalItem(
@@ -909,7 +909,7 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
                     sJournalItem.journalNo = rs.getString(Db.dot(Db.JOURNAL_HEADER, Db.NO));
                     sJournalItem.journalDesc = rs.getString(Db.dot(Db.JOURNAL_HEADER, Db.DESC));
 
-                    sJournal.addItem(sJournalItem);
+                    iList.add(sJournalItem);
                 }
 
                 return aJList;

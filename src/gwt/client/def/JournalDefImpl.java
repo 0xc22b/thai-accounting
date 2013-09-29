@@ -1,10 +1,12 @@
 package gwt.client.def;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import gwt.shared.model.SJournalHeader;
+import gwt.shared.model.SJournalItem;
 
-public class JournalDefImpl extends JournalDef<SJournalHeader> {
+public class JournalDefImpl extends JournalDef<SJournalHeader, SJournalItem> {
 
     private static JournalDefImpl instance = null;
 
@@ -51,21 +53,6 @@ public class JournalDefImpl extends JournalDef<SJournalHeader> {
     }
 
     @Override
-    public int getItemListSize(SJournalHeader e) {
-        return e.getItemList().size();
-    }
-
-    @Override
-    public String getItemACKeyString(SJournalHeader e, int i) {
-        return e.getItemList().get(i).getAccChartKeyString();
-    }
-
-    @Override
-    public double getItemAmt(SJournalHeader e, int i) {
-        return e.getItemList().get(i).getAmt();
-    }
-
-    @Override
     public int getIndex(ArrayList<ArrayList<SJournalHeader>> mJList, int month, int year) {
         for (int i = 0; i < mJList.size(); i++) {
             ArrayList<SJournalHeader> sJournalList = mJList.get(i);
@@ -85,32 +72,47 @@ public class JournalDefImpl extends JournalDef<SJournalHeader> {
     }
 
     @Override
-    public int getItemDay(SJournalHeader j, int i) {
-        return j.getItemList().get(i).day;
+    public List<SJournalItem> getItemList(SJournalHeader j) {
+        return j.getItemList();
     }
 
     @Override
-    public int getItemMonth(SJournalHeader j, int i) {
-        return j.getItemList().get(i).month;
+    public String getItemACKeyString(SJournalItem m) {
+        return m.getAccChartKeyString();
     }
 
     @Override
-    public int getItemYear(SJournalHeader j, int i) {
-        return j.getItemList().get(i).year;
+    public double getItemAmt(SJournalItem m) {
+        return m.getAmt();
     }
 
     @Override
-    public String getItemJTShortName(SJournalHeader j, int i) {
-        return j.getItemList().get(i).journalTypeShortName;
+    public int getItemDay(SJournalItem m) {
+        return m.day;
     }
 
     @Override
-    public String getItemJNo(SJournalHeader j, int i) {
-        return j.getItemList().get(i).journalNo;
+    public int getItemMonth(SJournalItem m) {
+        return m.month;
     }
 
     @Override
-    public String getItemJDesc(SJournalHeader j, int i) {
-        return j.getItemList().get(i).journalDesc;
+    public int getItemYear(SJournalItem m) {
+        return m.year;
+    }
+
+    @Override
+    public String getItemJTShortName(SJournalItem m) {
+        return m.journalTypeShortName;
+    }
+
+    @Override
+    public String getItemJNo(SJournalItem m) {
+        return m.journalNo;
+    }
+
+    @Override
+    public String getItemJDesc(SJournalItem m) {
+        return m.journalDesc;
     }
 }

@@ -12,6 +12,7 @@ import gwt.shared.model.SComList;
 import gwt.shared.model.SDocType;
 import gwt.shared.model.SFiscalYear;
 import gwt.shared.model.SJournalHeader;
+import gwt.shared.model.SJournalItem;
 import gwt.shared.model.SJournalType;
 
 import java.util.ArrayList;
@@ -956,7 +957,7 @@ public class Model {
 
     public void getJournalListWithAC(final String comKeyString, final String fisKeyString,
             final String beginACNo, final String endACNo, final int[] dates,
-            final AsyncCallback<HashMap<String, SJournalHeader>> callback) {
+            final AsyncCallback<HashMap<String, ArrayList<SJournalItem>>> callback) {
 
         // Validate SComList
         if(sComList == null || sComList.getSCom(comKeyString) == null ||
@@ -971,14 +972,14 @@ public class Model {
             public void onGet(String sSID, String sID) {
                 // Send request to server
                 rpcService.getJournalListWithAC(sSID, sID, fisKeyString, beginACNo, endACNo,
-                        dates, new AsyncCallback<HashMap<String, SJournalHeader>>() {
+                        dates, new AsyncCallback<HashMap<String, ArrayList<SJournalItem>>>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         callback.onFailure(caught);
                     }
 
                     @Override
-                    public void onSuccess(HashMap<String, SJournalHeader> result) {
+                    public void onSuccess(HashMap<String, ArrayList<SJournalItem>> result) {
                         callback.onSuccess(result);
                     }
                 });

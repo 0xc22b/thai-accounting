@@ -34,7 +34,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
-public class JournalViewImpl<T, J> extends Composite implements JournalView<T, J> {
+public class JournalViewImpl<T, J, M> extends Composite implements JournalView<T, J, M> {
 
     private class Item extends Composite {
 
@@ -83,11 +83,11 @@ public class JournalViewImpl<T, J> extends Composite implements JournalView<T, J
             initWidget(panel);
         }
 
-        public Item(T t, J j, int i) {
+        public Item(T t, M m) {
             this(t);
 
-            accNoSB.setKey(journalDef.getItemACKeyString(j, i));
-            double amt = journalDef.getItemAmt(j, i);
+            accNoSB.setKey(journalDef.getItemACKeyString(m));
+            double amt = journalDef.getItemAmt(m);
             if (amt > 0) {
                 debitDB.setCustomValue(amt);
             } else {
@@ -264,7 +264,7 @@ public class JournalViewImpl<T, J> extends Composite implements JournalView<T, J
     private Presenter presenter;
 
     private FisDef<T> fisDef;
-    private JournalDef<J> journalDef;
+    private JournalDef<J, M> journalDef;
 
     private String keyString;
 
@@ -276,7 +276,7 @@ public class JournalViewImpl<T, J> extends Composite implements JournalView<T, J
     private int endMonth;
     private int endYear;
 
-    public JournalViewImpl(FisDef<T> fisDef, JournalDef<J> journalDef) {
+    public JournalViewImpl(FisDef<T> fisDef, JournalDef<J, M> journalDef) {
         this.fisDef = fisDef;
         this.journalDef = journalDef;
         initWidget(uiBinder.createAndBindUi(this));
@@ -396,9 +396,9 @@ public class JournalViewImpl<T, J> extends Composite implements JournalView<T, J
 
             descTB.setText(journalDef.getDesc(j));
 
-            //Items
-            for (int i = 0; i < journalDef.getItemListSize(j); i++) {
-                Item journalItemPanel = new Item(t, j, i);
+            //Items            
+            for (M m : journalDef.getItemList(j)) {
+                Item journalItemPanel = new Item(t, m);
                 itemPanel.add(journalItemPanel);
             }
             

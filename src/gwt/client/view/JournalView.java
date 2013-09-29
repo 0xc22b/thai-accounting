@@ -6,7 +6,7 @@ import java.util.Date;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 
-public interface JournalView<T, J> extends IsWidget {
+public interface JournalView<T, J, M> extends IsWidget {
 
     public class ItemData {
         public String accChartKeyString;

@@ -7,7 +7,7 @@ import java.util.Map;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 
-public interface ReportView<T, J, A> extends IsWidget {
+public interface ReportView<T, J, M, A> extends IsWidget {
 
     public interface Presenter {      
         
@@ -15,6 +15,7 @@ public interface ReportView<T, J, A> extends IsWidget {
 
     Widget asWidget();
     void init(Presenter presenter);
+    void hideFlexTable();
 
     void onPrintBtnClicked();
 
@@ -23,7 +24,7 @@ public interface ReportView<T, J, A> extends IsWidget {
     void setJourData(T t, ArrayList<ArrayList<J>> mJList, ArrayList<int[]> months, String comName,
             String journalTypeName);
 
-    void setLedgerData(T t, HashMap<String, J> aJList, int[] dates, String comName,
+    void setLedgerData(T t, HashMap<String, ArrayList<M>> aJList, int[] dates, String comName,
             String beginACNo, String endACNo, boolean doShowAll);
 
     void setTrialData(T t, Map<String, A> aMap, String comName, boolean doShowAll);

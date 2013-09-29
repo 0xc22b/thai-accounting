@@ -21,6 +21,7 @@ import gwt.shared.model.SComList;
 import gwt.shared.model.SDocType;
 import gwt.shared.model.SFiscalYear;
 import gwt.shared.model.SJournalHeader;
+import gwt.shared.model.SJournalItem;
 import gwt.shared.model.SJournalType;
 
 import java.util.List;
@@ -54,7 +55,7 @@ public interface ClientFactory {
     BeginView<SFiscalYear> getBeginView();
 
     ListView<List<SJournalHeader>, SJournalHeader> getJournalListView();
-    JournalView<SFiscalYear, SJournalHeader> getJournalView();
+    JournalView<SFiscalYear, SJournalHeader, SJournalItem> getJournalView();
 
-    ReportView<SFiscalYear, SJournalHeader, SAccAmt> getReportView();
+    ReportView<SFiscalYear, SJournalHeader, SJournalItem, SAccAmt> getReportView();
 }

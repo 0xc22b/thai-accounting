@@ -14,6 +14,7 @@ import gwt.shared.model.SAccChart.AccType;
 import gwt.shared.model.SCom;
 import gwt.shared.model.SFiscalYear;
 import gwt.shared.model.SJournalHeader;
+import gwt.shared.model.SJournalItem;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,6 +22,7 @@ import java.util.List;
 
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
@@ -32,6 +34,7 @@ public class ReportActivity extends AbstractActivity implements ReportView.Prese
 
     private AllPlace place;
     private ClientFactory clientFactory;
+    private AcceptsOneWidget panel;
     private ResettableEventBus eventBus;
 
     public ReportActivity(AllPlace place, ClientFactory clientFactory) {
@@ -42,8 +45,8 @@ public class ReportActivity extends AbstractActivity implements ReportView.Prese
 
     @Override
     public void start(AcceptsOneWidget panel, EventBus _eventBus) {
+        this.panel = panel;
         clientFactory.getReportView().init(this);
-        panel.setWidget(clientFactory.getReportView().asWidget());
 
         getData();
     }
@@ -60,14 +63,17 @@ public class ReportActivity extends AbstractActivity implements ReportView.Prese
 
     @Override
     public void onStop() {
+        // Let the garbage collector garbages the huge DOMs of a report
+        clientFactory.getReportView().hideFlexTable();
+        
         eventBus.removeHandlers();
     }
 
     private void getData(){
-        // 1. Waiting for getting data
+        // Waiting for getting data
         clientFactory.getShell().setLoading();
 
-        // 2. Get data
+        // Get data
         clientFactory.getModel().getCom(place.getComKeyString(),
                 new AsyncCallback<SCom>() {
             @Override
@@ -86,11 +92,7 @@ public class ReportActivity extends AbstractActivity implements ReportView.Prese
 
                     @Override
                     public void onSuccess(SFiscalYear sFis) {
-                        // 3. set Shell and actBtns
-                        // 4. add Shell handlers via EventBus
-                        initShell();
-
-                        // 5. Update view
+                        // Update view
                         initView(sFis, sCom.getName());
                     }
                 });
@@ -128,9 +130,19 @@ public class ReportActivity extends AbstractActivity implements ReportView.Prese
         String action = place.getAction();
 
         if (action.equals(AllPlace.CHART)) {
+            // Let view updates itself first
+            new Timer() {
+                @Override
+                public void run() {
 
-            clientFactory.getReportView().setChartData(sFis, comName);
+                    // set Shell and actBtns
+                    // add Shell handlers via EventBus
+                    initShell();
 
+                    clientFactory.getReportView().setChartData(sFis, comName);
+                    panel.setWidget(clientFactory.getReportView().asWidget());
+                }
+            }.schedule(100);
         } else if (action.equals(AllPlace.JOUR)) {
 
             final String comKeyString = place.getComKeyString();
@@ -173,8 +185,14 @@ public class ReportActivity extends AbstractActivity implements ReportView.Prese
                         monthSJournalList.add(result);
 
                         if (monthSJournalList.size() == months.size()) {
+
+                            // set Shell and actBtns
+                            // add Shell handlers via EventBus
+                            initShell();
+
                             clientFactory.getReportView().setJourData(sFis, monthSJournalList,
                                     months, comName, journalTypeName);
+                            panel.setWidget(clientFactory.getReportView().asWidget());
                         }
                     }
                 });
@@ -226,7 +244,7 @@ public class ReportActivity extends AbstractActivity implements ReportView.Prese
             final boolean doShowAll = place.getKeyString9().equals(AllPlace.SHOW_ALL);
 
             clientFactory.getModel().getJournalListWithAC(comKeyString, fisKeyString, beginACNo,
-                    endACNo, dates, new AsyncCallback<HashMap<String, SJournalHeader>>() {
+                    endACNo, dates, new AsyncCallback<HashMap<String, ArrayList<SJournalItem>>>() {
 
                 @Override
                 public void onFailure(Throwable caught) {
@@ -234,10 +252,15 @@ public class ReportActivity extends AbstractActivity implements ReportView.Prese
                 }
 
                 @Override
-                public void onSuccess(HashMap<String, SJournalHeader> result) {
+                public void onSuccess(HashMap<String, ArrayList<SJournalItem>> result) {
+
+                    // set Shell and actBtns
+                    // add Shell handlers via EventBus
+                    initShell();
 
                     clientFactory.getReportView().setLedgerData(sFis, result, dates, comName,
                             beginACNo, endACNo, doShowAll);
+                    panel.setWidget(clientFactory.getReportView().asWidget());
                 }
             });
 
@@ -254,10 +277,15 @@ public class ReportActivity extends AbstractActivity implements ReportView.Prese
                         @Override
                         public void onSuccess(HashMap<String, SAccAmt> result) {
 
+                            // set Shell and actBtns
+                            // add Shell handlers via EventBus
+                            initShell();
+
                             boolean doShowAll = place.getKeyString().equals(AllPlace.SHOW_ALL);
 
                             clientFactory.getReportView().setTrialData(sFis, result, comName,
                                     doShowAll);
+                            panel.setWidget(clientFactory.getReportView().asWidget());
                         }
                     });
         } else if (action.equals(AllPlace.BALANCE)) {
@@ -273,6 +301,10 @@ public class ReportActivity extends AbstractActivity implements ReportView.Prese
                         @Override
                         public void onSuccess(HashMap<String, SAccAmt> result) {
 
+                            // set Shell and actBtns
+                            // add Shell handlers via EventBus
+                            initShell();
+
                             boolean doShowAll = place.getKeyString7().equals(AllPlace.SHOW_ALL);
                             boolean doesSplit = place.getKeyString8().equals(AllPlace.SPLIT);
                             clientFactory.getReportView().setBalanceData(sFis, result, comName,
@@ -280,6 +312,7 @@ public class ReportActivity extends AbstractActivity implements ReportView.Prese
                                     place.getKeyString3(), place.getKeyString4(),
                                     place.getKeyString5(), place.getKeyString6(), doShowAll,
                                     doesSplit);
+                            panel.setWidget(clientFactory.getReportView().asWidget());
                         }
                     });
         } else if (action.equals(AllPlace.PROFIT)) {
@@ -295,11 +328,16 @@ public class ReportActivity extends AbstractActivity implements ReportView.Prese
                         @Override
                         public void onSuccess(HashMap<String, SAccAmt> result) {
 
+                            // set Shell and actBtns
+                            // add Shell handlers via EventBus
+                            initShell();
+
                             boolean doShowAll = place.getKeyString3().equals(AllPlace.SHOW_ALL);
                             boolean doesSplit = place.getKeyString4().equals(AllPlace.SPLIT);
                             clientFactory.getReportView().setProfitData(sFis, result, comName,
                                     place.getKeyString(), place.getKeyString2(), doShowAll,
                                     doesSplit);
+                            panel.setWidget(clientFactory.getReportView().asWidget());
                         }
                     });
         } else if (action.equals(AllPlace.COST)) {
@@ -315,9 +353,14 @@ public class ReportActivity extends AbstractActivity implements ReportView.Prese
                         @Override
                         public void onSuccess(HashMap<String, SAccAmt> result) {
 
+                            // set Shell and actBtns
+                            // add Shell handlers via EventBus
+                            initShell();
+
                             boolean doShowAll = place.getKeyString2().equals(AllPlace.SHOW_ALL);
                             clientFactory.getReportView().setCostData(sFis, result, comName,
                                     place.getKeyString(), doShowAll);
+                            panel.setWidget(clientFactory.getReportView().asWidget());
                         }
                     });
         } else {

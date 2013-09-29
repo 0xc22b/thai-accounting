@@ -9,6 +9,7 @@ import gwt.shared.model.SComList;
 import gwt.shared.model.SDocType;
 import gwt.shared.model.SFiscalYear;
 import gwt.shared.model.SJournalHeader;
+import gwt.shared.model.SJournalItem;
 import gwt.shared.model.SJournalType;
 
 import java.util.ArrayList;
@@ -55,7 +56,7 @@ public interface RpcService extends RemoteService {
 
     ArrayList<SJournalHeader> getJournalListWithJT(String sSID, String sID, String fisKeyString,
             String journalTypeKeyString, int month, int year) throws NotLoggedInException;
-    HashMap<String, SJournalHeader> getJournalListWithAC(String sSID, String sID,
+    HashMap<String, ArrayList<SJournalItem>> getJournalListWithAC(String sSID, String sID,
             String fisKeyString, String beginACNo, String endACNo, int[] dates) throws NotLoggedInException;
 
     String addJournal(String sSID, String sID, String fisKeyString, SJournalHeader sJournal) throws NotLoggedInException;

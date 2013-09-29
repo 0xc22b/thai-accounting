@@ -47,6 +47,7 @@ import gwt.shared.model.SComList;
 import gwt.shared.model.SDocType;
 import gwt.shared.model.SFiscalYear;
 import gwt.shared.model.SJournalHeader;
+import gwt.shared.model.SJournalItem;
 import gwt.shared.model.SJournalType;
 
 import java.util.List;
@@ -98,9 +99,9 @@ public class ClientFactoryImpl implements ClientFactory {
     private BeginView<SFiscalYear> beginView;
 
     private ListView<List<SJournalHeader>, SJournalHeader> journalListView;
-    private JournalView<SFiscalYear, SJournalHeader> journalView;
+    private JournalView<SFiscalYear, SJournalHeader, SJournalItem> journalView;
     
-    private ReportView<SFiscalYear, SJournalHeader, SAccAmt> reportView;
+    private ReportView<SFiscalYear, SJournalHeader, SJournalItem, SAccAmt> reportView;
     
     @Override
     public App getApp() {
@@ -269,18 +270,18 @@ public class ClientFactoryImpl implements ClientFactory {
     }
 
     @Override
-    public JournalView<SFiscalYear, SJournalHeader> getJournalView() {
+    public JournalView<SFiscalYear, SJournalHeader, SJournalItem> getJournalView() {
         if (journalView == null) {
-            journalView = new JournalViewImpl<SFiscalYear, SJournalHeader>(
+            journalView = new JournalViewImpl<SFiscalYear, SJournalHeader, SJournalItem>(
                     FisDefImpl.getInstance(), JournalDefImpl.getInstance());
         }
         return journalView;
     }
 
     @Override
-    public ReportView<SFiscalYear, SJournalHeader, SAccAmt> getReportView() {
+    public ReportView<SFiscalYear, SJournalHeader, SJournalItem, SAccAmt> getReportView() {
         if (reportView == null) {
-            reportView = new ReportViewImpl<SFiscalYear, SJournalHeader, SAccAmt>(
+            reportView = new ReportViewImpl<SFiscalYear, SJournalHeader, SJournalItem, SAccAmt>(
                     FisDefImpl.getInstance(), JournalDefImpl.getInstance(), AccAmtDefImpl.getInstance());
         }
         return reportView;
