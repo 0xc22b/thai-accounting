@@ -1,0 +1,184 @@
+USE thai_accounting;
+
+CREATE TABLE IF NOT EXISTS com (
+
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_key_string VARCHAR(1000) NOT NULL,
+    `name` VARCHAR(500) NOT NULL,
+    create_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS fiscal_year (
+
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    com_id INT UNSIGNED NOT NULL,
+    begin_month TINYINT UNSIGNED NOT NULL,
+    begin_year SMALLINT UNSIGNED NOT NULL,
+    end_month TINYINT UNSIGNED NOT NULL,
+    end_year SMALLINT UNSIGNED NOT NULL,
+    create_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    INDEX com_id_index (com_id),
+
+    FOREIGN KEY (com_id) 
+        REFERENCES com(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS journal_type (
+
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    fiscal_year_id INT UNSIGNED NOT NULL,
+    `name` VARCHAR(500) NOT NULL,
+    short_name VARCHAR(100) NOT NULL,
+    create_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    INDEX fiscal_year_id_index (fiscal_year_id),
+
+    FOREIGN KEY (fiscal_year_id) 
+        REFERENCES fiscal_year(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS doc_type (
+
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    fiscal_year_id INT UNSIGNED NOT NULL,
+    journal_type_id INT UNSIGNED NOT NULL,
+    code VARCHAR(100) NOT NULL,
+    `name` VARCHAR(500) NOT NULL,
+    journal_desc VARCHAR(1000) NOT NULL,
+    create_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    INDEX fiscal_year_id_index (fiscal_year_id),
+    INDEX journal_type_id_index (journal_type_id),
+
+    FOREIGN KEY (fiscal_year_id) 
+        REFERENCES fiscal_year(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+
+    FOREIGN KEY (journal_type_id) 
+        REFERENCES journal_type(id)
+        ON DELETE RESTRICT
+        ON UPDATE RESTRICT
+);
+
+CREATE TABLE IF NOT EXISTS acc_grp (
+
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    fiscal_year_id INT UNSIGNED NOT NULL,
+    `name` VARCHAR(500) NOT NULL,
+    create_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    INDEX fiscal_year_id_index (fiscal_year_id),
+
+    FOREIGN KEY (fiscal_year_id) 
+        REFERENCES fiscal_year(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS acc_chart (
+
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    fiscal_year_id INT UNSIGNED NOT NULL,
+    acc_grp_id INT UNSIGNED NOT NULL,
+    parent_acc_chart_id INT UNSIGNED NULL,
+    `no` VARCHAR(100) NOT NULL,
+    `name` VARCHAR(500) NOT NULL,
+    `type` TINYINT UNSIGNED NOT NULL,   
+    `level` TINYINT UNSIGNED NOT NULL,
+    beginning DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
+    create_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    INDEX fiscal_year_id_index (fiscal_year_id, `type`, `no`),
+    INDEX acc_grp_id_index (acc_grp_id),
+    INDEX parent_acc_chart_id_index (parent_acc_chart_id),
+
+    FOREIGN KEY (fiscal_year_id) 
+        REFERENCES fiscal_year(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+
+    FOREIGN KEY (acc_grp_id) 
+        REFERENCES acc_grp(id)
+        ON DELETE RESTRICT
+        ON UPDATE RESTRICT,
+
+    FOREIGN KEY (parent_acc_chart_id) 
+        REFERENCES acc_chart(id)
+        ON DELETE RESTRICT
+        ON UPDATE RESTRICT
+);
+
+CREATE TABLE IF NOT EXISTS journal_header (
+
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    fiscal_year_id INT UNSIGNED NOT NULL,
+    doc_type_id INT UNSIGNED NOT NULL,
+    `no` VARCHAR(100) NOT NULL,
+    `day` TINYINT UNSIGNED NOT NULL,   
+    `month` TINYINT UNSIGNED NOT NULL,
+    `year` SMALLINT UNSIGNED NOT NULL,   
+    `desc` VARCHAR(1000) NOT NULL,
+    create_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    INDEX fiscal_year_id_index (fiscal_year_id),
+    INDEX doc_type_id_index (doc_type_id, `year`, `month`, `day`, `no`),
+    INDEX year_index (`year`, `month`, `day`, `no`),
+
+    FOREIGN KEY (fiscal_year_id) 
+        REFERENCES fiscal_year(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+
+    FOREIGN KEY (doc_type_id) 
+        REFERENCES doc_type(id)
+        ON DELETE RESTRICT
+        ON UPDATE RESTRICT
+);
+
+CREATE TABLE IF NOT EXISTS journal_item (
+
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    journal_header_id INT UNSIGNED NOT NULL,
+    acc_chart_id INT UNSIGNED NOT NULL,
+    amt DECIMAL(15, 2) NOT NULL,
+    create_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    INDEX journal_header_id_index (journal_header_id),
+    INDEX acc_chart_id_index (acc_chart_id),
+
+    FOREIGN KEY (journal_header_id) 
+        REFERENCES journal_header(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+
+    FOREIGN KEY (acc_chart_id) 
+        REFERENCES acc_chart(id)
+        ON DELETE RESTRICT
+        ON UPDATE RESTRICT
+);
+
+CREATE TABLE IF NOT EXISTS acc_amt (
+
+    fiscal_year_id INT UNSIGNED NOT NULL,
+    acc_chart_id INT UNSIGNED NOT NULL,
+    amt DECIMAL(15, 2) NOT NULL,
+    create_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (fiscal_year_id, acc_chart_id),
+
+    FOREIGN KEY (fiscal_year_id) 
+        REFERENCES fiscal_year(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+
+    FOREIGN KEY (acc_chart_id) 
+        REFERENCES acc_chart(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
