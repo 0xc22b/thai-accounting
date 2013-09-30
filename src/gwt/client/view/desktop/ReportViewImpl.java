@@ -5,7 +5,6 @@ import gwt.client.TCF;
 import gwt.client.TConstants;
 import gwt.client.def.AccAmtDef;
 import gwt.client.def.FisDef;
-import gwt.client.def.JournalDef;
 import gwt.client.ui.CustomFlexTable;
 import gwt.client.view.ReportView;
 import gwt.shared.Utils;
@@ -13,7 +12,6 @@ import gwt.shared.model.SAccChart.AccType;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -43,6 +41,8 @@ public class ReportViewImpl<T, J, M, A> extends Composite implements ReportView<
     private static final String DOC_TAG = "<!doctype html>";
     private static final String STYLE_TAG = "<link rel=stylesheet type=text/css media=all href=/css/printstyle-alpha.css>";
 
+    // Used by Ledger in server
+    @SuppressWarnings("unused")
     private static final String STYLE_NAME_RIGHT = "right";
     private static final String STYLE_NAME_CENTER = "center";
     private static final String STYLE_NAME_ULINE = "uline";
@@ -63,17 +63,15 @@ public class ReportViewImpl<T, J, M, A> extends Composite implements ReportView<
     private static final TConstants constants = TCF.get();
 
     private FisDef<T> fisDef;
-    private JournalDef<J, M> journalDef;
     private AccAmtDef<A> accAmtDef;
 
     private CustomFlexTable flexTable;
     private FlexCellFormatter flexCellFormatter;
     private RowFormatter flexRowFormatter;
 
-    public ReportViewImpl(FisDef<T> fisDef, JournalDef<J, M> journalDef, AccAmtDef<A> accAmtDef) {
+    public ReportViewImpl(FisDef<T> fisDef, AccAmtDef<A> accAmtDef) {
 
         this.fisDef = fisDef;
-        this.journalDef = journalDef;
         this.accAmtDef = accAmtDef;
 
         // Inject the contents of the CSS file
@@ -99,7 +97,8 @@ public class ReportViewImpl<T, J, M, A> extends Composite implements ReportView<
     }
     
     @Override
-    public void hideFlexTable() {
+    public void clearBodyInnerHTML() {
+        flexTable.setBodyInnerHTML("");
         flexTable.clear();
     }
 
@@ -147,8 +146,8 @@ public class ReportViewImpl<T, J, M, A> extends Composite implements ReportView<
     }
 
     @Override
-    public void setJourData(T t, ArrayList<ArrayList<J>> mJList, ArrayList<int[]> months,
-            String comName, String journalTypeName) {
+    public void setJourData(T t, int[] dates, String comName, String journalTypeName,
+            String bodyHtml) {
 
         flexTable.setStyleName("flexTable journal");
 
@@ -157,109 +156,21 @@ public class ReportViewImpl<T, J, M, A> extends Composite implements ReportView<
         flexTable.setHeaderHTML(0, 1, 2, genTodayDate());
         flexTable.setHeaderHTML(1, 0, 5, journalTypeName);
 
-        int[] beginDate = months.get(0);
-        int[] endDate = months.get(months.size() - 1);
         flexTable.setHeaderHTML(2, 0, 5, constants.begin() + " "
-                + genFormalDate(beginDate[0], beginDate[1], beginDate[2]) + " " + constants.end()
-                + " " + genFormalDate(endDate[0], endDate[1], endDate[2]));
+                + genFormalDate(dates[0], dates[1], dates[2]) + " " + constants.end()
+                + " " + genFormalDate(dates[3], dates[4], dates[5]));
         flexTable.setHeaderHTML(3, 0, 1, constants.accNo());
         flexTable.setHeaderHTML(3, 1, 1, constants.accName());
         flexTable.setHeaderHTML(3, 2, 1, constants.desc());
         flexTable.setHeaderHTML(3, 3, 1, constants.debit());
         flexTable.setHeaderHTML(3, 4, 1, constants.credit());
 
-        // Set content
-        int row = 0;
-        double debitTotal = 0;
-        double creditTotal = 0;
-        for (int i = 0; i < months.size(); i++) {
-
-            int[] month = months.get(i);
-            // As async, need to find the right index of sJournalList of the month
-            int mJListIndex = journalDef.getIndex(mJList, month[1], month[2]);
-            if (mJListIndex == -1) {
-                // Empty, no journal in this month;
-                continue;
-            }
-            ArrayList<J> jList = journalDef.getList(mJList, mJListIndex);
-
-            for (J j : jList) {
-                // Check beginDay
-                if (i == 0 && journalDef.getDay(j) < month[0]) {
-                    continue;
-                }
-                // Check endDay
-                if (i == months.size() - 1 && journalDef.getDay(j) > month[0]) {
-                    continue;
-                }
-
-                flexTable.setHTML(row, 0, journalDef.getDay(j) + "/" + journalDef.getMonth(j)
-                        + "/" + journalDef.getYear(j) + "&nbsp;&nbsp;&nbsp;&nbsp;"
-                        + journalDef.getNo(j));
-                flexCellFormatter.setColSpan(row, 0, 5);
-                row += 1;
-
-                double debit = 0;
-                double credit = 0;
-                for (M m : journalDef.getItemList(j)) {
-
-                    String accChartKeyString = journalDef.getItemACKeyString(m);
-                    flexTable.setHTML(row, 0, fisDef.getACNo(t, accChartKeyString));
-                    flexTable.setHTML(row, 1, fisDef.getACName(t, accChartKeyString));
-                    flexTable.setHTML(row, 2, journalDef.getDesc(j));
-
-                    double amt = journalDef.getItemAmt(m);
-                    if (amt > 0) {
-                        flexTable.setHTML(row, 3, NumberFormat.getFormat("#,##0.00").format(amt));
-                        flexTable.setHTML(row, 4, "&nbsp;");
-
-                        debit += amt;
-                    } else {
-                        flexTable.setHTML(row, 3, "&nbsp;");
-                        flexTable.setHTML(row, 4,
-                                NumberFormat.getFormat("#,##0.00").format(Math.abs(amt)));
-
-                        credit += amt;
-                    }
-                    row += 1;
-                }
-
-                flexTable.setHTML(row, 0, "&nbsp;");
-                flexTable.setHTML(row, 1, "&nbsp;");
-                flexTable.setHTML(row, 2, constants.total());
-                flexTable.setHTML(row, 3, NumberFormat.getFormat("#,##0.00").format(debit));
-                flexTable.setHTML(row, 4, NumberFormat.getFormat("#,##0.00").format(Math.abs(credit)));
-
-                flexCellFormatter.addStyleName(row, 3, STYLE_NAME_AULINE);
-                flexCellFormatter.addStyleName(row, 4, STYLE_NAME_AULINE);
-
-                row += 1;
-
-                debitTotal += debit;
-                creditTotal += credit;
-            }
-        }
-
-        flexTable.setHTML(row, 0, "&nbsp;");
-        flexTable.setHTML(row, 1, "&nbsp;");
-        flexTable.setHTML(row, 2, "&nbsp;");
-        flexTable.setHTML(row, 3, "&nbsp;");
-        flexTable.setHTML(row, 4, "&nbsp;");
-        row += 1;
-
-        flexTable.setHTML(row, 0, "&nbsp;");
-        flexTable.setHTML(row, 1, "&nbsp;");
-        flexTable.setHTML(row, 2, constants.wholeTotal());
-        flexTable.setHTML(row, 3, NumberFormat.getFormat("#,##0.00").format(debitTotal));
-        flexTable.setHTML(row, 4, NumberFormat.getFormat("#,##0.00").format(Math.abs(creditTotal)));
-
-        flexCellFormatter.addStyleName(row, 3, STYLE_NAME_DULINE);
-        flexCellFormatter.addStyleName(row, 4, STYLE_NAME_DULINE);
+        flexTable.setBodyInnerHTML(bodyHtml);
     }
 
     @Override
-    public void setLedgerData(T t, HashMap<String, ArrayList<M>> aJList, int[] dates, String comName,
-            String beginACNo, String endACNo, boolean doShowAll) {
+    public void setLedgerData(T t, int[] dates, String comName, String beginACNo, String endACNo,
+            String bodyHtml) {
 
         flexTable.setStyleName("flexTable ledger");
 
@@ -280,124 +191,7 @@ public class ReportViewImpl<T, J, M, A> extends Composite implements ReportView<
         flexTable.setHeaderHTML(3, 5, 1, constants.credit());
         flexTable.setHeaderHTML(3, 6, 1, constants.remaining());
 
-        // Set content
-        int row = 0;
-        double debitTotal = 0;
-        double creditTotal = 0;
-
-        // Some accounts have a beginning but journals so need to loop all accounts.
-        for (int i = 0; i < fisDef.getACListSize(t); i++) {
-
-            if (!fisDef.getACIsEntry(t, i)) {
-                continue;
-            }
-
-            String acNo = fisDef.getACNo(t, i);
-
-            if (acNo.compareTo(beginACNo) < 0) {
-                continue;
-            }
-
-            if (acNo.compareTo(endACNo) > 0) {
-                continue;
-            }
-
-            String acKeyString = fisDef.getACKeyString(t, i);
-
-            // Check if there is data
-            boolean doesHaveData = aJList.containsKey(acKeyString);
-
-            double beginning = fisDef.getACBeginning(t, acKeyString);
-
-            if (!doShowAll && Utils.isZero(beginning, 2) && !doesHaveData) {
-                continue;
-            }
-
-            String formattedBeginning = NumberFormat.getFormat(
-                    "#,##0.00;(#,##0.00)").format(Math.abs(beginning));
-
-            flexTable.setHTML(row, 0, acNo + "&nbsp;&nbsp;&nbsp;&nbsp;"
-                    + fisDef.getACName(t, acKeyString));
-            flexCellFormatter.setColSpan(row, 0, 6);
-            flexTable.setHTML(row, 1, formattedBeginning);
-            flexCellFormatter.addStyleName(row, 1, STYLE_NAME_RIGHT);
-
-            row += 1;
-
-            List<M> mList = aJList.get(acKeyString);
-
-            double debit = 0;
-            double credit = 0;
-
-            if (mList != null) {    // Can be null if doShowAll = true
-                for (M m : mList) {
-
-                    flexTable.setHTML(row, 0, journalDef.getItemDay(m) + "/"
-                            + journalDef.getItemMonth(m) + "/"
-                            + journalDef.getItemYear(m));
-                    flexTable.setHTML(row, 1, journalDef.getItemJTShortName(m));
-                    flexTable.setHTML(row, 2, journalDef.getItemJNo(m));
-                    flexTable.setHTML(row, 3, journalDef.getItemJDesc(m));
-
-                    double amt = journalDef.getItemAmt(m);
-                    String formattedAmt = NumberFormat.getFormat("#,##0.00").format(
-                            Math.abs(amt));
-                    if (amt > 0) {
-                        flexTable.setHTML(row, 4, formattedAmt);
-                        flexTable.setHTML(row, 5, "&nbsp;");
-
-                        beginning += amt;
-                        debit += amt;
-                    } else {
-                        flexTable.setHTML(row, 4, "&nbsp;");
-                        flexTable.setHTML(row, 5, formattedAmt);
-
-                        beginning += amt;
-                        credit += amt;
-                    }
-
-                    formattedBeginning = NumberFormat.getFormat(
-                            "#,##0.00;(#,##0.00)").format(Math.abs(beginning));
-                    flexTable.setHTML(row, 6, formattedBeginning);
-                    row += 1;
-                }
-            }
-
-            flexTable.setHTML(row, 0, "&nbsp;");
-            flexTable.setHTML(row, 1, "&nbsp;");
-            flexTable.setHTML(row, 2, "&nbsp;");
-            flexTable.setHTML(row, 3, constants.total());
-            flexTable.setHTML(row, 4, NumberFormat.getFormat("#,##0.00").format(debit));
-            flexTable.setHTML(row, 5, NumberFormat.getFormat("#,##0.00").format(Math.abs(credit)));
-            flexTable.setHTML(row, 6, "&nbsp;");
-
-            flexCellFormatter.addStyleName(row, 4, STYLE_NAME_AULINE);
-            flexCellFormatter.addStyleName(row, 5, STYLE_NAME_AULINE);
-            row += 1;
-
-            flexTable.setHTML(row, 0, "&nbsp;");
-            flexTable.setHTML(row, 1, "&nbsp;");
-            flexTable.setHTML(row, 2, "&nbsp;");
-            flexTable.setHTML(row, 3, "&nbsp;");
-            flexTable.setHTML(row, 4, "&nbsp;");
-            flexTable.setHTML(row, 5, "&nbsp;");
-            flexTable.setHTML(row, 6, "&nbsp;");
-            row += 1;
-
-            debitTotal += debit;
-            creditTotal += credit;
-        }
-
-        flexTable.setHTML(row, 0, "&nbsp;");
-        flexTable.setHTML(row, 1, "&nbsp;");
-        flexTable.setHTML(row, 2, "&nbsp;");
-        flexTable.setHTML(row, 3, constants.wholeTotal());
-        flexTable.setHTML(row, 4, NumberFormat.getFormat("#,##0.00").format(debitTotal));
-        flexTable.setHTML(row, 5, NumberFormat.getFormat("#,##0.00").format(Math.abs(creditTotal)));
-        flexTable.setHTML(row, 6, "&nbsp;");
-
-        flexCellFormatter.addStyleName(row, 4, STYLE_NAME_DULINE);
-        flexCellFormatter.addStyleName(row, 5, STYLE_NAME_DULINE);
+        flexTable.setBodyInnerHTML(bodyHtml);
     }
 
     @Override

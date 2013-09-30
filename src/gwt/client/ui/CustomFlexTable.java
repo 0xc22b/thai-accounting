@@ -10,7 +10,7 @@ public class CustomFlexTable extends FlexTable {
     private Element tHeadElement; 
     
     public CustomFlexTable(){
-        
+
     }
     
     /**
@@ -69,6 +69,10 @@ public class CustomFlexTable extends FlexTable {
         Element tr = DOM.getChild(getTHeadElement(), row);
         Element th = DOM.getChild(tr, column);
         th.addClassName(className);
+    }
+    
+    public void setBodyInnerHTML(String html) {
+        getBodyElement().setInnerHTML(html);
     }
 
     public void clear(){

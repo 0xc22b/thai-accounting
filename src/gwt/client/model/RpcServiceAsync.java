@@ -8,7 +8,6 @@ import gwt.shared.model.SComList;
 import gwt.shared.model.SDocType;
 import gwt.shared.model.SFiscalYear;
 import gwt.shared.model.SJournalHeader;
-import gwt.shared.model.SJournalItem;
 import gwt.shared.model.SJournalType;
 
 import java.util.ArrayList;
@@ -53,8 +52,14 @@ public interface RpcServiceAsync {
 
     void getJournalListWithJT(String sSID, String sID, String fisKeyString,
             String journalTypeKeyString, int month, int year, AsyncCallback<ArrayList<SJournalHeader>> callback);
-    void getJournalListWithAC(String sSID, String sID, String fisKeyString, String beginACNo,
-            String endACNo, int[] dates, AsyncCallback<HashMap<String, ArrayList<SJournalItem>>> callback);
+
+    void getJournalBodyHtml(String sSID, String sID, String fisKeyString,
+            String journalTypeKeyString, int[] dates, String totalConstant,
+            String wholeTotalConstant, AsyncCallback<String> callback);
+
+    void getLedgerBodyHtml(String sSID, String sID, String fisKeyString, String beginACNo,
+            String endACNo, int[] dates, boolean doShowAll, String totalConstant,
+            String wholeTotalConstant, AsyncCallback<String> callback);
 
 	void addJournal(String sSID, String sID, String fisKeyString, SJournalHeader sJournal, AsyncCallback<String> callback);
     void editJournal(String sSID, String sID, String fisKeyString, SJournalHeader sJournal, AsyncCallback<String> callback);

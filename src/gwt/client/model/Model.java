@@ -12,7 +12,6 @@ import gwt.shared.model.SComList;
 import gwt.shared.model.SDocType;
 import gwt.shared.model.SFiscalYear;
 import gwt.shared.model.SJournalHeader;
-import gwt.shared.model.SJournalItem;
 import gwt.shared.model.SJournalType;
 
 import java.util.ArrayList;
@@ -955,9 +954,10 @@ public class Model {
         });
     }
 
-    public void getJournalListWithAC(final String comKeyString, final String fisKeyString,
-            final String beginACNo, final String endACNo, final int[] dates,
-            final AsyncCallback<HashMap<String, ArrayList<SJournalItem>>> callback) {
+    public void getJournalBodyHtml(final String comKeyString, final String fisKeyString,
+            final String journalTypeKeyString, final int[] dates,
+            final String totalConstant, final String wholeTotalConstant,
+            final AsyncCallback<String> callback) {
 
         // Validate SComList
         if(sComList == null || sComList.getSCom(comKeyString) == null ||
@@ -971,15 +971,48 @@ public class Model {
             @Override
             public void onGet(String sSID, String sID) {
                 // Send request to server
-                rpcService.getJournalListWithAC(sSID, sID, fisKeyString, beginACNo, endACNo,
-                        dates, new AsyncCallback<HashMap<String, ArrayList<SJournalItem>>>() {
+                rpcService.getJournalBodyHtml(sSID, sID, fisKeyString, journalTypeKeyString, dates,
+                        totalConstant, wholeTotalConstant, new AsyncCallback<String>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         callback.onFailure(caught);
                     }
 
                     @Override
-                    public void onSuccess(HashMap<String, ArrayList<SJournalItem>> result) {
+                    public void onSuccess(String result) {
+                        callback.onSuccess(result);
+                    }
+                });
+            }
+        });
+    }
+
+    public void getLedgerBodyHtml(final String comKeyString, final String fisKeyString,
+            final String beginACNo, final String endACNo, final int[] dates,
+            final boolean doShowAll, final String totalConstant, final String wholeTotalConstant,
+            final AsyncCallback<String> callback) {
+
+        // Validate SComList
+        if(sComList == null || sComList.getSCom(comKeyString) == null ||
+                sComList.getSCom(comKeyString).getSFis(fisKeyString) == null) {
+            callback.onFailure(new DataNotFoundException());
+            return;
+        }
+
+        // Check and get login sessionID
+        getSID(callback, new GetSIDCallback() {
+            @Override
+            public void onGet(String sSID, String sID) {
+                // Send request to server
+                rpcService.getLedgerBodyHtml(sSID, sID, fisKeyString, beginACNo, endACNo, dates,
+                        doShowAll, totalConstant, wholeTotalConstant, new AsyncCallback<String>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        callback.onFailure(caught);
+                    }
+
+                    @Override
+                    public void onSuccess(String result) {
                         callback.onSuccess(result);
                     }
                 });

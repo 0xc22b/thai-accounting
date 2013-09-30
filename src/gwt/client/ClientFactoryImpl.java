@@ -282,7 +282,7 @@ public class ClientFactoryImpl implements ClientFactory {
     public ReportView<SFiscalYear, SJournalHeader, SJournalItem, SAccAmt> getReportView() {
         if (reportView == null) {
             reportView = new ReportViewImpl<SFiscalYear, SJournalHeader, SJournalItem, SAccAmt>(
-                    FisDefImpl.getInstance(), JournalDefImpl.getInstance(), AccAmtDefImpl.getInstance());
+                    FisDefImpl.getInstance(), AccAmtDefImpl.getInstance());
         }
         return reportView;
     }

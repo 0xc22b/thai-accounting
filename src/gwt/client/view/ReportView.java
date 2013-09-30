@@ -1,7 +1,5 @@
 package gwt.client.view;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 
 import com.google.gwt.user.client.ui.IsWidget;
@@ -9,23 +7,22 @@ import com.google.gwt.user.client.ui.Widget;
 
 public interface ReportView<T, J, M, A> extends IsWidget {
 
-    public interface Presenter {      
-        
+    public interface Presenter {
+
     }
 
     Widget asWidget();
     void init(Presenter presenter);
-    void hideFlexTable();
+    void clearBodyInnerHTML();
 
     void onPrintBtnClicked();
 
     void setChartData(T t, String comName);
 
-    void setJourData(T t, ArrayList<ArrayList<J>> mJList, ArrayList<int[]> months, String comName,
-            String journalTypeName);
+    void setJourData(T t, int[] dates, String comName, String journalTypeName, String bodyHtml);
 
-    void setLedgerData(T t, HashMap<String, ArrayList<M>> aJList, int[] dates, String comName,
-            String beginACNo, String endACNo, boolean doShowAll);
+    void setLedgerData(T t, int[] dates, String comName, String beginACNo, String endACNo,
+            String bodyHtml);
 
     void setTrialData(T t, Map<String, A> aMap, String comName, boolean doShowAll);
 

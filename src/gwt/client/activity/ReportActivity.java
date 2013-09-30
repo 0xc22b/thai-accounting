@@ -13,10 +13,7 @@ import gwt.shared.model.SAccChart;
 import gwt.shared.model.SAccChart.AccType;
 import gwt.shared.model.SCom;
 import gwt.shared.model.SFiscalYear;
-import gwt.shared.model.SJournalHeader;
-import gwt.shared.model.SJournalItem;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -34,7 +31,6 @@ public class ReportActivity extends AbstractActivity implements ReportView.Prese
 
     private AllPlace place;
     private ClientFactory clientFactory;
-    private AcceptsOneWidget panel;
     private ResettableEventBus eventBus;
 
     public ReportActivity(AllPlace place, ClientFactory clientFactory) {
@@ -45,8 +41,8 @@ public class ReportActivity extends AbstractActivity implements ReportView.Prese
 
     @Override
     public void start(AcceptsOneWidget panel, EventBus _eventBus) {
-        this.panel = panel;
         clientFactory.getReportView().init(this);
+        panel.setWidget(clientFactory.getReportView().asWidget());
 
         getData();
     }
@@ -63,10 +59,8 @@ public class ReportActivity extends AbstractActivity implements ReportView.Prese
 
     @Override
     public void onStop() {
-        // Let the garbage collector garbages the huge DOMs of a report
-        clientFactory.getReportView().hideFlexTable();
-        
         eventBus.removeHandlers();
+        clientFactory.getReportView().clearBodyInnerHTML();
     }
 
     private void getData(){
@@ -140,7 +134,6 @@ public class ReportActivity extends AbstractActivity implements ReportView.Prese
                     initShell();
 
                     clientFactory.getReportView().setChartData(sFis, comName);
-                    panel.setWidget(clientFactory.getReportView().asWidget());
                 }
             }.schedule(100);
         } else if (action.equals(AllPlace.JOUR)) {
@@ -151,7 +144,7 @@ public class ReportActivity extends AbstractActivity implements ReportView.Prese
 
             final String journalTypeName = sFis.getSJournalType(journalTypeKeyString).getName();
 
-            int[] dates = extractJournalDate();
+            final int[] dates = extractJournalDate();
             if (dates[0] == 0) {
                 dates[0] = 1;
                 dates[1] = sFis.getBeginMonth();
@@ -161,42 +154,26 @@ public class ReportActivity extends AbstractActivity implements ReportView.Prese
                 dates[5] = sFis.getEndYear();
             }
 
-            int[] beginDate = {dates[0], dates[1], dates[2]};
-            int[] endDate = {dates[3], dates[4], dates[5]};
+            clientFactory.getModel().getJournalBodyHtml(comKeyString, fisKeyString,
+                    journalTypeKeyString, dates, constants.total(), constants.wholeTotal(),
+                    new AsyncCallback<String>() {
 
-            final ArrayList<int[]> months = Utils.findAllMonths(beginDate, endDate);
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            Window.alert(caught.getMessage());
+                        }
 
-            final ArrayList<ArrayList<SJournalHeader>> monthSJournalList =
-                    new ArrayList<ArrayList<SJournalHeader>>();
-
-            for (int[] month : months) {
-                clientFactory.getModel().getJournalListWithJT(comKeyString, fisKeyString,
-                        journalTypeKeyString, month[1], month[2],
-                        new AsyncCallback<ArrayList<SJournalHeader>>() {
-
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        Window.alert(caught.getMessage());
-                    }
-
-                    @Override
-                    public void onSuccess(ArrayList<SJournalHeader> result) {
-
-                        monthSJournalList.add(result);
-
-                        if (monthSJournalList.size() == months.size()) {
+                        @Override
+                        public void onSuccess(String result) {
 
                             // set Shell and actBtns
                             // add Shell handlers via EventBus
                             initShell();
 
-                            clientFactory.getReportView().setJourData(sFis, monthSJournalList,
-                                    months, comName, journalTypeName);
-                            panel.setWidget(clientFactory.getReportView().asWidget());
+                            clientFactory.getReportView().setJourData(sFis, dates, comName,
+                                    journalTypeName, result);
                         }
-                    }
-                });
-            }
+                    });
         } else if (action.equals(AllPlace.LEDGER)) {
 
             String comKeyString = place.getComKeyString();
@@ -243,8 +220,9 @@ public class ReportActivity extends AbstractActivity implements ReportView.Prese
 
             final boolean doShowAll = place.getKeyString9().equals(AllPlace.SHOW_ALL);
 
-            clientFactory.getModel().getJournalListWithAC(comKeyString, fisKeyString, beginACNo,
-                    endACNo, dates, new AsyncCallback<HashMap<String, ArrayList<SJournalItem>>>() {
+            clientFactory.getModel().getLedgerBodyHtml(comKeyString, fisKeyString, beginACNo,
+                    endACNo, dates, doShowAll, constants.total(), constants.wholeTotal(),
+                    new AsyncCallback<String>() {
 
                 @Override
                 public void onFailure(Throwable caught) {
@@ -252,15 +230,14 @@ public class ReportActivity extends AbstractActivity implements ReportView.Prese
                 }
 
                 @Override
-                public void onSuccess(HashMap<String, ArrayList<SJournalItem>> result) {
+                public void onSuccess(String result) {
 
                     // set Shell and actBtns
                     // add Shell handlers via EventBus
                     initShell();
 
-                    clientFactory.getReportView().setLedgerData(sFis, result, dates, comName,
-                            beginACNo, endACNo, doShowAll);
-                    panel.setWidget(clientFactory.getReportView().asWidget());
+                    clientFactory.getReportView().setLedgerData(sFis, dates, comName, beginACNo,
+                            endACNo, result);
                 }
             });
 
@@ -285,7 +262,6 @@ public class ReportActivity extends AbstractActivity implements ReportView.Prese
 
                             clientFactory.getReportView().setTrialData(sFis, result, comName,
                                     doShowAll);
-                            panel.setWidget(clientFactory.getReportView().asWidget());
                         }
                     });
         } else if (action.equals(AllPlace.BALANCE)) {
@@ -312,7 +288,6 @@ public class ReportActivity extends AbstractActivity implements ReportView.Prese
                                     place.getKeyString3(), place.getKeyString4(),
                                     place.getKeyString5(), place.getKeyString6(), doShowAll,
                                     doesSplit);
-                            panel.setWidget(clientFactory.getReportView().asWidget());
                         }
                     });
         } else if (action.equals(AllPlace.PROFIT)) {
@@ -337,7 +312,6 @@ public class ReportActivity extends AbstractActivity implements ReportView.Prese
                             clientFactory.getReportView().setProfitData(sFis, result, comName,
                                     place.getKeyString(), place.getKeyString2(), doShowAll,
                                     doesSplit);
-                            panel.setWidget(clientFactory.getReportView().asWidget());
                         }
                     });
         } else if (action.equals(AllPlace.COST)) {
@@ -360,7 +334,6 @@ public class ReportActivity extends AbstractActivity implements ReportView.Prese
                             boolean doShowAll = place.getKeyString2().equals(AllPlace.SHOW_ALL);
                             clientFactory.getReportView().setCostData(sFis, result, comName,
                                     place.getKeyString(), doShowAll);
-                            panel.setWidget(clientFactory.getReportView().asWidget());
                         }
                     });
         } else {
