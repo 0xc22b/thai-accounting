@@ -98,7 +98,7 @@ public class ReportViewImpl<T, J, M, A> extends Composite implements ReportView<
     
     @Override
     public void clearBodyInnerHTML() {
-        flexTable.setBodyInnerHTML("");
+        //flexTable.setBodyInnerHTML("");
         flexTable.clear();
     }
 
