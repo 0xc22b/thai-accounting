@@ -60,7 +60,6 @@ public class ReportActivity extends AbstractActivity implements ReportView.Prese
     @Override
     public void onStop() {
         eventBus.removeHandlers();
-        clientFactory.getReportView().clearBodyInnerHTML();
     }
 
     private void getData(){

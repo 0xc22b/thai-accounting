@@ -70,10 +70,6 @@ public class CustomFlexTable extends FlexTable {
         Element th = DOM.getChild(tr, column);
         th.addClassName(className);
     }
-    
-    public void setBodyInnerHTML(String html) {
-        getBodyElement().setInnerHTML(html);
-    }
 
     public void clear(){
         super.removeAllRows();

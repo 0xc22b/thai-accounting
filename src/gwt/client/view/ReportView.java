@@ -13,8 +13,8 @@ public interface ReportView<T, J, M, A> extends IsWidget {
 
     Widget asWidget();
     void init(Presenter presenter);
-    void clearBodyInnerHTML();
 
+    void onStop();
     void onPrintBtnClicked();
 
     void setChartData(T t, String comName);

@@ -932,6 +932,13 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
         StringBuilder sb = new StringBuilder();
         DecimalFormat df = new DecimalFormat("#,##0.00;(#,##0.00)");
 
+        sb.append("<table class='flexTable journal'>");
+        /*sb.append("<thead>");
+        sb.append("<tr>");
+        
+        sb.append("</tr>");*/
+        sb.append("<tbody>");
+
         long jId = 0;
 
         double totalDebit = 0.0;
@@ -990,6 +997,8 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
         // Whole total
         genJournalTotalHtml(sb, df, wholeTotalConstant, STYLE_NAME_DULINE, wholeTotalDebit,
                 wholeTotalCredit);
+
+        sb.append("</tbody></table>");
 
         return sb.toString();
     }
@@ -1115,6 +1124,13 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
         StringBuilder sb = new StringBuilder();
         DecimalFormat df = new DecimalFormat("#,##0.00;(#,##0.00)");
 
+        sb.append("<table class='flexTable ledger'>");
+        /*sb.append("<thead>");
+        sb.append("<tr>");
+        
+        sb.append("</tr>");*/
+        sb.append("<tbody>");
+
         long acId = 0;
         boolean doPrintTotal = false;
 
@@ -1191,6 +1207,8 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
         // Whole total
         genLedgerTotalHtml(sb, df, wholeTotalConstant, STYLE_NAME_DULINE, wholeTotalDebit,
                 wholeTotalCredit);
+
+        sb.append("</tbody></table>");
 
         return sb.toString();
     }

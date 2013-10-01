@@ -22,6 +22,8 @@ import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable.FlexCellFormatter;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLTable.RowFormatter;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -65,9 +67,13 @@ public class ReportViewImpl<T, J, M, A> extends Composite implements ReportView<
     private FisDef<T> fisDef;
     private AccAmtDef<A> accAmtDef;
 
+    private FlowPanel panel;
+
     private CustomFlexTable flexTable;
     private FlexCellFormatter flexCellFormatter;
     private RowFormatter flexRowFormatter;
+    
+    private HTML html;
 
     public ReportViewImpl(FisDef<T> fisDef, AccAmtDef<A> accAmtDef) {
 
@@ -77,8 +83,11 @@ public class ReportViewImpl<T, J, M, A> extends Composite implements ReportView<
         // Inject the contents of the CSS file
         resources.style().ensureInjected();
 
+        panel = new FlowPanel();
+        initWidget(panel);
+        
         flexTable = new CustomFlexTable();
-        initWidget(flexTable);
+        html = new HTML();
 
         flexCellFormatter = flexTable.getFlexCellFormatter();
         flexRowFormatter = flexTable.getRowFormatter();
@@ -93,13 +102,18 @@ public class ReportViewImpl<T, J, M, A> extends Composite implements ReportView<
     public void init(Presenter presenter) {
         //this.presenter = presenter;
 
+        
+        flexTable.removeFromParent();
         flexTable.clear();
+
+        html.removeFromParent();
+        html.setHTML("");
     }
-    
+
     @Override
-    public void clearBodyInnerHTML() {
-        //flexTable.setBodyInnerHTML("");
-        flexTable.clear();
+    public void onStop() {
+        // TODO: Null for garbage collector
+        //     Should remove while it's still attached?
     }
 
     @Override
@@ -143,13 +157,15 @@ public class ReportViewImpl<T, J, M, A> extends Composite implements ReportView<
             flexTable.setHTML(i, 5, fisDef.getACParentACNo(t, keyString));
 
         }
+        
+        panel.add(flexTable);
     }
 
     @Override
     public void setJourData(T t, int[] dates, String comName, String journalTypeName,
             String bodyHtml) {
 
-        flexTable.setStyleName("flexTable journal");
+        /*flexTable.setStyleName("flexTable journal");
 
         // Set header
         flexTable.setHeaderHTML(0, 0, 3, comName);
@@ -165,14 +181,17 @@ public class ReportViewImpl<T, J, M, A> extends Composite implements ReportView<
         flexTable.setHeaderHTML(3, 3, 1, constants.debit());
         flexTable.setHeaderHTML(3, 4, 1, constants.credit());
 
-        flexTable.setBodyInnerHTML(bodyHtml);
+        flexTable.setBodyInnerHTML(bodyHtml);*/
+
+        panel.add(html);
+        html.setHTML(bodyHtml);
     }
 
     @Override
     public void setLedgerData(T t, int[] dates, String comName, String beginACNo, String endACNo,
             String bodyHtml) {
 
-        flexTable.setStyleName("flexTable ledger");
+        /*flexTable.setStyleName("flexTable ledger");
 
         // Set header
         flexTable.setHeaderHTML(0, 0, 4, comName);
@@ -191,7 +210,10 @@ public class ReportViewImpl<T, J, M, A> extends Composite implements ReportView<
         flexTable.setHeaderHTML(3, 5, 1, constants.credit());
         flexTable.setHeaderHTML(3, 6, 1, constants.remaining());
 
-        flexTable.setBodyInnerHTML(bodyHtml);
+        flexTable.setBodyInnerHTML(bodyHtml);*/
+
+        panel.add(html);
+        html.setHTML(bodyHtml);
     }
 
     @Override
@@ -251,6 +273,8 @@ public class ReportViewImpl<T, J, M, A> extends Composite implements ReportView<
 
         flexCellFormatter.addStyleName(row, 2, STYLE_NAME_ADULINE);
         flexCellFormatter.addStyleName(row, 3, STYLE_NAME_ADULINE);
+        
+        panel.add(flexTable);
     }
 
     @Override
@@ -321,6 +345,8 @@ public class ReportViewImpl<T, J, M, A> extends Composite implements ReportView<
         // Blank line
         row = printLine(row, "&nbsp;", 0.0, false, PrintStyle.BLANK,
                 false);
+        
+        panel.add(flexTable);
     }
 
     @Override
@@ -370,6 +396,8 @@ public class ReportViewImpl<T, J, M, A> extends Composite implements ReportView<
         // Blank line
         row = printLine(row, "&nbsp;", 0.0, false, PrintStyle.BLANK,
                 true);
+        
+        panel.add(flexTable);
     }
 
     @Override
@@ -391,6 +419,8 @@ public class ReportViewImpl<T, J, M, A> extends Composite implements ReportView<
         int row = 0;
         row = printSecondLevelCACs(row, costCACs.get(0), costCACs, doShowAll,
                 true, true, true, PrintStyle.ADULINE);
+        
+        panel.add(flexTable);
     }
 
     private static class CumulativeAC<T> {
