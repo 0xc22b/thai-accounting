@@ -78,7 +78,7 @@ public class Db {
         } else {
           // Local MySQL instance to use during development.
           Class.forName("com.mysql.jdbc.Driver");
-          url = "jdbc:mysql://localhost:3306/thai_accounting?user=root";
+          url = "jdbc:mysql://localhost:3306/thai_accounting?user=root&password=root";
         }
 
         return DriverManager.getConnection(url);

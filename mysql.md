@@ -4,6 +4,7 @@
     - brew install mysql (mysql_install_db is automatically run)
 *** Windows 7
     - Installer(.msi) (mysql_install_db is automatically run)
+    - Set System Path variable to have "C:\Program Files\MySQL\MySQL Server 5.6\bin"
 
 ** MySQL Connector/J 5.1.26
    - Download from http://dev.mysql.com/downloads/connector/j/
@@ -27,7 +28,7 @@
   - Check version: mysqladmin version
 
 * MySQL command-line tool
-  - Connect to the SQL server as root user: mysql -uroot
+  - Connect to the SQL server as root user with password 'root': mysql -uroot -proot
   - Show databases: SHOW DATABASES;
   - Create a database: CREATE DATABASE [database name];
   - Select a database: USE [database name];
