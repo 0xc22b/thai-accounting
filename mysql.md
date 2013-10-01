@@ -27,6 +27,12 @@
   - Check status: mysqladmin status
   - Check version: mysqladmin version
 
+* Set a password for root
+  - use mysql;
+  - update user set password=PASSWORD("NEW-ROOT-PASSWORD") where User='root';
+  - flush privileges;
+  - src: http://www.howtoforge.com/setting-changing-resetting-mysql-root-passwords
+
 * MySQL command-line tool
   - Connect to the SQL server as root user with password 'root': mysql -uroot -proot
   - Show databases: SHOW DATABASES;
@@ -37,6 +43,7 @@
   - Create a table: 
   - DESCRIBE [table name]: 
   - Delete a table: DROP TABLE IF EXISTS [table name];
+  - Size: SELECT COUNT(*) FROM [table name];
   - Quite: quite
 
 * a script file
