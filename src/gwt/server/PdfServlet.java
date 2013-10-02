@@ -38,6 +38,7 @@ public class PdfServlet extends HttpServlet {
     public static final String STYLE_NAME_RIGHT = "right";
     public static final String STYLE_NAME_DULINE = "duline";
     public static final String STYLE_NAME_AULINE = "auline";
+    public static final String STYLE_NAME_PAGE_AVOID_BREAK_AFTER = "page-avoid-break-after";
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException,
@@ -332,7 +333,7 @@ public class PdfServlet extends HttpServlet {
     private void genJournalBeginningHtml(StringBuilder sb, int day, int month, int year,
             String no) {
 
-        sb.append("<tr>");
+        sb.append("<tr class='" + STYLE_NAME_PAGE_AVOID_BREAK_AFTER + "'>");
         sb.append("<td colspan='5'>");
         sb.append(day + "/" + month + "/" + year + "&#160;&#160;&#160;&#160;" + no);
         sb.append("</td>");
