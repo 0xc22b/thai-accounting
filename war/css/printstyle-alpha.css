@@ -1,7 +1,7 @@
 /*********************************************
  * Caveats: Need to modify a bit!!!
  *
- * 1. Copy all from ReportViewImpl.css
+ * 1. Copy all from ReportViewImpl.css, paste below the mark
  * 2. Modify nth-child\(n\) to nth-child(n)
  *    Tip: Find \ and replace with ''
  ********************************************* */
@@ -34,6 +34,9 @@ body {
     }
 }
 
+/*********************************************
+ * Paste from ReportViewImpl below HERE
+ ********************************************* */
 
 @external .flexTable, .chart, .journal, .ledger, .trial, .finance;
 
@@ -269,7 +272,7 @@ body {
  * Helper
  *************************************************/
 
-@external .right, .center, uline, duline, auline, aduline, page-always-break-before;
+@external .right, .center, uline, duline, auline, aduline;
 
 .right {
     text-align: right;
@@ -296,6 +299,8 @@ body {
     border-top: 1px solid #000;
     border-bottom: 4px double #000;
 }
+
+@external page-always-break-before, page-avoid-break-after;
 
 .page-always-break-before {
     page-break-before: always;
