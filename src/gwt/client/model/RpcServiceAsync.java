@@ -53,14 +53,6 @@ public interface RpcServiceAsync {
     void getJournalListWithJT(String sSID, String sID, String fisKeyString,
             String journalTypeKeyString, int month, int year, AsyncCallback<ArrayList<SJournalHeader>> callback);
 
-    void getJournalBodyHtml(String sSID, String sID, String fisKeyString,
-            String journalTypeKeyString, int[] dates, String totalConstant,
-            String wholeTotalConstant, AsyncCallback<String> callback);
-
-    void getLedgerBodyHtml(String sSID, String sID, String fisKeyString, String beginACNo,
-            String endACNo, int[] dates, boolean doShowAll, String totalConstant,
-            String wholeTotalConstant, AsyncCallback<String> callback);
-
 	void addJournal(String sSID, String sID, String fisKeyString, SJournalHeader sJournal, AsyncCallback<String> callback);
     void editJournal(String sSID, String sID, String fisKeyString, SJournalHeader sJournal, AsyncCallback<String> callback);
     void deleteJournal(String sSID, String sID, String fisKeyString, String keyString, AsyncCallback<String> callback);

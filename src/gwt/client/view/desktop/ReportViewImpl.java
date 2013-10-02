@@ -17,13 +17,12 @@ import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable.FlexCellFormatter;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLTable.RowFormatter;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -43,9 +42,6 @@ public class ReportViewImpl<T, J, M, A> extends Composite implements ReportView<
     private static final String DOC_TAG = "<!doctype html>";
     private static final String STYLE_TAG = "<link rel=stylesheet type=text/css media=all href=/css/printstyle-alpha.css>";
 
-    // Used by Ledger in server
-    @SuppressWarnings("unused")
-    private static final String STYLE_NAME_RIGHT = "right";
     private static final String STYLE_NAME_CENTER = "center";
     private static final String STYLE_NAME_ULINE = "uline";
     private static final String STYLE_NAME_DULINE = "duline";
@@ -67,13 +63,9 @@ public class ReportViewImpl<T, J, M, A> extends Composite implements ReportView<
     private FisDef<T> fisDef;
     private AccAmtDef<A> accAmtDef;
 
-    private FlowPanel panel;
-
     private CustomFlexTable flexTable;
     private FlexCellFormatter flexCellFormatter;
     private RowFormatter flexRowFormatter;
-    
-    private HTML html;
 
     public ReportViewImpl(FisDef<T> fisDef, AccAmtDef<A> accAmtDef) {
 
@@ -82,12 +74,9 @@ public class ReportViewImpl<T, J, M, A> extends Composite implements ReportView<
 
         // Inject the contents of the CSS file
         resources.style().ensureInjected();
-
-        panel = new FlowPanel();
-        initWidget(panel);
         
         flexTable = new CustomFlexTable();
-        html = new HTML();
+        initWidget(flexTable);
 
         flexCellFormatter = flexTable.getFlexCellFormatter();
         flexRowFormatter = flexTable.getRowFormatter();
@@ -102,12 +91,8 @@ public class ReportViewImpl<T, J, M, A> extends Composite implements ReportView<
     public void init(Presenter presenter) {
         //this.presenter = presenter;
 
-        
-        flexTable.removeFromParent();
-        flexTable.clear();
 
-        html.removeFromParent();
-        html.setHTML("");
+        flexTable.clear();
     }
 
     @Override
@@ -157,63 +142,6 @@ public class ReportViewImpl<T, J, M, A> extends Composite implements ReportView<
             flexTable.setHTML(i, 5, fisDef.getACParentACNo(t, keyString));
 
         }
-        
-        panel.add(flexTable);
-    }
-
-    @Override
-    public void setJourData(T t, int[] dates, String comName, String journalTypeName,
-            String bodyHtml) {
-
-        /*flexTable.setStyleName("flexTable journal");
-
-        // Set header
-        flexTable.setHeaderHTML(0, 0, 3, comName);
-        flexTable.setHeaderHTML(0, 1, 2, genTodayDate());
-        flexTable.setHeaderHTML(1, 0, 5, journalTypeName);
-
-        flexTable.setHeaderHTML(2, 0, 5, constants.begin() + " "
-                + genFormalDate(dates[0], dates[1], dates[2]) + " " + constants.end()
-                + " " + genFormalDate(dates[3], dates[4], dates[5]));
-        flexTable.setHeaderHTML(3, 0, 1, constants.accNo());
-        flexTable.setHeaderHTML(3, 1, 1, constants.accName());
-        flexTable.setHeaderHTML(3, 2, 1, constants.desc());
-        flexTable.setHeaderHTML(3, 3, 1, constants.debit());
-        flexTable.setHeaderHTML(3, 4, 1, constants.credit());
-
-        flexTable.setBodyInnerHTML(bodyHtml);*/
-
-        panel.add(html);
-        html.setHTML(bodyHtml);
-    }
-
-    @Override
-    public void setLedgerData(T t, int[] dates, String comName, String beginACNo, String endACNo,
-            String bodyHtml) {
-
-        /*flexTable.setStyleName("flexTable ledger");
-
-        // Set header
-        flexTable.setHeaderHTML(0, 0, 4, comName);
-        flexTable.setHeaderHTML(0, 1, 3, genTodayDate());
-        flexTable.setHeaderHTML(1, 0, 7, constants.ledger());
-
-        flexTable.setHeaderHTML(2, 0, 7, constants.accNo() + " " + beginACNo + " - " + endACNo
-                + " (" + genFormalDate(dates[0], dates[1], dates[2])
-                + " - " + genFormalDate(dates[3], dates[4], dates[5]) + ")");
-
-        flexTable.setHeaderHTML(3, 0, 1, constants.date());
-        flexTable.setHeaderHTML(3, 1, 1, constants.journalType());
-        flexTable.setHeaderHTML(3, 2, 1, constants.journalNo());
-        flexTable.setHeaderHTML(3, 3, 1, constants.desc());
-        flexTable.setHeaderHTML(3, 4, 1, constants.debit());
-        flexTable.setHeaderHTML(3, 5, 1, constants.credit());
-        flexTable.setHeaderHTML(3, 6, 1, constants.remaining());
-
-        flexTable.setBodyInnerHTML(bodyHtml);*/
-
-        panel.add(html);
-        html.setHTML(bodyHtml);
     }
 
     @Override
@@ -273,8 +201,6 @@ public class ReportViewImpl<T, J, M, A> extends Composite implements ReportView<
 
         flexCellFormatter.addStyleName(row, 2, STYLE_NAME_ADULINE);
         flexCellFormatter.addStyleName(row, 3, STYLE_NAME_ADULINE);
-        
-        panel.add(flexTable);
     }
 
     @Override
@@ -341,12 +267,6 @@ public class ReportViewImpl<T, J, M, A> extends Composite implements ReportView<
         row = printLine(row, constants.total() + constants.debtAndShareholder(),
                 debtCAC.amt + shareholderCAC.amt, true, PrintStyle.DULINE,
                 false);
-
-        // Blank line
-        row = printLine(row, "&nbsp;", 0.0, false, PrintStyle.BLANK,
-                false);
-        
-        panel.add(flexTable);
     }
 
     @Override
@@ -392,12 +312,6 @@ public class ReportViewImpl<T, J, M, A> extends Composite implements ReportView<
         // Print total profit
         row = printLine(row, constants.profit(), profit, true,
                 PrintStyle.DULINE, false);
-
-        // Blank line
-        row = printLine(row, "&nbsp;", 0.0, false, PrintStyle.BLANK,
-                true);
-        
-        panel.add(flexTable);
     }
 
     @Override
@@ -419,8 +333,6 @@ public class ReportViewImpl<T, J, M, A> extends Composite implements ReportView<
         int row = 0;
         row = printSecondLevelCACs(row, costCACs.get(0), costCACs, doShowAll,
                 true, true, true, PrintStyle.ADULINE);
-        
-        panel.add(flexTable);
     }
 
     private static class CumulativeAC<T> {
@@ -725,12 +637,16 @@ public class ReportViewImpl<T, J, M, A> extends Composite implements ReportView<
         }
         return s + name;
     }
-
+    
     private String genTodayDate(){
         String dateS = DateTimeFormat.getFormat("dd/MM/yyyy").format(new Date());
-        //TODO: Convert to Thai year using company/user settings.
         String yearS = dateS.split("/")[2];
-        int year = Integer.parseInt(yearS) + 543;
+
+        int year = Integer.parseInt(yearS);
+        if (LocaleInfo.getCurrentLocale().getLocaleName().equals("th")) {
+            year += 543;
+        }
+
         return dateS.substring(0, 6) + year;
     }
 

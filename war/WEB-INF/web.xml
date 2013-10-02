@@ -80,6 +80,16 @@
         <servlet-name>StressTestServlet</servlet-name>
         <url-pattern>/stresstest</url-pattern>
     </servlet-mapping>
+    
+    <servlet>
+        <servlet-name>PdfServlet</servlet-name>
+        <servlet-class>gwt.server.PdfServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>PdfServlet</servlet-name>
+        <url-pattern>/pdf</url-pattern>
+    </servlet-mapping>
 
     <servlet>
         <servlet-name>mailHandler</servlet-name>

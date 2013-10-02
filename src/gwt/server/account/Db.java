@@ -354,4 +354,53 @@ public class Db {
     public static String dot(String t1, String t2) {
         return t1 + "." + t2;
     }
+
+    public static ResultSet getJournal(Connection conn, String fisKeyString,
+            String journalTypeKeyString, int[] dates) throws SQLException {
+
+        // TODO: Performance?
+        String sql = "SELECT * FROM doc_type LEFT JOIN journal_header ON doc_type.id = journal_header.doc_type_id LEFT JOIN journal_item ON journal_header.id = journal_item.journal_header_id LEFT JOIN acc_chart ON journal_item.acc_chart_id = acc_chart.id WHERE doc_type.fiscal_year_id = ? && doc_type.journal_type_id = ? && journal_header.year >= ? && journal_header.year <= ? && (journal_header.year > ? || journal_header.month >= ?) && (journal_header.year < ? || journal_header.month <= ?) && (journal_header.year != ? || journal_header.month != ? || journal_header.day >= ?) && (journal_header.year != ? || journal_header.month != ? || journal_header.day <= ?) ORDER BY journal_header.day ASC, journal_header.no ASC";
+        PreparedStatement statement = conn.prepareStatement(sql);
+        statement.setLong(1, Long.parseLong(fisKeyString));
+        statement.setLong(2, Long.parseLong(journalTypeKeyString));
+        statement.setInt(3, dates[2]);
+        statement.setInt(4, dates[5]);
+        statement.setInt(5, dates[2]);
+        statement.setInt(6, dates[1]);
+        statement.setInt(7, dates[5]);
+        statement.setInt(8, dates[4]);
+        statement.setInt(9, dates[2]);
+        statement.setInt(10, dates[1]);
+        statement.setInt(11, dates[0]);
+        statement.setInt(12, dates[5]);
+        statement.setInt(13, dates[4]);
+        statement.setInt(14, dates[3]);
+        return statement.executeQuery();
+    }
+
+    public static ResultSet getLedger(Connection conn, String fisKeyString, String beginACNo,
+            String endACNo, int[] dates) throws SQLException {
+
+        // TODO: Performance?
+        String sql = "SELECT * FROM acc_chart LEFT JOIN journal_item ON acc_chart.id = journal_item.acc_chart_id LEFT JOIN journal_header USE INDEX (year_index) ON journal_item.journal_header_id = journal_header.id LEFT JOIN doc_type ON journal_header.doc_type_id = doc_type.id LEFT JOIN journal_type ON doc_type.journal_type_id = journal_type.id WHERE acc_chart.fiscal_year_id = ? && acc_chart.type = ? && acc_chart.no BETWEEN ? AND ? && journal_header.year >= ? && journal_header.year <= ? && (journal_header.year > ? || journal_header.month >= ?) && (journal_header.year < ? || journal_header.month <= ?) && (journal_header.year != ? || journal_header.month != ? || journal_header.day >= ?) && (journal_header.year != ? || journal_header.month != ? || journal_header.day <= ?) ORDER BY acc_chart.no ASC, journal_header.year ASC, journal_header.month ASC, journal_header.day ASC, journal_header.no ASC";
+
+        PreparedStatement statement = conn.prepareStatement(sql);
+        statement.setLong(1, Long.parseLong(fisKeyString));
+        statement.setInt(2, AccType.ENTRY.ordinal());
+        statement.setString(3, beginACNo);
+        statement.setString(4, endACNo);
+        statement.setInt(5, dates[2]);
+        statement.setInt(6, dates[5]);
+        statement.setInt(7, dates[2]);
+        statement.setInt(8, dates[1]);
+        statement.setInt(9, dates[5]);
+        statement.setInt(10, dates[4]);
+        statement.setInt(11, dates[2]);
+        statement.setInt(12, dates[1]);
+        statement.setInt(13, dates[0]);
+        statement.setInt(14, dates[5]);
+        statement.setInt(15, dates[4]);
+        statement.setInt(16, dates[3]);
+        return statement.executeQuery();
+    }
 }

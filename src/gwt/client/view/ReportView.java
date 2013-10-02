@@ -19,11 +19,6 @@ public interface ReportView<T, J, M, A> extends IsWidget {
 
     void setChartData(T t, String comName);
 
-    void setJourData(T t, int[] dates, String comName, String journalTypeName, String bodyHtml);
-
-    void setLedgerData(T t, int[] dates, String comName, String beginACNo, String endACNo,
-            String bodyHtml);
-
     void setTrialData(T t, Map<String, A> aMap, String comName, boolean doShowAll);
 
     void setBalanceData(T t, Map<String, A> aMap, String comName, String assetACKeyString,

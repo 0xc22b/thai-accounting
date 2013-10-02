@@ -56,14 +56,6 @@ public interface RpcService extends RemoteService {
     ArrayList<SJournalHeader> getJournalListWithJT(String sSID, String sID, String fisKeyString,
             String journalTypeKeyString, int month, int year) throws NotLoggedInException;
 
-    String getJournalBodyHtml(String sSID, String sID, String fisKeyString,
-            String journalTypeKeyString, int[] dates, String totalConstant,
-            String wholeTotalConstant) throws NotLoggedInException;
-    
-    String getLedgerBodyHtml(String sSID, String sID, String fisKeyString, String beginACNo,
-            String endACNo, int[] dates, boolean doShowAll, String totalConstant,
-            String wholeTotalConstant) throws NotLoggedInException;
-
     String addJournal(String sSID, String sID, String fisKeyString, SJournalHeader sJournal) throws NotLoggedInException;
     String editJournal(String sSID, String sID, String fisKeyString, SJournalHeader sJournal) throws NotLoggedInException;
     String deleteJournal(String sSID, String sID, String fisKeyString, String keyString) throws NotLoggedInException;

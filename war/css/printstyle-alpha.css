@@ -9,31 +9,37 @@
 /* ===========================================
    Print styles
    =========================================== */
-@media print {
 
-    body, table, table th, table td {
+body, table, table th, table td {
+    font-family: BrowalliaUPC, "Arial Unicode MS", Arial, sans-serif;
+    font-size: 12pt;
+}
+
+body {
+    background: none repeat scroll 0 0 #FFFFFF;
+    border: 0 none;
+    color: black;
+    direction: ltr;
+    margin: 0;
+    padding: 0;
+}
+
+@page {
+    size: 9in 11in;
+	margin: 1.6cm 2cm 1cm 1.6cm;
+    @top-right {
         font-family: BrowalliaUPC, "Arial Unicode MS", Arial, sans-serif;
-        font-size: 12pt;
-    }
-    
-    body {
-        background: none repeat scroll 0 0 #FFFFFF;
-        border: 0 none;
-        color: black;
-        direction: ltr;
-        margin: 0;
-        padding: 0;
-    }
-
-    @page {
-
+        font-size: 11pt;
+        content: counter(page) " / " counter(pages);
     }
 }
+
 
 @external .flexTable, .chart, .journal, .ledger, .trial, .finance;
 
 .flexTable {
     width: 100%;
+    -fs-table-paginate: paginate;
 }
 
 .flexTable tr {
@@ -293,5 +299,9 @@
 
 .page-always-break-before {
     page-break-before: always;
+}
+
+.page-avoid-break-after {
+    page-break-after: avoid;
 }
 

@@ -7,6 +7,7 @@ import gwt.client.event.ActionEvent;
 import gwt.client.event.ActionNames;
 import gwt.client.place.AllPlace;
 import gwt.client.view.ReportView;
+import gwt.shared.SConstants;
 import gwt.shared.Utils;
 import gwt.shared.model.SAccAmt;
 import gwt.shared.model.SAccChart;
@@ -19,6 +20,7 @@ import java.util.List;
 
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -137,7 +139,6 @@ public class ReportActivity extends AbstractActivity implements ReportView.Prese
             }.schedule(100);
         } else if (action.equals(AllPlace.JOUR)) {
 
-            final String comKeyString = place.getComKeyString();
             final String fisKeyString = place.getFisKeyString();
             final String journalTypeKeyString = place.getKeyString();
 
@@ -153,29 +154,24 @@ public class ReportActivity extends AbstractActivity implements ReportView.Prese
                 dates[5] = sFis.getEndYear();
             }
 
-            clientFactory.getModel().getJournalBodyHtml(comKeyString, fisKeyString,
-                    journalTypeKeyString, dates, constants.total(), constants.wholeTotal(),
-                    new AsyncCallback<String>() {
-
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            Window.alert(caught.getMessage());
-                        }
-
-                        @Override
-                        public void onSuccess(String result) {
-
-                            // set Shell and actBtns
-                            // add Shell handlers via EventBus
-                            initShell();
-
-                            clientFactory.getReportView().setJourData(sFis, dates, comName,
-                                    journalTypeName, result);
-                        }
-                    });
+            String url = Window.Location.createUrlBuilder().setPath(SConstants.PDF_PATH)
+                    .setParameter(SConstants.ACTION, SConstants.JOURNAL_ACTION)
+                    .setParameter(SConstants.FIS_KEY_STRING, fisKeyString)
+                    .setParameter(SConstants.JOURNAL_TYPE_KEY_STRING, journalTypeKeyString)
+                    .setParameter(SConstants.BEGIN_DAY, dates[0] + "")
+                    .setParameter(SConstants.BEGIN_MONTH, dates[1] + "")
+                    .setParameter(SConstants.BEGIN_YEAR, dates[2] + "")
+                    .setParameter(SConstants.END_DAY, dates[3] + "")
+                    .setParameter(SConstants.END_MONTH, dates[4] + "")
+                    .setParameter(SConstants.END_YEAR, dates[5] + "")
+                    .setParameter(SConstants.COM_NAME, comName)
+                    .setParameter(SConstants.JOURNAL_TYPE_NAME, journalTypeName)
+                    .setParameter(SConstants.LANG, LocaleInfo.getCurrentLocale().getLocaleName())
+                    .buildString();
+            Window.open(url, journalTypeName, null);
+            
         } else if (action.equals(AllPlace.LEDGER)) {
 
-            String comKeyString = place.getComKeyString();
             String fisKeyString = place.getFisKeyString();
 
             String beginACKeyString = place.getKeyString();
@@ -219,27 +215,23 @@ public class ReportActivity extends AbstractActivity implements ReportView.Prese
 
             final boolean doShowAll = place.getKeyString9().equals(AllPlace.SHOW_ALL);
 
-            clientFactory.getModel().getLedgerBodyHtml(comKeyString, fisKeyString, beginACNo,
-                    endACNo, dates, doShowAll, constants.total(), constants.wholeTotal(),
-                    new AsyncCallback<String>() {
-
-                @Override
-                public void onFailure(Throwable caught) {
-                    Window.alert(caught.getMessage());
-                }
-
-                @Override
-                public void onSuccess(String result) {
-
-                    // set Shell and actBtns
-                    // add Shell handlers via EventBus
-                    initShell();
-
-                    clientFactory.getReportView().setLedgerData(sFis, dates, comName, beginACNo,
-                            endACNo, result);
-                }
-            });
-
+            
+            String url = Window.Location.createUrlBuilder().setPath(SConstants.PDF_PATH)
+                    .setParameter(SConstants.ACTION, SConstants.LEDGER_ACTION)
+                    .setParameter(SConstants.FIS_KEY_STRING, fisKeyString)
+                    .setParameter(SConstants.BEGIN_ACC_NO, beginACNo)
+                    .setParameter(SConstants.END_ACC_NO, endACNo)
+                    .setParameter(SConstants.BEGIN_DAY, dates[0] + "")
+                    .setParameter(SConstants.BEGIN_MONTH, dates[1] + "")
+                    .setParameter(SConstants.BEGIN_YEAR, dates[2] + "")
+                    .setParameter(SConstants.END_DAY, dates[3] + "")
+                    .setParameter(SConstants.END_MONTH, dates[4] + "")
+                    .setParameter(SConstants.END_YEAR, dates[5] + "")
+                    .setParameter(SConstants.DO_SHOW_ALL, doShowAll ? SConstants.DO_SHOW_ALL : "n")
+                    .setParameter(SConstants.COM_NAME, comName)
+                    .setParameter(SConstants.LANG, LocaleInfo.getCurrentLocale().getLocaleName())
+                    .buildString();
+            Window.open(url, constants.ledger(), null);
         } else if (action.equals(AllPlace.TRIAL)){
 
             clientFactory.getModel().getAccAmtMap(place.getComKeyString(),
