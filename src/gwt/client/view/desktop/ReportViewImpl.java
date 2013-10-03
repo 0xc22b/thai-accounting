@@ -40,7 +40,7 @@ public class ReportViewImpl<T, J, M, A> extends Composite implements ReportView<
     private Resources resources = GWT.create(Resources.class);
 
     private static final String DOC_TAG = "<!doctype html>";
-    private static final String STYLE_TAG = "<link rel=stylesheet type=text/css media=all href=/css/printstyle-alpha.css>";
+    private static final String STYLE_TAG = "<link rel='stylesheet' type='text/css' href='/css/printstyle-alpha.css' media='print' />";
 
     private static final String STYLE_NAME_CENTER = "center";
     private static final String STYLE_NAME_ULINE = "uline";

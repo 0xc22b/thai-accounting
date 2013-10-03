@@ -38,7 +38,6 @@ public class PdfServlet extends HttpServlet {
     public static final String STYLE_NAME_RIGHT = "right";
     public static final String STYLE_NAME_DULINE = "duline";
     public static final String STYLE_NAME_AULINE = "auline";
-    public static final String STYLE_NAME_PAGE_AVOID_BREAK_AFTER = "page-avoid-break-after";
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException,
@@ -50,7 +49,7 @@ public class PdfServlet extends HttpServlet {
         } else if (action.equals(SConstants.LEDGER_ACTION)) {
             getLedgerPdf(req, resp);
         } else {
-            test(resp);
+            test(req, resp);
         }
     }
 
@@ -78,13 +77,16 @@ public class PdfServlet extends HttpServlet {
 
                 ITextRenderer renderer = new ITextRenderer();
                 ITextFontResolver fontResolver = renderer.getFontResolver();
-                fontResolver.addFont("browau.ttf", BaseFont.IDENTITY_H, true);
+                fontResolver.addFont("C:\\Windows\\Fonts\\arialuni.ttf",
+                        BaseFont.IDENTITY_H, true);
 
                 // parse the markup into an xml Document
                 DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
                 Document doc = builder.parse(new ByteArrayInputStream(
                                 sb.toString().getBytes("UTF-8")));
-                renderer.setDocument(doc, null);
+                // IMPORTANT: Second arg is doc path used to retrieve css path
+                //     as in html header, css file is referred by relative path.
+                renderer.setDocument(doc, req.getRequestURL().toString());
                 renderer.layout();
 
                 resp.setContentType("application/pdf");
@@ -120,7 +122,8 @@ public class PdfServlet extends HttpServlet {
         String beginACNo = req.getParameter(SConstants.BEGIN_ACC_NO);
         String endACNo = req.getParameter(SConstants.END_ACC_NO);
         int[] dates = extractDate(req);
-        boolean doShowAll = req.getParameter(SConstants.DO_SHOW_ALL).equals(AllPlace.SHOW_ALL);
+        boolean doShowAll = req.getParameter(SConstants.DO_SHOW_ALL).equals(
+                AllPlace.SHOW_ALL);
         String comName = req.getParameter(SConstants.COM_NAME);
         String lang = req.getParameter(SConstants.LANG);
 
@@ -130,21 +133,26 @@ public class PdfServlet extends HttpServlet {
 
                 StringBuilder sb = new StringBuilder();
 
-                ResultSet rs = Db.getLedger(conn, fisKeyString, beginACNo, endACNo, dates);
+                ResultSet rs = Db.getLedger(conn, fisKeyString, beginACNo,
+                        endACNo, dates);
 
                 genBeforeBodyHtml(sb);
-                genLedgerBodyHtml(sb, rs, beginACNo, endACNo, dates, doShowAll, comName, lang);
+                genLedgerBodyHtml(sb, rs, beginACNo, endACNo, dates, doShowAll,
+                        comName, lang);
                 genAfterBodyHtml(sb);
 
                 ITextRenderer renderer = new ITextRenderer();
                 ITextFontResolver fontResolver = renderer.getFontResolver();
-                fontResolver.addFont("browau.ttf", BaseFont.IDENTITY_H, true);
+                fontResolver.addFont("C:\\Windows\\Fonts\\arialuni.ttf",
+                        BaseFont.IDENTITY_H, true);
 
                 // parse the markup into an xml Document
                 DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
                 Document doc = builder.parse(new ByteArrayInputStream(
                         sb.toString().getBytes("UTF-8")));
-                renderer.setDocument(doc, null);
+                // IMPORTANT: Second arg is doc path used to retrieve css path
+                //     as in html header, css file is referred by relative path.
+                renderer.setDocument(doc, req.getRequestURL().toString());
                 renderer.layout();
 
                 resp.setContentType("application/pdf");
@@ -173,12 +181,14 @@ public class PdfServlet extends HttpServlet {
         }
     }
 
-    private void test(HttpServletResponse resp) throws ServletException, IOException {
+    private void test(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
 
         try {
             ITextRenderer renderer = new ITextRenderer();
             ITextFontResolver fontResolver = renderer.getFontResolver();
-            fontResolver.addFont("browau.ttf", BaseFont.IDENTITY_H, true);
+            fontResolver.addFont("C:\\Windows\\Fonts\\arialuni.ttf",
+                    BaseFont.IDENTITY_H, true);
 
             StringBuilder sb = new StringBuilder();
             sb.append("<?xml version='1.0' encoding='UTF-8'?>");
@@ -198,7 +208,9 @@ public class PdfServlet extends HttpServlet {
             // parse the markup into an xml Document
             DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
             Document doc = builder.parse(new ByteArrayInputStream(sb.toString().getBytes("UTF-8")));
-            renderer.setDocument(doc, null);
+            // IMPORTANT: Second arg is doc path used to retrieve css path
+            //     as in html header, css file is referred by relative path.
+            renderer.setDocument(doc, req.getRequestURL().toString());
             renderer.layout();
 
             resp.setContentType("application/pdf");
@@ -333,7 +345,7 @@ public class PdfServlet extends HttpServlet {
     private void genJournalBeginningHtml(StringBuilder sb, int day, int month, int year,
             String no) {
 
-        sb.append("<tr class='" + STYLE_NAME_PAGE_AVOID_BREAK_AFTER + "'>");
+        sb.append("<tr>");
         sb.append("<td colspan='5'>");
         sb.append(day + "/" + month + "/" + year + "&#160;&#160;&#160;&#160;" + no);
         sb.append("</td>");
@@ -582,7 +594,7 @@ public class PdfServlet extends HttpServlet {
         sb.append("<html xmlns='http://www.w3.org/1999/xhtml'>");
         sb.append("<head>");
         sb.append("<link rel='stylesheet' type='text/css' href='");
-        sb.append(getServletContext().getRealPath("/css/printstyle-alpha.css"));
+        sb.append("css/printstyle-alpha.css");
         sb.append("' media='print' />");
         sb.append("</head>");
         sb.append("<body>");

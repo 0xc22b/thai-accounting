@@ -19,8 +19,6 @@ import java.sql.Types;
 import java.util.Date;
 import java.util.List;
 
-import com.google.appengine.api.utils.SystemProperty;
-
 public class Db {
 
     // Table names
@@ -70,16 +68,10 @@ public class Db {
     public static Connection getDBConn() throws ClassNotFoundException, SQLException {
 
         String url = null;
-
-        if (SystemProperty.environment.value() == SystemProperty.Environment.Value.Production) {
-          // Load the class that provides the new "jdbc:google:mysql://" prefix.
-          Class.forName("com.mysql.jdbc.GoogleDriver");
-          url = "jdbc:google:mysql://your-project-id:your-instance-name/thai_accounting?user=root";
-        } else {
-          // Local MySQL instance to use during development.
-          Class.forName("com.mysql.jdbc.Driver");
-          url = "jdbc:mysql://localhost:3306/thai_accounting?user=root&password=root";
-        }
+    
+        // MySQL instance
+        Class.forName("com.mysql.jdbc.Driver");
+        url = "jdbc:mysql://localhost:3306/thai_accounting?user=root&password=root";
 
         return DriverManager.getConnection(url);
     }

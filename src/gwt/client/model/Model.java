@@ -1,7 +1,6 @@
 package gwt.client.model;
 
 import gwt.shared.DataNotFoundException;
-import gwt.shared.NotLoggedInException;
 import gwt.shared.Utils;
 import gwt.shared.model.SAccAmt;
 import gwt.shared.model.SAccChart;
@@ -20,7 +19,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public class Model {
@@ -49,7 +47,7 @@ public class Model {
             @Override
             public void onGet(String sSID, String sID) {
                 // 3. Send request to server
-                rpcService.getComList(sSID, sID, new AsyncCallback<SComList>() {
+                rpcService.getComList(new AsyncCallback<SComList>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         callback.onFailure(caught);
@@ -85,7 +83,7 @@ public class Model {
             @Override
             public void onGet(String sSID, String sID) {
                 // Send request to server
-                rpcService.addCom(sSID, sID, sCom, new AsyncCallback<String>() {
+                rpcService.addCom(sCom, new AsyncCallback<String>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         callback.onFailure(caught);
@@ -111,7 +109,7 @@ public class Model {
             @Override
             public void onGet(String sSID, String sID) {
                 // Send request to server
-                rpcService.editCom(sSID, sID, sCom, new AsyncCallback<String>() {
+                rpcService.editCom(sCom, new AsyncCallback<String>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         callback.onFailure(caught);
@@ -136,7 +134,7 @@ public class Model {
             @Override
             public void onGet(String sSID, String sID) {
                 // Send request to server
-                rpcService.deleteCom(sSID, sID, keyString, new AsyncCallback<String>() {
+                rpcService.deleteCom(keyString, new AsyncCallback<String>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         callback.onFailure(caught);
@@ -177,7 +175,7 @@ public class Model {
             @Override
             public void onGet(String sSID, String sID) {
                 // Send request to server
-                rpcService.addFis(sSID, sID, comKeyString, setupType, sFis,
+                rpcService.addFis(comKeyString, setupType, sFis,
                         new AsyncCallback<String>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -205,7 +203,7 @@ public class Model {
             @Override
             public void onGet(String sSID, String sID) {
                 // Send request to server
-                rpcService.editFis(sSID, sID, sFis, new AsyncCallback<String>() {
+                rpcService.editFis(sFis, new AsyncCallback<String>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         callback.onFailure(caught);
@@ -231,7 +229,7 @@ public class Model {
             @Override
             public void onGet(String sSID, String sID) {
                 // Send request to server
-                rpcService.deleteFis(sSID, sID, fisKeyString,
+                rpcService.deleteFis(fisKeyString,
                         new AsyncCallback<String>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -273,7 +271,7 @@ public class Model {
             @Override
             public void onGet(String sSID, String sID) {
                 // Send request to server
-                rpcService.getSetup(sSID, sID, fisKeyString, new AsyncCallback<SFiscalYear>() {
+                rpcService.getSetup(fisKeyString, new AsyncCallback<SFiscalYear>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         callback.onFailure(caught);
@@ -357,7 +355,7 @@ public class Model {
             @Override
             public void onGet(String sSID, String sID) {
                 // Send request to server
-                rpcService.addJournalType(sSID, sID, fisKeyString, sJournalType,
+                rpcService.addJournalType(fisKeyString, sJournalType,
                         new AsyncCallback<String>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -385,7 +383,7 @@ public class Model {
             @Override
             public void onGet(String sSID, String sID) {
                 // Send request to server
-                rpcService.editJournalType(sSID, sID, sJournalType, new AsyncCallback<String>() {
+                rpcService.editJournalType(sJournalType, new AsyncCallback<String>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         callback.onFailure(caught);
@@ -418,7 +416,7 @@ public class Model {
             @Override
             public void onGet(String sSID, String sID) {
                 // Send request to server
-                rpcService.deleteJournalType(sSID, sID, journalTypeKeyString,
+                rpcService.deleteJournalType(journalTypeKeyString,
                         new AsyncCallback<String>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -483,7 +481,7 @@ public class Model {
             @Override
             public void onGet(String sSID, String sID) {
                 // Send request to server
-                rpcService.addDocType(sSID, sID, fisKeyString, sDocType,
+                rpcService.addDocType(fisKeyString, sDocType,
                         new AsyncCallback<String>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -517,7 +515,7 @@ public class Model {
             @Override
             public void onGet(String sSID, String sID) {
                 // Send request to server
-                rpcService.editDocType(sSID, sID, sDocType, new AsyncCallback<String>() {
+                rpcService.editDocType(sDocType, new AsyncCallback<String>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         callback.onFailure(caught);
@@ -549,7 +547,7 @@ public class Model {
             @Override
             public void onGet(String sSID, String sID) {
                 // Send request to server
-                rpcService.deleteDocType(sSID, sID, docTypeKeyString,
+                rpcService.deleteDocType(docTypeKeyString,
                         new AsyncCallback<String>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -614,7 +612,7 @@ public class Model {
             @Override
             public void onGet(String sSID, String sID) {
                 // Send request to server
-                rpcService.addAccGrp(sSID, sID, fisKeyString, sAccGrp, new AsyncCallback<String>() {
+                rpcService.addAccGrp(fisKeyString, sAccGrp, new AsyncCallback<String>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         callback.onFailure(caught);
@@ -641,7 +639,7 @@ public class Model {
             @Override
             public void onGet(String sSID, String sID) {
                 // Send request to server
-                rpcService.editAccGrp(sSID, sID, sAccGrp, new AsyncCallback<String>() {
+                rpcService.editAccGrp(sAccGrp, new AsyncCallback<String>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         callback.onFailure(caught);
@@ -673,7 +671,7 @@ public class Model {
             @Override
             public void onGet(String sSID, String sID) {
                 // Send request to server
-                rpcService.deleteAccGrp(sSID, sID, accGrpKeyString, new AsyncCallback<String>() {
+                rpcService.deleteAccGrp(accGrpKeyString, new AsyncCallback<String>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         callback.onFailure(caught);
@@ -794,7 +792,7 @@ public class Model {
             @Override
             public void onGet(String sSID, String sID) {
                 // Send request to server
-                rpcService.addAccChart(sSID, sID, fisKeyString, sAccChart,
+                rpcService.addAccChart(fisKeyString, sAccChart,
                         new AsyncCallback<String>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -832,7 +830,7 @@ public class Model {
             @Override
             public void onGet(String sSID, String sID) {
                 // Send request to server
-                rpcService.editAccChart(sSID, sID, fisKeyString, sAccChart, new AsyncCallback<String>() {
+                rpcService.editAccChart(fisKeyString, sAccChart, new AsyncCallback<String>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         callback.onFailure(caught);
@@ -869,7 +867,7 @@ public class Model {
             @Override
             public void onGet(String sSID, String sID) {
                 // Send request to server
-                rpcService.deleteAccChart(sSID, sID, accChartKeyString,
+                rpcService.deleteAccChart(accChartKeyString,
                         new AsyncCallback<String>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -898,7 +896,7 @@ public class Model {
             @Override
             public void onGet(String sSID, String sID) {
                 // Send request to server
-                rpcService.setBeginning(sSID, sID, accChartKeyString, beginning,
+                rpcService.setBeginning(accChartKeyString, beginning,
                         new AsyncCallback<String>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -938,7 +936,7 @@ public class Model {
             @Override
             public void onGet(String sSID, String sID) {
                 // Send request to server
-                rpcService.getJournalListWithJT(sSID, sID, fisKeyString, journalTypeKeyString,
+                rpcService.getJournalListWithJT(fisKeyString, journalTypeKeyString,
                         month, year, new AsyncCallback<ArrayList<SJournalHeader>>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -961,7 +959,7 @@ public class Model {
             @Override
             public void onGet(String sSID, String sID) {
                 // Send request to server
-                rpcService.addJournal(sSID, sID, fisKeyString, sJournal, new AsyncCallback<String>() {
+                rpcService.addJournal(fisKeyString, sJournal, new AsyncCallback<String>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         callback.onFailure(caught);
@@ -986,7 +984,7 @@ public class Model {
             @Override
             public void onGet(String sSID, String sID) {
                 // Send request to server
-                rpcService.editJournal(sSID, sID, fisKeyString, sJournal, new AsyncCallback<String>() {
+                rpcService.editJournal(fisKeyString, sJournal, new AsyncCallback<String>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         callback.onFailure(caught);
@@ -1009,7 +1007,7 @@ public class Model {
             @Override
             public void onGet(String sSID, String sID) {
                 // Send request to server
-                rpcService.deleteJournal(sSID, sID, fisKeyString, journalKeyString,
+                rpcService.deleteJournal(fisKeyString, journalKeyString,
                         new AsyncCallback<String>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -1070,7 +1068,7 @@ public class Model {
             @Override
             public void onGet(String sSID, String sID) {
                 // Send request to server
-                rpcService.getAccAmtMap(sSID, sID, fisKeyString,
+                rpcService.getAccAmtMap(fisKeyString,
                         new AsyncCallback<HashMap<String, SAccAmt>>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -1101,7 +1099,7 @@ public class Model {
             @Override
             public void onGet(String sSID, String sID) {
                 // Send request to server
-                rpcService.recalculateAccAmt(sSID, sID, fisKeyString,
+                rpcService.recalculateAccAmt(fisKeyString,
                         new AsyncCallback<String>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -1119,12 +1117,13 @@ public class Model {
 
     private void getSID(@SuppressWarnings("rawtypes") AsyncCallback asyncCallback,
             GetSIDCallback getSIDCallback) {
-        String sSID = Cookies.getCookie("SSID");
+        /*String sSID = Cookies.getCookie("SSID");
         String sID = Cookies.getCookie("SID");
         if (sSID == null || sID == null) {
             asyncCallback.onFailure(new NotLoggedInException());
         } else {
             getSIDCallback.onGet(sSID, sID);
-        }
+        }*/
+        getSIDCallback.onGet("sSID", "sID");
     }
 }

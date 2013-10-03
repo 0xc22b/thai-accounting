@@ -31,7 +31,15 @@
 * Margins (inches)- Left: 0.732, Right: 0.122, Top: 0.166, Bottom: 0.332
 * Headers - Empty, Emtpy, Custom: &p / &P
 * Footers - Empty all
-  Caveats: Don't print from Tools, click 'Print' button in the app
+### CAVEATS:
+* Don't print from Tools, click 'Print' button in the app
+* Margin-top here and margin-top in printstyle-alpha.css need to be different.
+
+## Adobe reader setup
+* OPPOSE FROM THE ABOVE: Click Tools -> Print -> Print...
+* Choose the right printer driver (USB001 or USB002)
+* No need to setup page size or margin (Already done in printstyle-alpha.css)
+* Page Sizing & Handling: Actual size
 
 ## Excel setup
 * Page size: Letter Fanfold 8 1/2 x 11 in

@@ -1,6 +1,5 @@
 package gwt.client.model;
 
-import gwt.shared.NotLoggedInException;
 import gwt.shared.model.SAccAmt;
 import gwt.shared.model.SAccChart;
 import gwt.shared.model.SAccGrp;
@@ -23,43 +22,43 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RemoteServiceRelativePath("rpcService")
 public interface RpcService extends RemoteService {
 	
-	SComList getComList(String sSID, String sID) throws NotLoggedInException;
+	SComList getComList();
 	
-	String addCom(String sSID, String sID, SCom sCom) throws NotLoggedInException;
-	String editCom(String sSID, String sID, SCom sCom) throws NotLoggedInException;
-	String deleteCom(String sSID, String sID, String keyString) throws NotLoggedInException;
+	String addCom(SCom sCom);
+	String editCom(SCom sCom);
+	String deleteCom(String keyString);
 	
-	String addFis(String sSID, String sID, String comKeyString, int setupType, SFiscalYear sFis) throws NotLoggedInException;
-    String editFis(String sSID, String sID, SFiscalYear sFis) throws NotLoggedInException, IllegalArgumentException;
-    String deleteFis(String sSID, String sID, String keyString) throws NotLoggedInException;
+	String addFis(String comKeyString, int setupType, SFiscalYear sFis);
+    String editFis(SFiscalYear sFis);
+    String deleteFis(String keyString);
     
-    SFiscalYear getSetup(String sSID, String sID, String fisKeyString) throws NotLoggedInException;
+    SFiscalYear getSetup(String fisKeyString);
     
-    String addJournalType(String sSID, String sID, String fisKeyString, SJournalType sJournalType) throws NotLoggedInException;
-    String editJournalType(String sSID, String sID, SJournalType sJournalType) throws NotLoggedInException;
-    String deleteJournalType(String sSID, String sID, String keyString) throws NotLoggedInException, IllegalArgumentException;
+    String addJournalType(String fisKeyString, SJournalType sJournalType);
+    String editJournalType(SJournalType sJournalType);
+    String deleteJournalType(String keyString);
     
-    String addDocType(String sSID, String sID, String fisKeyString, SDocType sDocType) throws NotLoggedInException;
-    String editDocType(String sSID, String sID, SDocType sDocType) throws NotLoggedInException;
-    String deleteDocType(String sSID, String sID, String keyString) throws NotLoggedInException, IllegalArgumentException;
+    String addDocType(String fisKeyString, SDocType sDocType);
+    String editDocType(SDocType sDocType);
+    String deleteDocType(String keyString);
     
-    String addAccGrp(String sSID, String sID, String fisKeyString, SAccGrp sAccGrp) throws NotLoggedInException;
-    String editAccGrp(String sSID, String sID, SAccGrp sAccGrp) throws NotLoggedInException;
-    String deleteAccGrp(String sSID, String sID, String keyString) throws NotLoggedInException, IllegalArgumentException;
+    String addAccGrp(String fisKeyString, SAccGrp sAccGrp);
+    String editAccGrp(SAccGrp sAccGrp);
+    String deleteAccGrp(String keyString);
     
-    String addAccChart(String sSID, String sID, String fisKeyString, SAccChart sAccChart) throws NotLoggedInException;
-    String editAccChart(String sSID, String sID, String fisKeyString, SAccChart sAccChart) throws NotLoggedInException;
-    String deleteAccChart(String sSID, String sID, String keyString) throws NotLoggedInException, IllegalArgumentException;
+    String addAccChart(String fisKeyString, SAccChart sAccChart);
+    String editAccChart(String fisKeyString, SAccChart sAccChart);
+    String deleteAccChart(String keyString);
     
-    String setBeginning(String sSID, String sID, String accChartKeyString, double beginning) throws NotLoggedInException;
+    String setBeginning(String accChartKeyString, double beginning);
 
-    ArrayList<SJournalHeader> getJournalListWithJT(String sSID, String sID, String fisKeyString,
-            String journalTypeKeyString, int month, int year) throws NotLoggedInException;
+    ArrayList<SJournalHeader> getJournalListWithJT(String fisKeyString,
+            String journalTypeKeyString, int month, int year);
 
-    String addJournal(String sSID, String sID, String fisKeyString, SJournalHeader sJournal) throws NotLoggedInException;
-    String editJournal(String sSID, String sID, String fisKeyString, SJournalHeader sJournal) throws NotLoggedInException;
-    String deleteJournal(String sSID, String sID, String fisKeyString, String keyString) throws NotLoggedInException;
+    String addJournal(String fisKeyString, SJournalHeader sJournal);
+    String editJournal(String fisKeyString, SJournalHeader sJournal);
+    String deleteJournal(String fisKeyString, String keyString);
     
-    HashMap<String, SAccAmt> getAccAmtMap(String sSID, String sID, String fisKeyString) throws NotLoggedInException;
-    String recalculateAccAmt(String sSID, String sID, String fisKeyString) throws NotLoggedInException;
+    HashMap<String, SAccAmt> getAccAmtMap(String fisKeyString);
+    String recalculateAccAmt(String fisKeyString);
 }

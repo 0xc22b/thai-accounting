@@ -20,43 +20,43 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
  */
 public interface RpcServiceAsync {
 
-	void getComList(String sSID, String sID, AsyncCallback<SComList> callback);
+	void getComList(AsyncCallback<SComList> callback);
 	
-	void addCom(String sSID, String sID, SCom sCom, AsyncCallback<String> callback);
-	void editCom(String sSID, String sID, SCom sCom, AsyncCallback<String> callback);
-	void deleteCom(String sSID, String sID, String keyString, AsyncCallback<String> callback);
+	void addCom(SCom sCom, AsyncCallback<String> callback);
+	void editCom(SCom sCom, AsyncCallback<String> callback);
+	void deleteCom(String keyString, AsyncCallback<String> callback);
 	
-    void addFis(String sSID, String sID, String comKeyString, int setupType, SFiscalYear sFis, AsyncCallback<String> callback);
-    void editFis(String sSID, String sID, SFiscalYear sFis, AsyncCallback<String> callback);
-    void deleteFis(String sSID, String sID, String keyString, AsyncCallback<String> callback);
+    void addFis(String comKeyString, int setupType, SFiscalYear sFis, AsyncCallback<String> callback);
+    void editFis(SFiscalYear sFis, AsyncCallback<String> callback);
+    void deleteFis(String keyString, AsyncCallback<String> callback);
     
-    void getSetup(String sSID, String sID, String fisKeyString, AsyncCallback<SFiscalYear> callback);
+    void getSetup(String fisKeyString, AsyncCallback<SFiscalYear> callback);
     
-    void addJournalType(String sSID, String sID, String fisKeyString, SJournalType sJournalType, AsyncCallback<String> callback);
-    void editJournalType(String sSID, String sID, SJournalType sJournalType, AsyncCallback<String> callback);
-    void deleteJournalType(String sSID, String sID, String keyString, AsyncCallback<String> callback);
+    void addJournalType(String fisKeyString, SJournalType sJournalType, AsyncCallback<String> callback);
+    void editJournalType(SJournalType sJournalType, AsyncCallback<String> callback);
+    void deleteJournalType(String keyString, AsyncCallback<String> callback);
     
-    void addDocType(String sSID, String sID, String fisKeyString, SDocType sDocType, AsyncCallback<String> callback);
-    void editDocType(String sSID, String sID, SDocType sDocType, AsyncCallback<String> callback);
-    void deleteDocType(String sSID, String sID, String keyString, AsyncCallback<String> callback);
+    void addDocType(String fisKeyString, SDocType sDocType, AsyncCallback<String> callback);
+    void editDocType(SDocType sDocType, AsyncCallback<String> callback);
+    void deleteDocType(String keyString, AsyncCallback<String> callback);
     
-    void addAccGrp(String sSID, String sID, String fisKeyString, SAccGrp sAccGrp, AsyncCallback<String> callback);
-    void editAccGrp(String sSID, String sID, SAccGrp sAccGrp, AsyncCallback<String> callback);
-    void deleteAccGrp(String sSID, String sID, String keyString, AsyncCallback<String> callback);
+    void addAccGrp(String fisKeyString, SAccGrp sAccGrp, AsyncCallback<String> callback);
+    void editAccGrp(SAccGrp sAccGrp, AsyncCallback<String> callback);
+    void deleteAccGrp(String keyString, AsyncCallback<String> callback);
     
-    void addAccChart(String sSID, String sID, String fisKeyString, SAccChart sAccChart, AsyncCallback<String> callback);
-    void editAccChart(String sSID, String sID, String fisKeyString, SAccChart sAccChart, AsyncCallback<String> callback);
-    void deleteAccChart(String sSID, String sID, String keyString, AsyncCallback<String> callback);
+    void addAccChart(String fisKeyString, SAccChart sAccChart, AsyncCallback<String> callback);
+    void editAccChart(String fisKeyString, SAccChart sAccChart, AsyncCallback<String> callback);
+    void deleteAccChart(String keyString, AsyncCallback<String> callback);
     
-    void setBeginning(String sSID, String sID, String accChartKeyString, double beginning, AsyncCallback<String> callback);
+    void setBeginning(String accChartKeyString, double beginning, AsyncCallback<String> callback);
 
-    void getJournalListWithJT(String sSID, String sID, String fisKeyString,
+    void getJournalListWithJT(String fisKeyString,
             String journalTypeKeyString, int month, int year, AsyncCallback<ArrayList<SJournalHeader>> callback);
 
-	void addJournal(String sSID, String sID, String fisKeyString, SJournalHeader sJournal, AsyncCallback<String> callback);
-    void editJournal(String sSID, String sID, String fisKeyString, SJournalHeader sJournal, AsyncCallback<String> callback);
-    void deleteJournal(String sSID, String sID, String fisKeyString, String keyString, AsyncCallback<String> callback);
+	void addJournal(String fisKeyString, SJournalHeader sJournal, AsyncCallback<String> callback);
+    void editJournal(String fisKeyString, SJournalHeader sJournal, AsyncCallback<String> callback);
+    void deleteJournal(String fisKeyString, String keyString, AsyncCallback<String> callback);
 
-    void getAccAmtMap(String sSID, String sID, String fisKeyString, AsyncCallback<HashMap<String, SAccAmt>> callback);
-    void recalculateAccAmt(String sSID, String sID, String fisKeyString, AsyncCallback<String> callback);
+    void getAccAmtMap(String fisKeyString, AsyncCallback<HashMap<String, SAccAmt>> callback);
+    void recalculateAccAmt(String fisKeyString, AsyncCallback<String> callback);
 }

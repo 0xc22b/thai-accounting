@@ -3,10 +3,10 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" output="test-classes" path="test"/>
 	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
-	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
-	<classpathentry kind="lib" path="C:/Users/C60/Applications/eclipse/plugins/com.google.appengine.eclipse.sdkbundle_1.8.3/appengine-java-sdk-1.8.3/lib/impl/appengine-api-stubs.jar"/>
-	<classpathentry kind="lib" path="C:/Users/C60/Applications/eclipse/plugins/com.google.appengine.eclipse.sdkbundle_1.8.3/appengine-java-sdk-1.8.3/lib/testing/appengine-testing.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/flying-saucer-core-9.0.3.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/flying-saucer-pdf-9.0.3.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/itext-2.1.7.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

@@ -3,10 +3,6 @@ package gwt.server;
 import gwt.client.model.RpcService;
 import gwt.server.account.CreateSetup;
 import gwt.server.account.Db;
-import gwt.server.user.UserManager;
-import gwt.server.user.model.User;
-import gwt.server.user.model.UserData;
-import gwt.shared.NotLoggedInException;
 import gwt.shared.SConstants;
 import gwt.shared.Utils;
 import gwt.shared.model.SAccAmt;
@@ -32,8 +28,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.jdo.PersistenceManager;
-
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 /**
@@ -43,23 +37,15 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
 
     @Override
-    public SComList getComList(String sSID, String sID) throws NotLoggedInException {
-        User user = null;
-        PersistenceManager pm = PMF.get().getPersistenceManager();
-        try{
-            user = UserManager.checkLoggedInAndGetUser(sSID, sID);
-        } finally{
-            pm.close();
-        }
+    public SComList getComList() {
 
         try {
             Connection conn = Db.getDBConn();
             try {
                 SComList sComList = new SComList();
 
-                String sql = "SELECT * FROM com LEFT JOIN fiscal_year ON com.id = fiscal_year.com_id WHERE com.user_key_string = ? ORDER BY com.create_date ASC, fiscal_year.begin_month ASC, fiscal_year.begin_year ASC";
+                String sql = "SELECT * FROM com LEFT JOIN fiscal_year ON com.id = fiscal_year.com_id ORDER BY com.create_date ASC, fiscal_year.begin_month ASC, fiscal_year.begin_year ASC";
                 PreparedStatement statement = conn.prepareStatement(sql);
-                statement.setString(1, user.getKeyString());
                 ResultSet rs = statement.executeQuery();
 
                 SCom sCom = null;
@@ -97,15 +83,7 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
     }
 
     @Override
-    public String addCom(String sSID, String sID, final SCom sCom) throws NotLoggedInException {
-
-        User user = null;
-        PersistenceManager pm = PMF.get().getPersistenceManager();
-        try{
-            user = UserManager.checkLoggedInAndGetUser(sSID, sID);
-        } finally{
-            pm.close();
-        }
+    public String addCom(final SCom sCom) {
 
         try {
             Connection conn = Db.getDBConn();
@@ -114,7 +92,7 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
                 PreparedStatement statement = conn.prepareStatement(sql,
                         Statement.RETURN_GENERATED_KEYS);
                 statement.setNull(1, Types.INTEGER);
-                statement.setString(2, user.getKeyString());
+                statement.setString(2, "one_user");
                 statement.setString(3, sCom.getName());
                 int affectedRows = statement.executeUpdate();
                 if (affectedRows != 1) {
@@ -140,14 +118,7 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
     }
 
     @Override
-    public String editCom(String sSID, String sID, final SCom sCom) throws NotLoggedInException {
-
-        PersistenceManager pm = PMF.get().getPersistenceManager();
-        try{
-            UserManager.checkLoggedInAndGetUser(sSID, sID);
-        } finally{
-            pm.close();
-        }
+    public String editCom(final SCom sCom) {
 
         try {
             Connection conn = Db.getDBConn();
@@ -175,14 +146,7 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
     }
 
     @Override
-    public String deleteCom(String sSID, String sID, String keyString) throws NotLoggedInException {
-
-        PersistenceManager pm = PMF.get().getPersistenceManager();
-        try{
-            UserManager.checkLoggedInAndGetUser(sSID, sID);
-        } finally{
-            pm.close();
-        }
+    public String deleteCom(String keyString) {
 
         try {
             Connection conn = Db.getDBConn();
@@ -202,16 +166,8 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
     }
 
     @Override
-    public String addFis(String sSID, String sID, final String comKeyString,
-            final int setupType, final SFiscalYear sFis) throws NotLoggedInException {
-        User user = null;
-        PersistenceManager pm = PMF.get().getPersistenceManager();
-        try{
-            user = UserManager.checkLoggedInAndGetUser(sSID, sID);
-        } finally{
-            pm.close();
-        }
-
+    public String addFis(final String comKeyString,
+            final int setupType, final SFiscalYear sFis) {
         try {
             Connection conn = Db.getDBConn();
             try {
@@ -237,12 +193,14 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
                     long fisId = generatedKeys.getLong(1);
 
                     if(setupType == SConstants.ADD_FIS_WITH_DEFAULT_SETUP){
-                        UserData userData = UserManager.getUserData(user.getKey());
+                        // TODO: Fix this after set lang
+                        CreateSetup.createInThai(conn, fisId);
+                        /*UserData userData = UserManager.getUserData(user.getKey());
                         if (userData.getLang().equals("th")) {
                             CreateSetup.createInThai(conn, fisId);
                         } else {
                             CreateSetup.createInEnglish(conn, fisId);
-                        }
+                        }*/
                     } else if (setupType == SConstants.ADD_FIS_WITH_PREVIOUS_SETUP) {
                         CreateSetup.createFromPrev(conn, comId, fisId);
                     }
@@ -264,15 +222,7 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
     }
 
     @Override
-    public String editFis(String sSID, String sID, final SFiscalYear sFis)
-            throws NotLoggedInException {
-
-        PersistenceManager pm = PMF.get().getPersistenceManager();
-        try{
-            UserManager.checkLoggedInAndGetUser(sSID, sID);
-        } finally{
-            pm.close();
-        }
+    public String editFis(final SFiscalYear sFis) {
 
         try {
             Connection conn = Db.getDBConn();
@@ -319,14 +269,7 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
     }
 
     @Override
-    public String deleteFis(String sSID, String sID, String keyString) throws NotLoggedInException {
-        PersistenceManager pm = PMF.get().getPersistenceManager();
-        try{
-            UserManager.checkLoggedInAndGetUser(sSID, sID);
-        } finally{
-            pm.close();
-        }
-
+    public String deleteFis( String keyString) {
         try {
             Connection conn = Db.getDBConn();
             try {
@@ -345,15 +288,7 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
     }
 
     @Override
-    public SFiscalYear getSetup(String sSID, String sID, final String fisKeyString)
-            throws NotLoggedInException {
-
-        PersistenceManager pm = PMF.get().getPersistenceManager();
-        try{
-            UserManager.checkLoggedInAndGetUser(sSID, sID);
-        } finally{
-            pm.close();
-        }
+    public SFiscalYear getSetup(final String fisKeyString) {
 
         try {
             Connection conn = Db.getDBConn();
@@ -373,15 +308,8 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
     }
 
     @Override
-    public String addJournalType(String sSID, String sID, final String fisKeyString,
-            final SJournalType sJournalType) throws NotLoggedInException {
-
-        PersistenceManager pm = PMF.get().getPersistenceManager();
-        try{
-            UserManager.checkLoggedInAndGetUser(sSID, sID);
-        } finally{
-            pm.close();
-        }
+    public String addJournalType(final String fisKeyString,
+            final SJournalType sJournalType) {
 
         try {
             Connection conn = Db.getDBConn();
@@ -402,15 +330,7 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
     }
 
     @Override
-    public String editJournalType(String sSID, String sID, final SJournalType sJournalType)
-            throws NotLoggedInException {
-        PersistenceManager pm = PMF.get().getPersistenceManager();
-        try{
-            UserManager.checkLoggedInAndGetUser(sSID, sID);
-        } finally{
-            pm.close();
-        }
-
+    public String editJournalType(final SJournalType sJournalType) {
         try {
             Connection conn = Db.getDBConn();
             try {
@@ -438,15 +358,7 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
     }
 
     @Override
-    public String deleteJournalType(String sSID, String sID, String keyString)
-            throws NotLoggedInException {
-        PersistenceManager pm = PMF.get().getPersistenceManager();
-        try{
-            UserManager.checkLoggedInAndGetUser(sSID, sID);
-        } finally{
-            pm.close();
-        }
-
+    public String deleteJournalType(String keyString) {
         try {
             Connection conn = Db.getDBConn();
             try {
@@ -465,15 +377,8 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
     }
 
     @Override
-    public String addDocType(String sSID, String sID, final String fisKeyString,
-            final SDocType sDocType) throws NotLoggedInException {
-        PersistenceManager pm = PMF.get().getPersistenceManager();
-        try{
-            UserManager.checkLoggedInAndGetUser(sSID, sID);
-        } finally{
-            pm.close();
-        }
-
+    public String addDocType(final String fisKeyString,
+            final SDocType sDocType) {
         try {
             Connection conn = Db.getDBConn();
             try {
@@ -499,15 +404,7 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
     }
 
     @Override
-    public String editDocType(String sSID, String sID, final SDocType sDocType)
-            throws NotLoggedInException {
-        PersistenceManager pm = PMF.get().getPersistenceManager();
-        try{
-            UserManager.checkLoggedInAndGetUser(sSID, sID);
-        } finally{
-            pm.close();
-        }
-
+    public String editDocType(final SDocType sDocType) {
         try {
             Connection conn = Db.getDBConn();
             try {
@@ -536,15 +433,7 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
     }
 
     @Override
-    public String deleteDocType(String sSID, String sID, final String keyString)
-            throws NotLoggedInException {
-        PersistenceManager pm = PMF.get().getPersistenceManager();
-        try{
-            UserManager.checkLoggedInAndGetUser(sSID, sID);
-        } finally{
-            pm.close();
-        }
-
+    public String deleteDocType(final String keyString) {
         try {
             Connection conn = Db.getDBConn();
             try {
@@ -563,15 +452,8 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
     }
 
     @Override
-    public String addAccGrp(String sSID, String sID, final String fisKeyString,
-            final SAccGrp sAccGrp) throws NotLoggedInException {
-        PersistenceManager pm = PMF.get().getPersistenceManager();
-        try{
-            UserManager.checkLoggedInAndGetUser(sSID, sID);
-        } finally{
-            pm.close();
-        }
-
+    public String addAccGrp(final String fisKeyString,
+            final SAccGrp sAccGrp) {
         try {
             Connection conn = Db.getDBConn();
             try {
@@ -591,15 +473,7 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
     }
 
     @Override
-    public String editAccGrp(String sSID, String sID, final SAccGrp sAccGrp)
-            throws NotLoggedInException {
-        PersistenceManager pm = PMF.get().getPersistenceManager();
-        try{
-            UserManager.checkLoggedInAndGetUser(sSID, sID);
-        } finally{
-            pm.close();
-        }
-
+    public String editAccGrp(final SAccGrp sAccGrp) {
         try {
             Connection conn = Db.getDBConn();
             try {
@@ -626,14 +500,7 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
     }
 
     @Override
-    public String deleteAccGrp(String sSID, String sID, String keyString) throws NotLoggedInException {
-        PersistenceManager pm = PMF.get().getPersistenceManager();
-        try{
-            UserManager.checkLoggedInAndGetUser(sSID, sID);
-        } finally{
-            pm.close();
-        }
-
+    public String deleteAccGrp(String keyString) {
         try {
             Connection conn = Db.getDBConn();
             try {
@@ -652,15 +519,8 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
     }
 
     @Override
-    public String addAccChart(String sSID, String sID, final String fisKeyString,
-            final SAccChart sAccChart) throws NotLoggedInException {
-        PersistenceManager pm = PMF.get().getPersistenceManager();
-        try{
-            UserManager.checkLoggedInAndGetUser(sSID, sID);
-        } finally{
-            pm.close();
-        }
-
+    public String addAccChart(final String fisKeyString,
+            final SAccChart sAccChart) {
         try {
             Connection conn = Db.getDBConn();
             try {
@@ -690,15 +550,8 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
     }
 
     @Override
-    public String editAccChart(String sSID, String sID, String fisKeyString,
-            final SAccChart sAccChart) throws NotLoggedInException {
-        PersistenceManager pm = PMF.get().getPersistenceManager();
-        try{
-            UserManager.checkLoggedInAndGetUser(sSID, sID);
-        } finally{
-            pm.close();
-        }
-
+    public String editAccChart(String fisKeyString,
+            final SAccChart sAccChart) {
         try {
             Connection conn = Db.getDBConn();
             try {
@@ -749,14 +602,7 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
     }
 
     @Override
-    public String deleteAccChart(String sSID, String sID, String keyString) throws NotLoggedInException {
-        PersistenceManager pm = PMF.get().getPersistenceManager();
-        try{
-            UserManager.checkLoggedInAndGetUser(sSID, sID);
-        } finally{
-            pm.close();
-        }
-
+    public String deleteAccChart(String keyString) {
         try {
             Connection conn = Db.getDBConn();
             try {
@@ -775,15 +621,7 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
     }
 
     @Override
-    public String setBeginning(String sSID, String sID, String accChartKeyString, double beginning)
-            throws NotLoggedInException {
-        PersistenceManager pm = PMF.get().getPersistenceManager();
-        try{
-            UserManager.checkLoggedInAndGetUser(sSID, sID);
-        } finally{
-            pm.close();
-        }
-
+    public String setBeginning(String accChartKeyString, double beginning) {
         try {
             Connection conn = Db.getDBConn();
             try {
@@ -810,15 +648,8 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
     }
 
     @Override
-    public ArrayList<SJournalHeader> getJournalListWithJT(String sSID, String sID, String fisKeyString,
-            String journalTypeKeyString, int month, int year) throws NotLoggedInException {
-        PersistenceManager pm = PMF.get().getPersistenceManager();
-        try{
-            UserManager.checkLoggedInAndGetUser(sSID, sID);
-        } finally{
-            pm.close();
-        }
-
+    public ArrayList<SJournalHeader> getJournalListWithJT(String fisKeyString,
+            String journalTypeKeyString, int month, int year) {
         try {
             Connection conn = Db.getDBConn();
             try {
@@ -878,15 +709,7 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
     }
 
     @Override
-    public String addJournal(String sSID, String sID, String fisKeyString, SJournalHeader sJournal)
-            throws NotLoggedInException {
-
-        PersistenceManager pm = PMF.get().getPersistenceManager();
-        try{
-            UserManager.checkLoggedInAndGetUser(sSID, sID);
-        } finally{
-            pm.close();
-        }
+    public String addJournal(String fisKeyString, SJournalHeader sJournal) {
 
         try {
             Connection conn = Db.getDBConn();
@@ -917,15 +740,7 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
     }
 
     @Override
-    public String editJournal(String sSID, String sID, String fisKeyString, SJournalHeader sJournal)
-            throws NotLoggedInException {
-
-        PersistenceManager pm = PMF.get().getPersistenceManager();
-        try{
-            UserManager.checkLoggedInAndGetUser(sSID, sID);
-        } finally{
-            pm.close();
-        }
+    public String editJournal(String fisKeyString, SJournalHeader sJournal) {
 
         try {
             Connection conn = Db.getDBConn();
@@ -987,15 +802,7 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
     }
 
     @Override
-    public String deleteJournal(String sSID, String sID, String fisKeyString, String keyString)
-            throws NotLoggedInException {
-
-        PersistenceManager pm = PMF.get().getPersistenceManager();
-        try{
-            UserManager.checkLoggedInAndGetUser(sSID, sID);
-        } finally{
-            pm.close();
-        }
+    public String deleteJournal(String fisKeyString, String keyString) {
 
         try {
             Connection conn = Db.getDBConn();
@@ -1053,15 +860,7 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
     }
 
     @Override
-    public HashMap<String, SAccAmt> getAccAmtMap(String sSID, String sID, String fisKeyString)
-            throws NotLoggedInException {
-        PersistenceManager pm = PMF.get().getPersistenceManager();
-        try{
-            UserManager.checkLoggedInAndGetUser(sSID, sID);
-        } finally{
-            pm.close();
-        }
-
+    public HashMap<String, SAccAmt> getAccAmtMap(String fisKeyString) {
         try {
             Connection conn = Db.getDBConn();
             try {
@@ -1094,15 +893,7 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
     }
 
     @Override
-    public String recalculateAccAmt(String sSID, String sID, String fisKeyString)
-            throws NotLoggedInException {
-
-        PersistenceManager pm = PMF.get().getPersistenceManager();
-        try{
-            UserManager.checkLoggedInAndGetUser(sSID, sID);
-        } finally{
-            pm.close();
-        }
+    public String recalculateAccAmt(String fisKeyString) {
 
         try {
             Connection conn = Db.getDBConn();
