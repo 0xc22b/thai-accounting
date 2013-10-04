@@ -3,7 +3,6 @@ package gwt.client.view.desktop;
 import gwt.client.TCF;
 import gwt.client.TConstants;
 import gwt.client.event.ActionEvent;
-import gwt.client.event.ActionNames;
 import gwt.client.view.Shell;
 
 import com.google.gwt.core.client.GWT;
@@ -12,7 +11,6 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.uibinder.client.UiTemplate;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
@@ -44,10 +42,6 @@ public class ShellImpl extends Composite implements Shell {
     @UiField
     FlowPanel actBar;
     @UiField
-    Button logOutBtn;
-    @UiField
-    Button userBtn;
-    @UiField
     ScrollPanel container;
     
     private static final TConstants constants = TCF.get();
@@ -57,9 +51,6 @@ public class ShellImpl extends Composite implements Shell {
     public ShellImpl(EventBus eventBus) {
         this.eventBus = eventBus;
         initWidget(uiBinder.createAndBindUi(this));
-        
-        logOutBtn.setText(constants.logOut());
-        userBtn.setText(constants.user());
         
         initializeActBtns(7);
     }
@@ -115,16 +106,6 @@ public class ShellImpl extends Composite implements Shell {
     public void setActBtnVisible(int i, boolean visible) {
         ActBtn actBtn = (ActBtn)actBar.getWidget(i);
         actBtn.setVisible(visible);
-    }
-    
-    @UiHandler("logOutBtn")
-    void onLogOutBtnClicked(ClickEvent event) {
-        ActionEvent.fire(eventBus, ActionNames.LOGOUT);
-    }
-    
-    @UiHandler("userBtn")
-    void onUserBtnClicked(ClickEvent event) {
-        ActionEvent.fire(eventBus, ActionNames.USER);
     }
     
     private void initializeActBtns(int targetSize){

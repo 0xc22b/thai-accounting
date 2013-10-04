@@ -10,16 +10,6 @@
         <servlet-name>rpcServiceServlet</servlet-name>
         <url-pattern>/thaiaccounting/rpcService</url-pattern>
     </servlet-mapping>
-
-    <servlet>
-        <servlet-name>StressTestServlet</servlet-name>
-        <servlet-class>gwt.server.StressTestServlet</servlet-class>
-    </servlet>
-
-    <servlet-mapping>
-        <servlet-name>StressTestServlet</servlet-name>
-        <url-pattern>/stresstest</url-pattern>
-    </servlet-mapping>
     
     <servlet>
         <servlet-name>PdfServlet</servlet-name>
@@ -29,6 +19,26 @@
     <servlet-mapping>
         <servlet-name>PdfServlet</servlet-name>
         <url-pattern>/pdf</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>UserServlet</servlet-name>
+        <servlet-class>gwt.server.UserServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>UserServlet</servlet-name>
+        <url-pattern>/user</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>StressTestServlet</servlet-name>
+        <servlet-class>gwt.server.StressTestServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>StressTestServlet</servlet-name>
+        <url-pattern>/stresstest</url-pattern>
     </servlet-mapping>
 
     <!-- Default page to serve -->

@@ -7,20 +7,14 @@ import gwt.client.event.ActionEvent;
 import gwt.client.event.ActionNames;
 import gwt.client.place.AllPlace;
 import gwt.client.view.ReportView;
-import gwt.shared.SConstants;
-import gwt.shared.Utils;
 import gwt.shared.model.SAccAmt;
-import gwt.shared.model.SAccChart;
-import gwt.shared.model.SAccChart.AccType;
 import gwt.shared.model.SCom;
 import gwt.shared.model.SFiscalYear;
 
 import java.util.HashMap;
-import java.util.List;
 
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
-import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -137,101 +131,6 @@ public class ReportActivity extends AbstractActivity implements ReportView.Prese
                     clientFactory.getReportView().setChartData(sFis, comName);
                 }
             }.schedule(100);
-        } else if (action.equals(AllPlace.JOUR)) {
-
-            final String fisKeyString = place.getFisKeyString();
-            final String journalTypeKeyString = place.getKeyString();
-
-            final String journalTypeName = sFis.getSJournalType(journalTypeKeyString).getName();
-
-            final int[] dates = extractJournalDate();
-            if (dates[0] == 0) {
-                dates[0] = 1;
-                dates[1] = sFis.getBeginMonth();
-                dates[2] = sFis.getBeginYear();
-                dates[3] = Utils.getLastDay(sFis.getEndMonth(), sFis.getEndYear());
-                dates[4] = sFis.getEndMonth();
-                dates[5] = sFis.getEndYear();
-            }
-
-            String url = Window.Location.createUrlBuilder().setPath(SConstants.PDF_PATH)
-                    .setParameter(SConstants.ACTION, SConstants.JOURNAL_ACTION)
-                    .setParameter(SConstants.FIS_KEY_STRING, fisKeyString)
-                    .setParameter(SConstants.JOURNAL_TYPE_KEY_STRING, journalTypeKeyString)
-                    .setParameter(SConstants.BEGIN_DAY, dates[0] + "")
-                    .setParameter(SConstants.BEGIN_MONTH, dates[1] + "")
-                    .setParameter(SConstants.BEGIN_YEAR, dates[2] + "")
-                    .setParameter(SConstants.END_DAY, dates[3] + "")
-                    .setParameter(SConstants.END_MONTH, dates[4] + "")
-                    .setParameter(SConstants.END_YEAR, dates[5] + "")
-                    .setParameter(SConstants.COM_NAME, comName)
-                    .setParameter(SConstants.JOURNAL_TYPE_NAME, journalTypeName)
-                    .setParameter(SConstants.LANG, LocaleInfo.getCurrentLocale().getLocaleName())
-                    .buildString();
-            Window.open(url, journalTypeName, null);
-            
-        } else if (action.equals(AllPlace.LEDGER)) {
-
-            String fisKeyString = place.getFisKeyString();
-
-            String beginACKeyString = place.getKeyString();
-            String endACKeyString = place.getKeyString2();
-
-            // Assume that Acc chart is sorted
-            List<SAccChart> sAccChartList = sFis.getSAccChartList();
-
-            if (beginACKeyString.equals(AllPlace.FIRST)) {
-                for (SAccChart sAccChart : sAccChartList) {
-                    if (sAccChart.getType() == AccType.ENTRY) {
-                        beginACKeyString = sAccChart.getKeyString();
-                        break;
-                    }
-                }
-            }
-
-            if (endACKeyString.equals(AllPlace.LAST)) {
-                for (int i = sAccChartList.size() - 1; i >= 0; i--) {
-                    SAccChart sAccChart = sAccChartList.get(i);
-                    if (sAccChart.getType() == AccType.ENTRY) {
-                        endACKeyString = sAccChart.getKeyString();
-                        break;
-                    }
-                }
-            }
-
-            final String beginACNo = sFis.getSAccChart(beginACKeyString).getNo();
-            final String endACNo = sFis.getSAccChart(endACKeyString).getNo();
-
-            // Begin and end dates
-            final int[] dates = extractLedgerDate();
-            if (dates[0] == 0) {
-                dates[0] = 1;
-                dates[1] = sFis.getBeginMonth();
-                dates[2] = sFis.getBeginYear();
-                dates[3] = Utils.getLastDay(sFis.getEndMonth(), sFis.getEndYear());
-                dates[4] = sFis.getEndMonth();
-                dates[5] = sFis.getEndYear();
-            }
-
-            final boolean doShowAll = place.getKeyString9().equals(AllPlace.SHOW_ALL);
-
-            
-            String url = Window.Location.createUrlBuilder().setPath(SConstants.PDF_PATH)
-                    .setParameter(SConstants.ACTION, SConstants.LEDGER_ACTION)
-                    .setParameter(SConstants.FIS_KEY_STRING, fisKeyString)
-                    .setParameter(SConstants.BEGIN_ACC_NO, beginACNo)
-                    .setParameter(SConstants.END_ACC_NO, endACNo)
-                    .setParameter(SConstants.BEGIN_DAY, dates[0] + "")
-                    .setParameter(SConstants.BEGIN_MONTH, dates[1] + "")
-                    .setParameter(SConstants.BEGIN_YEAR, dates[2] + "")
-                    .setParameter(SConstants.END_DAY, dates[3] + "")
-                    .setParameter(SConstants.END_MONTH, dates[4] + "")
-                    .setParameter(SConstants.END_YEAR, dates[5] + "")
-                    .setParameter(SConstants.DO_SHOW_ALL, doShowAll ? SConstants.DO_SHOW_ALL : "n")
-                    .setParameter(SConstants.COM_NAME, comName)
-                    .setParameter(SConstants.LANG, LocaleInfo.getCurrentLocale().getLocaleName())
-                    .buildString();
-            Window.open(url, constants.ledger(), null);
         } else if (action.equals(AllPlace.TRIAL)){
 
             clientFactory.getModel().getAccAmtMap(place.getComKeyString(),
@@ -330,29 +229,5 @@ public class ReportActivity extends AbstractActivity implements ReportView.Prese
         } else {
             throw new AssertionError(action);
         }
-    }
-
-    private int[] extractJournalDate(){
-        int[] date = new int[6];
-        if(place.getKeyString2() != null){
-            date[0] = Integer.parseInt(place.getKeyString2());
-            date[1] = Integer.parseInt(place.getKeyString3());
-            date[2] = Integer.parseInt(place.getKeyString4());
-            date[3] = Integer.parseInt(place.getKeyString5());
-            date[4] = Integer.parseInt(place.getKeyString6());
-            date[5] = Integer.parseInt(place.getKeyString7());
-        }
-        return date;
-    }
-
-    private int[] extractLedgerDate(){
-        int[] date = new int[6];
-        date[0] = Integer.parseInt(place.getKeyString3());
-        date[1] = Integer.parseInt(place.getKeyString4());
-        date[2] = Integer.parseInt(place.getKeyString5());
-        date[3] = Integer.parseInt(place.getKeyString6());
-        date[4] = Integer.parseInt(place.getKeyString7());
-        date[5] = Integer.parseInt(place.getKeyString8());
-        return date;
     }
 }

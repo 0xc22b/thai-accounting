@@ -88,11 +88,10 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
         try {
             Connection conn = Db.getDBConn();
             try {
-                String sql = "INSERT INTO com (id, user_key_string, `name`) VALUES( ? , ? , ? )";
+                String sql = "INSERT INTO com (id, `name`) VALUES( ? , ? )";
                 PreparedStatement statement = conn.prepareStatement(sql,
                         Statement.RETURN_GENERATED_KEYS);
                 statement.setNull(1, Types.INTEGER);
-                statement.setString(2, "one_user");
                 statement.setString(3, sCom.getName());
                 int affectedRows = statement.executeUpdate();
                 if (affectedRows != 1) {
@@ -193,14 +192,13 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
                     long fisId = generatedKeys.getLong(1);
 
                     if(setupType == SConstants.ADD_FIS_WITH_DEFAULT_SETUP){
-                        // TODO: Fix this after set lang
-                        CreateSetup.createInThai(conn, fisId);
-                        /*UserData userData = UserManager.getUserData(user.getKey());
-                        if (userData.getLang().equals("th")) {
+
+                        String lang = Db.getLang(conn);
+                        if (lang.equals("th")) {
                             CreateSetup.createInThai(conn, fisId);
                         } else {
                             CreateSetup.createInEnglish(conn, fisId);
-                        }*/
+                        }
                     } else if (setupType == SConstants.ADD_FIS_WITH_PREVIOUS_SETUP) {
                         CreateSetup.createFromPrev(conn, comId, fisId);
                     }

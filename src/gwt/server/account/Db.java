@@ -34,7 +34,6 @@ public class Db {
 
     // Table fields
     public static final String ID = "id";
-    public static final String USER_KEY_STRING = "user_key_string";
     public static final String NAME = "name";
     public static final String CREATE_DATE = "create_date";
     public static final String BEGIN_MONTH = "begin_month";
@@ -58,6 +57,7 @@ public class Db {
     public static final String DESC = "desc";
     public static final String ACC_CHART_ID = "acc_chart_id";
     public static final String AMT = "amt";
+    public static final String LANG = "lang";
 
     // Error messages
     public static final String NO_ROW_EFFECTED_ERR = "Failed, no row affected!";
@@ -68,7 +68,7 @@ public class Db {
     public static Connection getDBConn() throws ClassNotFoundException, SQLException {
 
         String url = null;
-    
+
         // MySQL instance
         Class.forName("com.mysql.jdbc.Driver");
         url = "jdbc:mysql://localhost:3306/thai_accounting?user=root&password=root";
@@ -303,15 +303,13 @@ public class Db {
         String plusSql = "INSERT INTO acc_amt (fiscal_year_id, acc_chart_id, amt) VALUES ( ?, ?, ? ) ON DUPLICATE KEY UPDATE amt = amt + ?";
         PreparedStatement plusStatement = conn.prepareStatement(plusSql);
 
-        int affectedRows;
-
         for (SJournalItem sJournalItem : itemList) {
             addItemStatement.setNull(1, Types.INTEGER);
             addItemStatement.setLong(2, headerId);
             addItemStatement.setLong(3, Long.parseLong(sJournalItem.getAccChartKeyString()));
             addItemStatement.setDouble(4, sJournalItem.getAmt());
 
-            affectedRows = addItemStatement.executeUpdate();
+            int affectedRows = addItemStatement.executeUpdate();
             if (affectedRows != 1) {
                 throw new SQLException(Db.NO_ROW_EFFECTED_ERR);
             }
@@ -394,5 +392,28 @@ public class Db {
         statement.setInt(15, dates[4]);
         statement.setInt(16, dates[3]);
         return statement.executeQuery();
+    }
+
+    public static String getLang(Connection conn) throws SQLException {
+        String sql = "SELECT * FROM user WHERE id = 1";
+        PreparedStatement statement = conn.prepareStatement(sql);
+        ResultSet rs = statement.executeQuery();
+        if (rs.first()) {
+            return rs.getString(Db.LANG);
+        }
+        return "en_US";
+    }
+
+    public static void updateLang(Connection conn, String lang) throws SQLException {
+        String sql = "INSERT INTO user (id, lang) VALUES ( ? , ? ) ON DUPLICATE KEY UPDATE lang = ? ";
+        PreparedStatement statement = conn.prepareStatement(sql);
+        statement.setLong(1, 1);
+        statement.setString(2, lang);
+        statement.setString(3, lang);
+
+        int affectedRows = statement.executeUpdate();
+        if (affectedRows != 1 && affectedRows != 2) {
+            throw new SQLException(Db.NO_ROW_EFFECTED_ERR);
+        }
     }
 }

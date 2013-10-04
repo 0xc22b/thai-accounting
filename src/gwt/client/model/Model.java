@@ -255,6 +255,29 @@ public class Model {
         // Validate SComList
         if(sComList == null || sComList.getSCom(comKeyString) == null
                 || sComList.getSCom(comKeyString).getSFis(fisKeyString) == null) {
+            getComList(new AsyncCallback<SComList>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    callback.onFailure(new DataNotFoundException());
+                    return;
+                }
+
+                @Override
+                public void onSuccess(SComList result) {
+                    getSetupInternal(comKeyString, fisKeyString, callback);
+                }
+            });
+        } else {
+            getSetupInternal(comKeyString, fisKeyString, callback);
+        }
+    }
+    
+    private void getSetupInternal(final String comKeyString, final String fisKeyString,
+            final AsyncCallback<SFiscalYear> callback) {
+
+        // Validate SComList
+        if(sComList == null || sComList.getSCom(comKeyString) == null
+                || sComList.getSCom(comKeyString).getSFis(fisKeyString) == null) {
             callback.onFailure(new DataNotFoundException());
             return;
         }

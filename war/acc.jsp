@@ -1,9 +1,38 @@
+<%@ page import="java.sql.DriverManager" %>
+<%@ page import="java.sql.Connection" %>
+<%@ page import="java.sql.PreparedStatement" %>
+<%@ page import="java.sql.ResultSet" %>
+<%@ page import="java.sql.SQLException" %>
+<%
+   String lang = "en_US";
+   try {
+       Class.forName("com.mysql.jdbc.Driver");
+       String url = "jdbc:mysql://localhost:3306/thai_accounting?user=root&password=root";
+
+       Connection conn =  DriverManager.getConnection(url);
+       try {
+           String sql = "SELECT * FROM user WHERE id = 1";
+           PreparedStatement statement = conn.prepareStatement(sql);
+           ResultSet rs = statement.executeQuery();
+           if (rs.first()) {
+               lang = rs.getString("lang");
+           }
+       } finally {
+           conn.close();
+       }
+   } catch (ClassNotFoundException e) {
+       e.printStackTrace();
+   } catch (SQLException e) {
+       e.printStackTrace();
+   }
+%>
+
 <!doctype html>
 <html>
 <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
 
-    <meta name="gwt:property" content="locale=th">
+    <meta name="gwt:property" content="locale=<%= lang %>">
 
     <title>Thai SME accounting</title>        
 </head>

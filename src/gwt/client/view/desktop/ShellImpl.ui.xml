@@ -46,28 +46,19 @@
 	        right: 10px;
 	    }
         
-        .logOutBtn {
-	        float: right;
-	        border: 0;
-	        background-color: white;
-	        cursor: pointer;
+        .upperRightPanel a {
+	        color: #222;
+	        text-decoration: none;
 	    }
 	    
-	    .logOutBtn:hover {
+	    .upperRightPanel a:hover, .upperRightPanel a:visited {
+	        color: #222;
+	    }
+	    
+	    .upperRightPanel a:hover {
 	        text-decoration: underline;
 	    }
-	    
-	    .userBtn {
-	        float: right;
-	        border: 0;
-	        background-color: white;
-	        cursor: pointer;
-	    }
-	    
-	    .userBtn:hover {
-	        text-decoration: underline;
-	    }
-        
+
         .container {
             margin: 0 10px 0 0;
         }
@@ -88,8 +79,9 @@
                         <g:Label ui:field="hLb" styleName='{style.hLb}'></g:Label>
                         <g:FlowPanel ui:field="actBar"></g:FlowPanel>
                         <g:HTMLPanel styleName='{style.upperRightPanel}'>
-                            <g:Button ui:field="logOutBtn" styleName='{style.logOutBtn}'></g:Button>
-                            <g:Button ui:field="userBtn" styleName='{style.userBtn}'></g:Button>
+                            <a href="/user?lang=en">en</a>
+                            <span>/</span>
+                            <a href="/user?lang=th">th</a>
                         </g:HTMLPanel>
                     </g:FlowPanel>
                 </g:north>

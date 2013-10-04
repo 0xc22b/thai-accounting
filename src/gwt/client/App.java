@@ -4,14 +4,11 @@ import com.google.gwt.activity.shared.ActivityManager;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.place.shared.PlaceHistoryHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.web.bindery.event.shared.EventBus;
 
 import gwt.client.place.AllPlace;
 import gwt.client.place.AppPlaceHistoryMapper;
-import gwt.client.event.ActionEvent;
-import gwt.client.event.ActionNames;
 import gwt.client.view.Shell;
 
 /**
@@ -42,20 +39,6 @@ public class App {
     public void run(HasWidgets.ForIsWidget parentView) {
         activityManager.setDisplay(shell);
         parentView.add(shell);
-
-        ActionEvent.register(eventBus, ActionNames.LOGOUT, new ActionEvent.Handler() {
-            @Override
-            public void onAction(ActionEvent event) {
-                Window.Location.assign("/logout");
-            }
-        });
-        
-        ActionEvent.register(eventBus, ActionNames.USER, new ActionEvent.Handler() {
-            @Override
-            public void onAction(ActionEvent event) {
-                Window.Location.assign("/user");
-            }
-        });
         
         /*GWT.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
             @Override
