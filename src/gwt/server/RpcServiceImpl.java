@@ -92,7 +92,7 @@ public class RpcServiceImpl extends RemoteServiceServlet implements RpcService {
                 PreparedStatement statement = conn.prepareStatement(sql,
                         Statement.RETURN_GENERATED_KEYS);
                 statement.setNull(1, Types.INTEGER);
-                statement.setString(3, sCom.getName());
+                statement.setString(2, sCom.getName());
                 int affectedRows = statement.executeUpdate();
                 if (affectedRows != 1) {
                     throw new SQLException(Db.NO_ROW_EFFECTED_ERR);

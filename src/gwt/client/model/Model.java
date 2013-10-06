@@ -325,7 +325,7 @@ public class Model {
                         sFis.sortSAccChartList();
 
                         // Return data to caller
-                        callback.onSuccess(result);
+                        callback.onSuccess(sFis);
 
                         fetchedSetupList.add(fisKeyString);
                     }

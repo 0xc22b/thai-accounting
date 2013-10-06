@@ -31,14 +31,16 @@ public class StressTestServlet extends HttpServlet {
         String respText;
 
         String fisKeyString = req.getParameter("fis");
-        String monthString = req.getParameter("month");
+        String beginMonthString = req.getParameter("beginmonth");
+        String endMonthString = req.getParameter("endmonth");
         String yearString = req.getParameter("year");
 
         long fisId = Long.parseLong(fisKeyString);
-        int month = Integer.parseInt(monthString);
+        int beginMonth = Integer.parseInt(beginMonthString);
+        int endMonth = Integer.parseInt(endMonthString);
         int year = Integer.parseInt(yearString);
 
-        addJournals(fisId, month, year);
+        addJournals(fisId, beginMonth, endMonth, year);
 
         respText = "Journals added to the month!";
 
@@ -50,7 +52,7 @@ public class StressTestServlet extends HttpServlet {
         out.close();
     }
 
-    private void addJournals(long fisId, int month, int year) {
+    private void addJournals(long fisId, int beginMonth, int endMonth, int year) {
 
         try {
             Connection conn = Db.getDBConn();
@@ -59,8 +61,7 @@ public class StressTestServlet extends HttpServlet {
                 // Get doc types and acc charts
                 SFiscalYear sFis = Db.getSetup(conn, fisId);
 
-                List<SDocType> sDTList = new ArrayList<SDocType>();
-                sDTList = sFis.getSDocTypeList();
+                List<SDocType> sDTList = sFis.getSDocTypeList();
 
                 List<SAccChart> sACList = new ArrayList<SAccChart>();
                 for (SAccChart sAccChart : sFis.getSAccChartList()) {
@@ -75,82 +76,84 @@ public class StressTestServlet extends HttpServlet {
                 conn.setAutoCommit(false);
 
                 SJournalItem sJItem;
-                for (int i = 1; i <= 26; i++) { // Total of days in 1 month
-                    for (int j = 1; j <= 40; j++) { // Total of journals per day
-
-                        SJournalHeader sJournal = new SJournalHeader(
-                                null,
-                                getRandomDTKeyString(sDTList),
-                                genNo(year, month, i, j),
-                                (i % 30),
-                                month,
-                                year,
-                                "Desc for " + year + "-" + month + "-" + i + "-" + j);
-
-                        sJItem = new SJournalItem(null, getRandomACKeyString(sACList), 28230.0, d);
-                        sJournal.addItem(sJItem);
-
-                        sJItem = new SJournalItem(null, getRandomACKeyString(sACList), -28230.0, d);
-                        sJournal.addItem(sJItem);
-
-                        sJItem = new SJournalItem(null, getRandomACKeyString(sACList), 6720.0, d);
-                        sJournal.addItem(sJItem);
-
-                        sJItem = new SJournalItem(null, getRandomACKeyString(sACList), -6720.0, d);
-                        sJournal.addItem(sJItem);
-
-                        sJItem = new SJournalItem(null, getRandomACKeyString(sACList), 88110.0, d);
-                        sJournal.addItem(sJItem);
-
-                        sJItem = new SJournalItem(null, getRandomACKeyString(sACList), -88110.0, d);
-                        sJournal.addItem(sJItem);
-
-                        sJItem = new SJournalItem(null, getRandomACKeyString(sACList), 5210.37, d);
-                        sJournal.addItem(sJItem);
-
-                        sJItem = new SJournalItem(null, getRandomACKeyString(sACList), -5210.37, d);
-                        sJournal.addItem(sJItem);
-
-                        sJItem = new SJournalItem(null, getRandomACKeyString(sACList), 10.99, d);
-                        sJournal.addItem(sJItem);
-
-                        sJItem = new SJournalItem(null, getRandomACKeyString(sACList), -10.99, d);
-                        sJournal.addItem(sJItem);
-
-                        sJItem = new SJournalItem(null, getRandomACKeyString(sACList), 99000.30, d);
-                        sJournal.addItem(sJItem);
-
-                        sJItem = new SJournalItem(null, getRandomACKeyString(sACList), -99000.30, d);
-                        sJournal.addItem(sJItem);
-
-                        sJItem = new SJournalItem(null, getRandomACKeyString(sACList), 3456.78, d);
-                        sJournal.addItem(sJItem);
-
-                        sJItem = new SJournalItem(null, getRandomACKeyString(sACList), -3456.78, d);
-                        sJournal.addItem(sJItem);
-
-                        sJItem = new SJournalItem(null, getRandomACKeyString(sACList), 21098.76, d);
-                        sJournal.addItem(sJItem);
-
-                        sJItem = new SJournalItem(null, getRandomACKeyString(sACList), -21098.76, d);
-                        sJournal.addItem(sJItem);
-
-                        sJItem = new SJournalItem(null, getRandomACKeyString(sACList), 6785.00, d);
-                        sJournal.addItem(sJItem);
-
-                        sJItem = new SJournalItem(null, getRandomACKeyString(sACList), -6785.00, d);
-                        sJournal.addItem(sJItem);
-
-                        sJItem = new SJournalItem(null, getRandomACKeyString(sACList), 987.65, d);
-                        sJournal.addItem(sJItem);
-
-                        sJItem = new SJournalItem(null, getRandomACKeyString(sACList), -987.65, d);
-                        sJournal.addItem(sJItem);
-
-                        Db.addJournal(conn, fisId, sJournal);
-
-                        // end transaction
-                        conn.commit();
+                for (int m = beginMonth; m <= endMonth; m++) {
+                    for (int i = 1; i <= 26; i++) { // Total of days in 1 month
+                        for (int j = 1; j <= 40; j++) { // Total of journals per day
+    
+                            SJournalHeader sJournal = new SJournalHeader(
+                                    null,
+                                    getRandomDTKeyString(sDTList),
+                                    genNo(year, m, i, j),
+                                    (i % 30),
+                                    m,
+                                    year,
+                                    "Desc for " + year + "-" + m + "-" + i + "-" + j);
+    
+                            sJItem = new SJournalItem(null, getRandomACKeyString(sACList), 2823.0, d);
+                            sJournal.addItem(sJItem);
+    
+                            sJItem = new SJournalItem(null, getRandomACKeyString(sACList), -2823.0, d);
+                            sJournal.addItem(sJItem);
+    
+                            sJItem = new SJournalItem(null, getRandomACKeyString(sACList), 672.0, d);
+                            sJournal.addItem(sJItem);
+    
+                            sJItem = new SJournalItem(null, getRandomACKeyString(sACList), -672.0, d);
+                            sJournal.addItem(sJItem);
+    
+                            sJItem = new SJournalItem(null, getRandomACKeyString(sACList), 881.0, d);
+                            sJournal.addItem(sJItem);
+    
+                            sJItem = new SJournalItem(null, getRandomACKeyString(sACList), -881.0, d);
+                            sJournal.addItem(sJItem);
+    
+                            sJItem = new SJournalItem(null, getRandomACKeyString(sACList), 50.37, d);
+                            sJournal.addItem(sJItem);
+    
+                            sJItem = new SJournalItem(null, getRandomACKeyString(sACList), -50.37, d);
+                            sJournal.addItem(sJItem);
+    
+                            sJItem = new SJournalItem(null, getRandomACKeyString(sACList), 1.99, d);
+                            sJournal.addItem(sJItem);
+    
+                            sJItem = new SJournalItem(null, getRandomACKeyString(sACList), -1.99, d);
+                            sJournal.addItem(sJItem);
+    
+                            sJItem = new SJournalItem(null, getRandomACKeyString(sACList), 99.30, d);
+                            sJournal.addItem(sJItem);
+    
+                            sJItem = new SJournalItem(null, getRandomACKeyString(sACList), -99.30, d);
+                            sJournal.addItem(sJItem);
+    
+                            sJItem = new SJournalItem(null, getRandomACKeyString(sACList), 3456.78, d);
+                            sJournal.addItem(sJItem);
+    
+                            sJItem = new SJournalItem(null, getRandomACKeyString(sACList), -3456.78, d);
+                            sJournal.addItem(sJItem);
+    
+                            sJItem = new SJournalItem(null, getRandomACKeyString(sACList), 210.76, d);
+                            sJournal.addItem(sJItem);
+    
+                            sJItem = new SJournalItem(null, getRandomACKeyString(sACList), -210.76, d);
+                            sJournal.addItem(sJItem);
+    
+                            sJItem = new SJournalItem(null, getRandomACKeyString(sACList), 67.00, d);
+                            sJournal.addItem(sJItem);
+    
+                            sJItem = new SJournalItem(null, getRandomACKeyString(sACList), -67.00, d);
+                            sJournal.addItem(sJItem);
+    
+                            sJItem = new SJournalItem(null, getRandomACKeyString(sACList), 98.65, d);
+                            sJournal.addItem(sJItem);
+    
+                            sJItem = new SJournalItem(null, getRandomACKeyString(sACList), -98.65, d);
+                            sJournal.addItem(sJItem);
+    
+                            Db.addJournal(conn, fisId, sJournal);
+    
+                            // end transaction
+                            conn.commit();
+                        }
                     }
                 }
             } catch (SQLException e) {
@@ -169,12 +172,12 @@ public class StressTestServlet extends HttpServlet {
     }
 
     private String getRandomACKeyString(List<SAccChart> sACList) {
-        int i = (int)(Math.random() * (sACList.size() - 1));
+        int i = (int)(Math.random() * sACList.size());
         return sACList.get(i).getKeyString();
     }
 
     private String getRandomDTKeyString(List<SDocType> sDTList) {
-        int i = (int)(Math.random() * (sDTList.size() - 1));
+        int i = (int)(Math.random() * sDTList.size());
         return sDTList.get(i).getKeyString();
     }
 
