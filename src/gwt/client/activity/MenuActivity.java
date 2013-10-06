@@ -17,6 +17,8 @@ import gwt.shared.model.SFiscalYear;
 import gwt.shared.model.SAccChart.AccType;
 
 import com.google.gwt.activity.shared.AbstractActivity;
+import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.Window;
@@ -44,10 +46,13 @@ public class MenuActivity extends AbstractActivity implements MenuView.Presenter
         panel.setWidget(clientFactory.getMenuView().asWidget());
         
         getSetup();
+        
+        Document.get().getBody().getStyle().setOverflowY(Style.Overflow.SCROLL);
     }
 
     @Override
     public String mayStop() {
+        Document.get().getBody().getStyle().clearOverflowY();
         return null;
     }
 

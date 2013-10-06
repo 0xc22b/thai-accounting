@@ -81,6 +81,7 @@ public class ListViewImpl<L, E> extends Composite implements ListView<L, E> {
 
     private boolean doKeepState = false;
     private int scrollTop = 0;
+    private int scrollMore = 0;
 
     public ListViewImpl(ListDef<L, E> listDef) {
         this.listDef = listDef;
@@ -104,6 +105,7 @@ public class ListViewImpl<L, E> extends Composite implements ListView<L, E> {
 
             pager.setPage(0);
             scrollTop = 0;
+            scrollMore = 0;
         }
         doKeepState = false;
     }
@@ -143,7 +145,8 @@ public class ListViewImpl<L, E> extends Composite implements ListView<L, E> {
             el = el.getParentElement();
             if (el == null) return;
         }
-        scrollTop = el.getScrollTop() + scrollMore;
+        this.scrollTop = el.getScrollTop();
+        this.scrollMore = scrollMore;
     }
 
     private Handler loadingStateChangeHandler = new Handler() {
@@ -154,15 +157,23 @@ public class ListViewImpl<L, E> extends Composite implements ListView<L, E> {
             LoadingState ls = event.getLoadingState();
             if (ls.equals(LoadingState.LOADED)) {
                 if (scrollTop > 0) {
-                    // TODO: scrollMore = 0, No need timer
-                    new Timer() {
-                        public void run() {
-                            Element el = dataGrid.getRowContainer();
-                            el = el.getParentElement().getParentElement().getParentElement();
-                            el.setScrollTop(scrollTop);
-                            scrollTop = 0;
-                        }
-                    }.schedule(1);
+                    // scrollMore = 0, No need timer
+                    if (scrollMore > 0) {
+                        new Timer() {
+                            public void run() {
+                                Element el = dataGrid.getRowContainer();
+                                el = el.getParentElement().getParentElement().getParentElement();
+                                el.setScrollTop(scrollTop + scrollMore);
+                                scrollTop = 0;
+                                scrollMore = 0;
+                            }
+                        }.schedule(1);
+                    } else {
+                        Element el = dataGrid.getRowContainer();
+                        el = el.getParentElement().getParentElement().getParentElement();
+                        el.setScrollTop(scrollTop);
+                        scrollTop = 0;
+                    }
                 }
             }
         }

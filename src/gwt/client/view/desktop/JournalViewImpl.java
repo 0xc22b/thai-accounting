@@ -78,6 +78,7 @@ public class JournalViewImpl<T, J, M> extends Composite implements JournalView<T
             removeBtn = new Button(constants.remove());
             removeBtn.addStyleName(style.cell());
             removeBtn.addClickHandler(removeBtnClickHandler);
+            removeBtn.setTabIndex(-2);
             panel.add(removeBtn);
             
             initWidget(panel);

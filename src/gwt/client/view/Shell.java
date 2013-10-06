@@ -12,4 +12,5 @@ public interface Shell extends AcceptsOneWidget, IsWidget {
     void setActBtn(int i, String text, String actionName, boolean visible);
     void setActBtnVisible(int i, boolean visible);
 
+    //void setScrollYShown(boolean shown);
 }

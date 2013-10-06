@@ -48,6 +48,7 @@ public class CustomSuggestBox extends Composite{
         
         suggest = new MultiWordSuggestOracle();
         suggestionDisplay = new DefaultSuggestionDisplay();
+
         suggestBox = new SuggestBox(suggest, new TextBox(), suggestionDisplay);
         suggestBox.getValueBox().addKeyUpHandler(suggestBoxKeyUpHandler);
         suggestBox.getValueBox().addValueChangeHandler(suggestBoxValueChangeHandler);
@@ -55,6 +56,7 @@ public class CustomSuggestBox extends Composite{
         suggestBox.setLimit(1000);
         
         showAllBtn = new Button("show");
+        showAllBtn.setTabIndex(-2);
         showAllBtn.addClickHandler(showAllBtnClickHandler);
         
         panel = new FlowPanel();
@@ -163,16 +165,19 @@ public class CustomSuggestBox extends Composite{
         }
     };
     
-    private ValueChangeHandler<String> suggestBoxValueChangeHandler = new ValueChangeHandler<String>(){
+    private ValueChangeHandler<String> suggestBoxValueChangeHandler =
+            new ValueChangeHandler<String>(){
         @Override
         public void onValueChange(ValueChangeEvent<String> event) {
             callbackCompleteInput();
         }
     };
     
-    private SelectionHandler<Suggestion> suggestBoxSelectionHandler = new SelectionHandler<Suggestion>(){
+    private SelectionHandler<Suggestion> suggestBoxSelectionHandler =
+            new SelectionHandler<Suggestion>(){
         @Override
         public void onSelection(SelectionEvent<Suggestion> event) {
+            suggestBox.setFocus(true);
             callbackCompleteInput();
         }
     };
