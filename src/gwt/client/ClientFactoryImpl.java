@@ -25,6 +25,7 @@ import gwt.client.view.JournalTypeView;
 import gwt.client.view.JournalView;
 import gwt.client.view.ListView;
 import gwt.client.view.MenuView;
+import gwt.client.view.PdfView;
 import gwt.client.view.ReportView;
 import gwt.client.view.Shell;
 import gwt.client.view.desktop.AccChartViewImpl;
@@ -37,6 +38,7 @@ import gwt.client.view.desktop.JournalTypeViewImpl;
 import gwt.client.view.desktop.JournalViewImpl;
 import gwt.client.view.desktop.ListViewImpl;
 import gwt.client.view.desktop.MenuViewImpl;
+import gwt.client.view.desktop.PdfViewImpl;
 import gwt.client.view.desktop.ReportViewImpl;
 import gwt.client.view.desktop.ShellImpl;
 import gwt.shared.model.SAccAmt;
@@ -103,6 +105,8 @@ public class ClientFactoryImpl implements ClientFactory {
     
     private ReportView<SFiscalYear, SJournalHeader, SJournalItem, SAccAmt> reportView;
     
+    private PdfView pdfView;
+
     @Override
     public App getApp() {
         return new App(this,
@@ -281,21 +285,18 @@ public class ClientFactoryImpl implements ClientFactory {
     @Override
     public ReportView<SFiscalYear, SJournalHeader, SJournalItem, SAccAmt> getReportView() {
         if (reportView == null) {
-            reportView = new ReportViewImpl<SFiscalYear, SJournalHeader, SJournalItem, SAccAmt>(
-                    FisDefImpl.getInstance(), AccAmtDefImpl.getInstance());
+            reportView = new ReportViewImpl<SFiscalYear, SJournalHeader,
+                    SJournalItem, SAccAmt>(FisDefImpl.getInstance(),
+                            AccAmtDefImpl.getInstance());
         }
         return reportView;
     }
 
-    
-
-    
-    
-    
-    
-
-    
-
-    
-
+    @Override
+    public PdfView getPdfView() {
+        if (pdfView == null) {
+            pdfView = new PdfViewImpl();
+        }
+        return pdfView;
+    }
 }

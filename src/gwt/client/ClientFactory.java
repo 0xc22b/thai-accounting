@@ -11,6 +11,7 @@ import gwt.client.view.JournalTypeView;
 import gwt.client.view.JournalView;
 import gwt.client.view.ListView;
 import gwt.client.view.MenuView;
+import gwt.client.view.PdfView;
 import gwt.client.view.ReportView;
 import gwt.client.view.Shell;
 import gwt.shared.model.SAccAmt;
@@ -58,4 +59,6 @@ public interface ClientFactory {
     JournalView<SFiscalYear, SJournalHeader, SJournalItem> getJournalView();
 
     ReportView<SFiscalYear, SJournalHeader, SJournalItem, SAccAmt> getReportView();
+    
+    PdfView getPdfView();
 }

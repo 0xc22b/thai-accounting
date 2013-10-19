@@ -23,3 +23,6 @@
 
 # Caveats
   - Not supported in App Engine as java.awt.* not allowed to be use!
+
+# In IE9, PDF not updated sometimes!!!
+  - Turn off Browsing history: Internet options -> General -> Browsing history -> Settings -> Choose Every time I visit the webpage
