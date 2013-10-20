@@ -125,7 +125,15 @@ public class BeginViewImpl<T> extends Composite implements BeginView<T> {
             return;
         }
         
-        String ks = keyString != null ? keyString : noSB.getKey();
+        String ks = noSB.getKey();
+
+        if (presenter.isBeginningAlreadySet(ks)) {
+            errNoLb.setText(constants.duplicateBeginningMsg());
+            return;
+        } else {
+            errNoLb.setText("");
+        }
+
         double debit = debitDB.getCustomValue();
         double credit = creditDB.getCustomValue();
         double beginning = debit != 0 ? debit : credit * -1;
@@ -137,12 +145,11 @@ public class BeginViewImpl<T> extends Composite implements BeginView<T> {
         if(!validateInputs()){
             return;
         }
-        
-        String ks = keyString != null ? keyString : noSB.getKey();
+
         double debit = debitDB.getCustomValue();
         double credit = creditDB.getCustomValue();
         double beginning = debit != 0 ? debit : credit * -1;
-        presenter.editBegin(ks, beginning);
+        presenter.editBegin(keyString, beginning);
     }
     
     private boolean validateInputs(){

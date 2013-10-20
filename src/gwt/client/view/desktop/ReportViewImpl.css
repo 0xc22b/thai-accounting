@@ -21,7 +21,7 @@
 }
 
 .flexTable thead tr:last-child th {
-    border-bottom: 1px solid #000;
+    border-bottom: 1px solid #222;
     text-align: left;
 }
 
@@ -88,12 +88,12 @@
 }
 
 .journal thead tr:last-child th:nth-child\(4\){
-    width: 12%;
+    width: 13%;
     text-align: center !important;
 }
 
 .journal thead tr:last-child th:nth-child\(5\){
-    width: 12%;
+    width: 13%;
     text-align: center !important;
 }
 
@@ -139,17 +139,17 @@
 }
 
 .ledger thead tr:last-child th:nth-child\(5\){
-    width: 12%;
+    width: 13%;
     text-align: center !important;
 }
 
 .ledger thead tr:last-child th:nth-child\(6\){
-    width: 12%;
+    width: 13%;
     text-align: center !important;
 }
 
 .ledger thead tr:last-child th:nth-child\(7\){
-    width: 12%;
+    width: 13%;
     text-align: center !important;
 }
 
@@ -191,12 +191,12 @@
 }
 
 .trial thead tr:last-child th:nth-child\(3\){
-    width: 12%;
+    width: 13%;
     text-align: center !important;
 }
 
 .trial thead tr:last-child th:nth-child\(4\){
-    width: 12%;
+    width: 13%;
     text-align: center !important;
 }
 .trial tbody tr td:nth-child\(3\){
@@ -225,7 +225,7 @@
 }
 
 .finance tbody tr td:nth-child\(2\){
-	width: 12%;
+    width: 13%;
     text-align: right !important;
 }
 
@@ -238,7 +238,7 @@
 @external .right, .center, uline, duline, auline, aduline;
 
 .right {
-	text-align: right;
+    text-align: right;
 }
 
 .center {
@@ -246,27 +246,27 @@
 }
 
 .uline {
-    border-bottom: 1px solid #000;
+    border-bottom: 1px solid #222;
 }
 
 .duline {
-    border-bottom: 4px double #000;
+    border-bottom: 4px double #222;
 }
 
 .auline {
-	border-top: 1px solid #000;
-	border-bottom: 1px solid #000;
+    border-top: 1px solid #222;
+    border-bottom: 1px solid #222;
 }
 
 .aduline {
-    border-top: 1px solid #000;
-    border-bottom: 4px double #000;
+    border-top: 1px solid #222;
+    border-bottom: 4px double #222;
 }
 
 @external page-always-break-before, page-avoid-break-after;
 
 .page-always-break-before {
-	page-break-before: always;
+    page-break-before: always;
 }
 
 .page-avoid-break-after {

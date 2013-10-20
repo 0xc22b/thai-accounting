@@ -910,6 +910,23 @@ public class Model {
             }
         });
     }
+    
+    public boolean isBeginningAlreadySet(final String comKeyString,
+            final String fisKeyString, final String accChartKeyString) {
+
+        SFiscalYear sFis = sComList.getSCom(comKeyString).getSFis(fisKeyString);
+        for (int i = 0; i < sFis.getSAccChartList().size(); i++) {
+            SAccChart sAccChart = sFis.getSAccChartList().get(i);
+            if (sAccChart.getKeyString().equals(accChartKeyString)) {
+                if (Utils.isZero(sAccChart.getBeginning(), 2)) {
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+        }
+        throw new AssertionError();
+    }
 
     public void setBeginning(final String comKeyString, final String fisKeyString,
             final String accChartKeyString,
@@ -1053,7 +1070,8 @@ public class Model {
         boolean isPut = false;
         for (int i = 0; i < sJournalList.size(); i++) {
             SJournalHeader sJournal = sJournalList.get(i);
-            if (sJournal.compareDate(nSJH.getDay(), nSJH.getMonth(), nSJH.getYear()) > 0) {
+            int cd = sJournal.compareDate(nSJH.getDay(), nSJH.getMonth(), nSJH.getYear());
+            if (cd > 0 || (cd == 0 && sJournal.getNo().compareTo(nSJH.getNo()) > 0)) {
                 sJournalList.add(i, nSJH);
                 isPut = true;
                 break;

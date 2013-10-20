@@ -103,6 +103,10 @@ public class JournalViewImpl<T, J, M> extends Composite implements JournalView<T
             removeBtn.setEnabled(enabled);
         }
         
+        public void setFocus(boolean focused) {
+            accNoSB.setFocus(focused);
+        }
+        
         public void setErrText(String text) {
             errLb.setText(text);
         }
@@ -254,6 +258,8 @@ public class JournalViewImpl<T, J, M> extends Composite implements JournalView<T
     @UiField
     FlowPanel itemPanel;
     @UiField
+    Label totalLb;
+    @UiField
     Label totalDebitLb;
     @UiField
     Label totalCreditLb;
@@ -295,6 +301,8 @@ public class JournalViewImpl<T, J, M> extends Composite implements JournalView<T
         debitLb.setText(constants.debit());
         creditLb.setText(constants.credit());
 
+        totalLb.setText(constants.total());
+        
         dayIB.setRange(1, 31);
 
         docTypeLB.addChangeHandler(docTypeChangeHandler);
@@ -311,8 +319,9 @@ public class JournalViewImpl<T, J, M> extends Composite implements JournalView<T
         this.presenter = presenter;
 
         keyString = null;
-        
-        month = 0;
+ 
+        // Don't reset here as it will be used for suggestion later.
+        //month = 0;
         year = 0;
 
         beginMonth = 0;
@@ -367,6 +376,12 @@ public class JournalViewImpl<T, J, M> extends Composite implements JournalView<T
             descTB.setText(fisDef.getDTJournalDesc(t, docTypeLB.getValue()));
         } else {
             errDocTypeLb.setText(constants.invalidMsg());
+        }
+
+        // Month changed, reset some values
+        if (this.month != month) {
+            noTB.setText("");
+            dayIB.clear();
         }
 
         this.month = month;
@@ -432,7 +447,9 @@ public class JournalViewImpl<T, J, M> extends Composite implements JournalView<T
 
     @Override
     public void addItemBtnClicked(T t) {
-        itemPanel.add(new Item(t));
+        Item item = new Item(t);
+        itemPanel.add(item);
+        item.setFocus(true);
     }
     
     @Override
@@ -494,7 +511,12 @@ public class JournalViewImpl<T, J, M> extends Composite implements JournalView<T
                 errDateLb.setText(constants.invalidMsg());
                 isValid = false;
             } else {
-                errDateLb.setText("");
+                if (day > Utils.getLastDay(month, year)) {
+                    errDateLb.setText(constants.invalidMsg());
+                    isValid = false;
+                } else {
+                    errDateLb.setText("");
+                }
             }
         } catch (NumberFormatException e) {
             errDateLb.setText(constants.invalidNumberMsg());

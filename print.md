@@ -28,7 +28,7 @@
 * Tools -> Print -> Page setup...
 * Page Size: Letter Fanfold 8 1/2 x 11 in
 * Select Portrait
-* Margins (inches)- Left: 0.732, Right: 0.122, Top: 0.166, Bottom: 0.332
+* Margins (inches)- Left: 0.932, Right: 0.122, Top: 0.166, Bottom: 0.664
 * Headers - Empty, Emtpy, Custom: &p / &P
 * Footers - Empty all
 ### CAVEATS:

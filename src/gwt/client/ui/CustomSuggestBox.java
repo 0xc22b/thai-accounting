@@ -1,5 +1,7 @@
 package gwt.client.ui;
 
+import gwt.client.TCF;
+import gwt.client.TConstants;
 import gwt.shared.InvalidValueException;
 
 import java.util.ArrayList;
@@ -30,6 +32,8 @@ public class CustomSuggestBox extends Composite{
         void onCompleteInput(String key, String value);
     }
     
+    private static final TConstants constants = TCF.get();
+    
     private FlowPanel panel;
     private SuggestBox suggestBox;
     private Button showAllBtn;
@@ -55,7 +59,7 @@ public class CustomSuggestBox extends Composite{
         suggestBox.addSelectionHandler(suggestBoxSelectionHandler);
         suggestBox.setLimit(1000);
         
-        showAllBtn = new Button("show");
+        showAllBtn = new Button(constants.show());
         showAllBtn.setTabIndex(-2);
         showAllBtn.addClickHandler(showAllBtnClickHandler);
         

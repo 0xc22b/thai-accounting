@@ -4,7 +4,6 @@ import com.google.gwt.i18n.client.Constants;
 
 public interface TConstants extends Constants{
 
-    
     @DefaultStringValue("Log out")
     String logOut();
     
@@ -214,7 +213,10 @@ public interface TConstants extends Constants{
     
     @DefaultStringValue("Show all")
     String showAll();
-    
+
+    @DefaultStringValue("Show")
+    String show();
+
     @DefaultStringValue("Does split")
     String doesSplit();
 
@@ -301,6 +303,9 @@ public interface TConstants extends Constants{
 
     @DefaultStringValue("This name is already in use.")
     String duplicateNameMsg();
+    
+    @DefaultStringValue("Already set the beginning for this account.")
+    String duplicateBeginningMsg();
     
     @DefaultStringValue("Items are required.")
     String itemRequiredMsg();

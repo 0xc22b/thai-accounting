@@ -5,6 +5,7 @@
  * 2. Modify nth-child\(n\) to nth-child(n)
  *    Tip: Find \ and replace with ''
  * 3. Change border 1px to 0.4pt and 4px to 1pt
+ * 4. Add -fs-table-paginate: paginate in .flexTable
  ********************************************* */
 
 /* ===========================================
@@ -27,7 +28,7 @@ body {
 
 @page {
     size: letter;
-	margin: 0.532in 0.122in 0.322in 0.732in;
+	margin: 0.532in 0.122in 0.644in 0.932in;
     @top-right {
         font-family: "Arial Unicode MS", Arial, sans-serif;
         font-size: 7pt;
@@ -126,12 +127,12 @@ body {
 }
 
 .journal thead tr:last-child th:nth-child(4){
-    width: 12%;
+    width: 13%;
     text-align: center !important;
 }
 
 .journal thead tr:last-child th:nth-child(5){
-    width: 12%;
+    width: 13%;
     text-align: center !important;
 }
 
@@ -177,17 +178,17 @@ body {
 }
 
 .ledger thead tr:last-child th:nth-child(5){
-    width: 12%;
+    width: 13%;
     text-align: center !important;
 }
 
 .ledger thead tr:last-child th:nth-child(6){
-    width: 12%;
+    width: 13%;
     text-align: center !important;
 }
 
 .ledger thead tr:last-child th:nth-child(7){
-    width: 12%;
+    width: 13%;
     text-align: center !important;
 }
 
@@ -229,12 +230,12 @@ body {
 }
 
 .trial thead tr:last-child th:nth-child(3){
-    width: 12%;
+    width: 13%;
     text-align: center !important;
 }
 
 .trial thead tr:last-child th:nth-child(4){
-    width: 12%;
+    width: 13%;
     text-align: center !important;
 }
 .trial tbody tr td:nth-child(3){
@@ -263,7 +264,7 @@ body {
 }
 
 .finance tbody tr td:nth-child(2){
-    width: 10%;
+    width: 13%;
     text-align: right !important;
 }
 
@@ -288,7 +289,7 @@ body {
 }
 
 .duline {
-	border-bottom: 2.5pt double #222;
+    border-bottom: 2.5pt double #222;
 }
 
 .auline {

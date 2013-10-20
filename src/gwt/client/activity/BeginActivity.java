@@ -59,6 +59,12 @@ public class BeginActivity extends AbstractActivity implements BeginView.Present
     }
 
     @Override
+    public boolean isBeginningAlreadySet(String accChartKeyString) {
+        return clientFactory.getModel().isBeginningAlreadySet(place.getComKeyString(),
+                place.getFisKeyString(), accChartKeyString);
+    }
+
+    @Override
     public void addBegin(String keyString, double beginning) {
 
         clientFactory.getShell().setLoading();

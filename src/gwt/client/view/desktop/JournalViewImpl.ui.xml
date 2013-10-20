@@ -126,7 +126,7 @@
         </div>
         <g:FlowPanel ui:field="itemPanel"></g:FlowPanel>
         <div class='{style.clearfix} {style.colHeader}'>
-            <label class='{style.cell} {style.accNoCell} {style.totalLb}'>Total</label>
+            <g:Label ui:field="totalLb" styleName='{style.cell} {style.accNoCell} {style.totalLb}'></g:Label>
             <g:Label ui:field="totalDebitLb" styleName='{style.cell} {style.debitCell}'></g:Label>
             <g:Label ui:field="totalCreditLb" styleName='{style.cell} {style.creditCell}'></g:Label>
             <g:Label ui:field="errTotalLb" styleName='{style.cell} {style.errTotalLb}'></g:Label>
